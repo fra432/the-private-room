@@ -69,7 +69,7 @@
 
 :root {
   --radius: 0.125rem;
-  /* THE ROOM — nero opaco + oro */
+  /* THE ROOM — nero opaco + oro (login / welcome) */
   --background: oklch(0.13 0.005 60);
   --foreground: oklch(0.92 0.02 80);
   --card: oklch(0.16 0.006 60);
@@ -104,6 +104,19 @@
   --sidebar-accent-foreground: oklch(0.92 0.02 80);
   --sidebar-border: oklch(0.78 0.12 80 / 0.18);
   --sidebar-ring: oklch(0.78 0.12 80 / 0.6);
+}
+
+/* Interno chiaro — usato dopo il login (colore "porta aperta") */
+.theme-interior {
+  --background: oklch(0.93 0.018 75);
+  --foreground: oklch(0.22 0.01 60);
+  --card: oklch(0.96 0.012 75);
+  --card-foreground: oklch(0.22 0.01 60);
+  --muted: oklch(0.88 0.015 75);
+  --muted-foreground: oklch(0.42 0.015 60);
+  --border: oklch(0.22 0.01 60 / 0.15);
+  --gold: oklch(0.55 0.13 65);
+  --gold-soft: oklch(0.65 0.11 70);
 }
 
 .dark {
