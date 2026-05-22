@@ -37,9 +37,10 @@ function LoginPage() {
       const { error } = await supabase.auth.signInWithPassword(parsed.data);
       setLoading(false);
       if (error) {
-        toast.error(error.message);
+        toast.error("Credenziali non valide.");
         return;
       }
+      if (typeof window !== "undefined") sessionStorage.removeItem("room:intro");
       navigate({ to: "/dashboard" });
     } else {
       const { error } = await supabase.auth.signUp({
@@ -52,7 +53,8 @@ function LoginPage() {
         toast.error(error.message);
         return;
       }
-      toast.success("Account created.");
+      toast.success("Account creato.");
+      if (typeof window !== "undefined") sessionStorage.removeItem("room:intro");
       navigate({ to: "/dashboard" });
     }
   }
@@ -61,13 +63,13 @@ function LoginPage() {
     <main className="min-h-screen bg-background text-foreground">
       <div className="mx-auto flex min-h-screen max-w-sm flex-col px-6 py-10">
         <Link to="/welcome" className="text-[0.6rem] tracking-[0.4em] uppercase text-muted-foreground hover:text-foreground">
-          ← Back
+          ← Indietro
         </Link>
 
         <div className="mt-10 flex flex-col items-center text-center">
           <BrandLogo className="w-[200px]" />
           <h1 className="mt-10 brand-title text-sm">
-            {mode === "login" ? "Welcome back" : "Create access"}
+            {mode === "login" ? "Bentornato" : "Crea il tuo accesso"}
           </h1>
         </div>
 
@@ -80,7 +82,7 @@ function LoginPage() {
             disabled={loading}
             className="mt-4 inline-flex h-12 items-center justify-center bg-[color:var(--gold)] px-8 text-[0.7rem] tracking-[0.4em] uppercase text-background transition-opacity hover:opacity-90 disabled:opacity-50"
           >
-            {loading ? "…" : mode === "login" ? "Enter" : "Create account"}
+            {loading ? "…" : mode === "login" ? "Entra" : "Crea account"}
           </button>
         </form>
 
@@ -89,7 +91,7 @@ function LoginPage() {
           onClick={() => setMode(mode === "login" ? "signup" : "login")}
           className="mt-8 text-center text-[0.6rem] tracking-[0.4em] uppercase text-muted-foreground hover:text-[color:var(--gold)]"
         >
-          {mode === "login" ? "Don't have an account? Sign up" : "Already have access? Login"}
+          {mode === "login" ? "Non hai un account? Registrati" : "Hai già accesso? Entra"}
         </button>
       </div>
     </main>
