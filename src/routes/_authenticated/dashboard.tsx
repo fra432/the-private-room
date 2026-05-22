@@ -14,8 +14,8 @@ function DashboardPage() {
   const { user, isAdmin } = useAuth();
   const [introDone, setIntroDone] = useState(false);
   const [skipIntro, setSkipIntro] = useState(false);
+  const [bookings, setBookings] = useState<{ id: string; date: string; status: string }[]>([]);
 
-  // Show intro video only on first session-load
   useEffect(() => {
     if (typeof window === "undefined") return;
     const seen = sessionStorage.getItem("room:intro");
@@ -27,10 +27,20 @@ function DashboardPage() {
     }
   }, []);
 
+  useEffect(() => {
+    if (!user) return;
+    supabase
+      .from("bookings")
+      .select("id,date,status")
+      .gte("date", new Date().toISOString().slice(0, 10))
+      .order("date", { ascending: true })
+      .then(({ data }) => setBookings(data ?? []));
+  }, [user]);
+
   return (
-    <main className="min-h-screen bg-background text-foreground">
+    <main className="theme-interior min-h-screen bg-background text-foreground">
       {!skipIntro && !introDone && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-background">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black">
           <video
             src="/intro.mp4"
             autoPlay
@@ -41,47 +51,79 @@ function DashboardPage() {
           />
           <button
             onClick={() => setIntroDone(true)}
-            className="absolute bottom-8 right-8 text-[0.55rem] tracking-[0.5em] uppercase text-muted-foreground hover:text-[color:var(--gold)]"
+            className="absolute bottom-8 right-8 text-[0.55rem] tracking-[0.5em] uppercase text-white/60 hover:text-white"
           >
-            Skip
+            Salta
           </button>
         </div>
       )}
 
-      <div className="mx-auto flex min-h-screen max-w-2xl flex-col px-6 py-10">
-        <header className="flex items-center justify-between">
-          <BrandLogo className="w-[110px]" />
-          <button
-            onClick={() => supabase.auth.signOut()}
-            className="text-[0.55rem] tracking-[0.4em] uppercase text-muted-foreground hover:text-[color:var(--gold)]"
-          >
-            Sign out
-          </button>
-        </header>
+      {/* Navbar nera */}
+      <header className="bg-black text-white">
+        <div className="mx-auto flex max-w-3xl items-center justify-between px-6 py-4">
+          <BrandLogo className="w-[90px]" />
+          <nav className="flex items-center gap-6">
+            <Link to="/book" className="text-[0.55rem] tracking-[0.4em] uppercase text-white/70 hover:text-white">
+              Prenota
+            </Link>
+            {isAdmin && (
+              <Link to="/admin" className="text-[0.55rem] tracking-[0.4em] uppercase text-white/70 hover:text-white">
+                Admin
+              </Link>
+            )}
+            <button
+              onClick={() => supabase.auth.signOut()}
+              className="text-[0.55rem] tracking-[0.4em] uppercase text-white/70 hover:text-white"
+            >
+              Esci
+            </button>
+          </nav>
+        </div>
+      </header>
 
-        <section className="mt-16 text-center flex flex-col items-center">
+      <div className="mx-auto max-w-3xl px-6 py-12">
+        <section className="flex flex-col items-center text-center">
           <img
             src={door}
             alt="The Room"
-            className="w-full max-w-md opacity-90 mb-10"
+            className="w-full max-w-md mb-10"
             draggable={false}
           />
-          <p className="text-[0.6rem] tracking-[0.5em] uppercase text-muted-foreground">Welcome</p>
+          <p className="text-[0.6rem] tracking-[0.5em] uppercase text-muted-foreground">Benvenuto</p>
           <h1 className="mt-4 font-serif text-4xl text-[color:var(--gold)]">
             {user?.email}
           </h1>
-          <p className="mt-8 max-w-sm mx-auto text-xs leading-relaxed text-muted-foreground">
-            Your space is being prepared. Onboarding and booking will arrive in the next update.
+          <p className="mt-6 max-w-sm text-xs leading-relaxed text-muted-foreground">
+            Sei dentro. Lo spazio è tuo, solo su appuntamento.
           </p>
 
-          {isAdmin && (
-            <Link
-              to="/admin"
-              className="mt-12 inline-flex h-11 items-center justify-center brand-frame px-8 text-[0.6rem] tracking-[0.5em] uppercase text-[color:var(--gold)] hover:bg-[color:var(--gold)] hover:text-background transition-colors"
-            >
-              Admin Area
-            </Link>
-          )}
+          <Link
+            to="/book"
+            className="mt-10 inline-flex h-12 items-center justify-center bg-black px-10 text-[0.65rem] tracking-[0.5em] uppercase text-white hover:opacity-90"
+          >
+            Prenota un appuntamento
+          </Link>
+        </section>
+
+        <section className="mt-16">
+          <h2 className="text-[0.6rem] tracking-[0.5em] uppercase text-muted-foreground">
+            I tuoi appuntamenti
+          </h2>
+          <ul className="mt-4 divide-y divide-[color:var(--border)]">
+            {bookings.length === 0 && (
+              <li className="py-6 text-xs text-muted-foreground">Nessun appuntamento in programma.</li>
+            )}
+            {bookings.map((b) => (
+              <li key={b.id} className="flex items-center justify-between py-4">
+                <span className="font-serif text-lg">
+                  {new Date(b.date).toLocaleDateString("it-IT", { weekday: "long", day: "numeric", month: "long" })}
+                </span>
+                <span className="text-[0.55rem] tracking-[0.4em] uppercase text-muted-foreground">
+                  {b.status === "pending" ? "In attesa" : b.status === "confirmed" ? "Confermato" : b.status === "cancelled" ? "Annullato" : "Rifiutato"}
+                </span>
+              </li>
+            ))}
+          </ul>
         </section>
       </div>
     </main>
