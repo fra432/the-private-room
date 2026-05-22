@@ -11,10 +11,10 @@ export const Route = createFileRoute("/request-access")({
 });
 
 const Schema = z.object({
-  first_name: z.string().trim().min(1, "Required").max(100),
-  last_name: z.string().trim().min(1, "Required").max(100),
-  email: z.string().trim().email("Invalid email").max(255),
-  phone: z.string().trim().min(3, "Required").max(40),
+  first_name: z.string().trim().min(1, "Obbligatorio").max(100),
+  last_name: z.string().trim().min(1, "Obbligatorio").max(100),
+  email: z.string().trim().email("Email non valida").max(255),
+  phone: z.string().trim().min(3, "Obbligatorio").max(40),
   instagram: z.string().trim().max(100).optional().or(z.literal("")),
   how_heard: z.string().trim().max(500).optional().or(z.literal("")),
 });
@@ -42,7 +42,7 @@ function RequestAccessPage() {
     });
     setLoading(false);
     if (error) {
-      toast.error("Could not submit. Please try again.");
+      toast.error("Invio non riuscito. Riprova.");
       return;
     }
     navigate({ to: "/request-received" });
@@ -52,26 +52,26 @@ function RequestAccessPage() {
     <main className="min-h-screen bg-background text-foreground">
       <div className="mx-auto flex min-h-screen max-w-md flex-col px-6 py-10">
         <Link to="/welcome" className="text-[0.6rem] tracking-[0.4em] uppercase text-muted-foreground hover:text-foreground">
-          ← Back
+          ← Indietro
         </Link>
 
         <div className="mt-10 flex flex-col items-center text-center">
           <BrandLogo className="w-[200px]" />
-          <h1 className="mt-10 brand-title text-sm">Request Access</h1>
+          <h1 className="mt-10 brand-title text-sm">Richiedi accesso</h1>
           <p className="mt-3 max-w-xs text-xs leading-relaxed text-muted-foreground">
-            Tell us a little about yourself. Each request is reviewed personally.
+            Raccontaci qualcosa di te. Ogni richiesta è valutata personalmente.
           </p>
         </div>
 
         <form onSubmit={onSubmit} className="mt-10 flex flex-col gap-6">
-          <Field name="first_name" label="First name" required />
-          <Field name="last_name" label="Last name" required />
+          <Field name="first_name" label="Nome" required />
+          <Field name="last_name" label="Cognome" required />
           <Field name="email" label="Email" type="email" required />
-          <Field name="phone" label="Phone" required />
-          <Field name="instagram" label="Instagram (optional)" placeholder="@username" />
+          <Field name="phone" label="Telefono" required />
+          <Field name="instagram" label="Instagram (facoltativo)" placeholder="@username" />
           <Field
             name="how_heard"
-            label="How did you discover The Room?"
+            label="Come hai scoperto The Room?"
             as="textarea"
           />
 
@@ -80,7 +80,7 @@ function RequestAccessPage() {
             disabled={loading}
             className="mt-4 inline-flex h-12 items-center justify-center bg-[color:var(--gold)] px-8 text-[0.7rem] tracking-[0.4em] uppercase text-background transition-opacity hover:opacity-90 disabled:opacity-50"
           >
-            {loading ? "Sending…" : "Request Access"}
+            {loading ? "Invio…" : "Invia richiesta"}
           </button>
         </form>
 

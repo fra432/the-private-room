@@ -43,20 +43,20 @@ function WelcomePage() {
               to="/login"
               className="brand-frame inline-flex h-12 min-w-[180px] items-center justify-center px-8 text-[0.7rem] tracking-[0.4em] uppercase text-[color:var(--gold)] transition-colors hover:bg-[color:var(--gold)] hover:text-background"
             >
-              Login
+              Entra
             </Link>
             <Link
               to="/request-access"
               className="inline-flex h-12 min-w-[180px] items-center justify-center bg-[color:var(--gold)] px-8 text-[0.7rem] tracking-[0.4em] uppercase text-background transition-opacity hover:opacity-90"
             >
-              Request Access
+              Richiedi accesso
             </Link>
           </div>
         </section>
 
         <footer className="text-center text-[0.6rem] tracking-[0.5em] uppercase text-muted-foreground">
           <p>Private Hair Studio</p>
-          <p className="mt-2">By appointment only · Barcelona</p>
+          <p className="mt-2">Solo su appuntamento · Barcelona</p>
         </footer>
       </div>
     </main>
