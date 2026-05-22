@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
 import { BrandLogo } from "@/components/brand-logo";
+import door from "@/assets/door.png";
 
 export const Route = createFileRoute("/_authenticated/dashboard")({
   head: () => ({ meta: [{ title: "The Room" }] }),
@@ -58,7 +59,13 @@ function DashboardPage() {
           </button>
         </header>
 
-        <section className="mt-24 text-center">
+        <section className="mt-16 text-center flex flex-col items-center">
+          <img
+            src={door}
+            alt="The Room"
+            className="w-full max-w-md opacity-90 mb-10"
+            draggable={false}
+          />
           <p className="text-[0.6rem] tracking-[0.5em] uppercase text-muted-foreground">Welcome</p>
           <h1 className="mt-4 font-serif text-4xl text-[color:var(--gold)]">
             {user?.email}
