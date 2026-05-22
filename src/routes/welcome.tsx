@@ -1,6 +1,5 @@
 import { createFileRoute, Link, Navigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import door from "@/assets/door.png";
 import { BrandLogo } from "@/components/brand-logo";
 import { useAuth } from "@/hooks/use-auth";
 
@@ -27,16 +26,6 @@ function WelcomePage() {
 
   return (
     <main className="relative min-h-screen overflow-hidden bg-background text-foreground">
-      {/* Door image as ambient backdrop */}
-      <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
-        <img
-          src={door}
-          alt=""
-          aria-hidden
-          className="h-[85vh] w-auto max-w-none opacity-[0.18] mix-blend-screen animate-door-glow"
-          draggable={false}
-        />
-      </div>
       <div className="absolute inset-0 vignette" aria-hidden />
 
       <div className="relative z-10 flex min-h-screen flex-col items-center justify-between px-6 py-12">
