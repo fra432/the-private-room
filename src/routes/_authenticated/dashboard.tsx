@@ -63,7 +63,9 @@ function DashboardPage() {
         {/* Navbar flottante sopra l'immagine */}
         <header className="absolute inset-x-0 top-0 z-20">
           <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-6 md:px-10 md:py-8">
-            <BrandLogo className="w-[80px] opacity-95 invert" />
+            <Link to="/dashboard" className="text-[color:var(--gold-soft)] transition hover:text-white">
+              <BrandLogo variant="horizontal" className="h-10 w-auto" />
+            </Link>
             <nav className="flex items-center gap-8">
               <Link to="/book" className="text-[0.55rem] tracking-[0.5em] uppercase text-white/90 hover:text-white">
                 Prenota
@@ -232,7 +234,7 @@ function DashboardPage() {
 
       <footer className="border-t border-[color:var(--border)]">
         <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-10 md:px-10">
-          <BrandLogo className="w-[70px] opacity-60" />
+          <BrandLogo variant="horizontal" className="h-8 w-auto text-foreground/60" />
           <p className="text-[0.5rem] tracking-[0.5em] uppercase text-muted-foreground">
             Access by appointment only
           </p>
