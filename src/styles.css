@@ -108,15 +108,16 @@
 
 /* Interno chiaro — usato dopo il login (colore "porta aperta") */
 .theme-interior {
-  --background: oklch(0.93 0.018 75);
-  --foreground: oklch(0.22 0.01 60);
-  --card: oklch(0.96 0.012 75);
-  --card-foreground: oklch(0.22 0.01 60);
-  --muted: oklch(0.88 0.015 75);
-  --muted-foreground: oklch(0.42 0.015 60);
-  --border: oklch(0.22 0.01 60 / 0.15);
-  --gold: oklch(0.55 0.13 65);
-  --gold-soft: oklch(0.65 0.11 70);
+  /* Tonalità calde campionate dalla foto del salone */
+  --background: oklch(0.78 0.028 70);
+  --foreground: oklch(0.24 0.012 55);
+  --card: oklch(0.83 0.022 72);
+  --card-foreground: oklch(0.24 0.012 55);
+  --muted: oklch(0.72 0.025 68);
+  --muted-foreground: oklch(0.40 0.018 60);
+  --border: oklch(0.24 0.012 55 / 0.18);
+  --gold: oklch(0.45 0.10 55);
+  --gold-soft: oklch(0.58 0.10 65);
 }
 
 .dark {
