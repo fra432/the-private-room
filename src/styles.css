@@ -2,7 +2,7 @@
 @source "../src";
 @import "tw-animate-css";
 
-@import url("https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;500&family=Josefin+Sans:wght@200;300;400;500&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=Italiana&family=Josefin+Sans:wght@200;300;400;500&display=swap");
 
 @custom-variant dark (&:is(.dark *));
 
@@ -65,6 +65,7 @@
   --color-gold-soft: var(--gold-soft);
   --font-display: "Josefin Sans", system-ui, sans-serif;
   --font-serif: "Cormorant Garamond", Georgia, serif;
+  --font-italiana: "Italiana", "Cormorant Garamond", Georgia, serif;
 }
 
 :root {
@@ -141,11 +142,12 @@
 
   .font-serif { font-family: var(--font-serif); }
   .font-display { font-family: var(--font-display); }
+  .font-italiana { font-family: var(--font-italiana); letter-spacing: 0.04em; }
 
   .brand-title {
-    font-family: var(--font-display);
-    font-weight: 300;
-    letter-spacing: 0.35em;
+    font-family: var(--font-italiana);
+    font-weight: 400;
+    letter-spacing: 0.5em;
     text-transform: uppercase;
     color: var(--gold);
   }
@@ -172,4 +174,17 @@
     50% { opacity: 1; }
   }
   .animate-door-glow { animation: door-glow 4s ease-in-out infinite; }
+
+  /* Kill the white background Chrome paints on autofilled inputs */
+  input:-webkit-autofill,
+  input:-webkit-autofill:hover,
+  input:-webkit-autofill:focus,
+  input:-webkit-autofill:active,
+  textarea:-webkit-autofill {
+    -webkit-text-fill-color: var(--foreground) !important;
+    -webkit-box-shadow: 0 0 0px 1000px transparent inset !important;
+    box-shadow: 0 0 0px 1000px transparent inset !important;
+    transition: background-color 5000s ease-in-out 0s;
+    caret-color: var(--gold);
+  }
 }
