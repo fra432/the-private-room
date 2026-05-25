@@ -137,6 +137,51 @@ export type Database = {
         }
         Relationships: []
       }
+      questionnaires: {
+        Row: {
+          additional: string | null
+          allergies: string | null
+          created_at: string
+          goals: string
+          hair_color: string
+          hair_length: string
+          hair_type: string
+          id: string
+          inspiration: string | null
+          treatments: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          additional?: string | null
+          allergies?: string | null
+          created_at?: string
+          goals: string
+          hair_color: string
+          hair_length: string
+          hair_type: string
+          id?: string
+          inspiration?: string | null
+          treatments?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          additional?: string | null
+          allergies?: string | null
+          created_at?: string
+          goals?: string
+          hair_color?: string
+          hair_length?: string
+          hair_type?: string
+          id?: string
+          inspiration?: string | null
+          treatments?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           created_at: string
