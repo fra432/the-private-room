@@ -15,6 +15,7 @@ function DashboardPage() {
   const [introDone, setIntroDone] = useState(false);
   const [skipIntro, setSkipIntro] = useState(false);
   const [bookings, setBookings] = useState<{ id: string; date: string; status: string }[]>([]);
+  const [hasQuestionnaire, setHasQuestionnaire] = useState<boolean | null>(null);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -35,6 +36,12 @@ function DashboardPage() {
       .gte("date", new Date().toISOString().slice(0, 10))
       .order("date", { ascending: true })
       .then(({ data }) => setBookings(data ?? []));
+    supabase
+      .from("questionnaires")
+      .select("id")
+      .eq("user_id", user.id)
+      .maybeSingle()
+      .then(({ data }) => setHasQuestionnaire(!!data));
   }, [user]);
 
   return (
@@ -63,8 +70,8 @@ function DashboardPage() {
         {/* Navbar flottante sopra l'immagine */}
         <header className="absolute inset-x-0 top-0 z-20">
           <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-6 md:px-10 md:py-8">
-            <Link to="/dashboard" className="text-[color:var(--gold-soft)] transition hover:text-white">
-              <BrandLogo variant="horizontal" className="h-10 w-auto" />
+            <Link to="/dashboard" className="text-white drop-shadow-[0_1px_8px_rgba(0,0,0,0.5)] transition hover:opacity-80">
+              <BrandLogo variant="horizontal" className="h-12 w-auto md:h-14" />
             </Link>
             <nav className="flex items-center gap-8">
               <Link to="/book" className="text-[0.55rem] tracking-[0.5em] uppercase text-white/90 hover:text-white">
@@ -123,13 +130,36 @@ function DashboardPage() {
               Un solo appuntamento al giorno. Tutto il tempo, solo per te.
             </p>
           </div>
-          <Link
-            to="/book"
-            className="inline-flex h-14 items-center justify-center border border-foreground/80 bg-foreground px-12 text-[0.6rem] tracking-[0.6em] uppercase text-background transition hover:bg-transparent hover:text-foreground"
-          >
-            Prenota appuntamento
-          </Link>
+          {hasQuestionnaire === false ? (
+            <Link
+              to="/questionnaire"
+              className="inline-flex h-14 items-center justify-center border border-[color:var(--gold)] bg-[color:var(--gold)] px-10 text-[0.6rem] tracking-[0.6em] uppercase text-background transition hover:bg-transparent hover:text-[color:var(--gold)]"
+            >
+              Compila il questionario
+            </Link>
+          ) : (
+            <Link
+              to="/book"
+              className="inline-flex h-14 items-center justify-center border border-foreground/80 bg-foreground px-12 text-[0.6rem] tracking-[0.6em] uppercase text-background transition hover:bg-transparent hover:text-foreground"
+            >
+              Prenota appuntamento
+            </Link>
+          )}
         </div>
+
+        {hasQuestionnaire === false && (
+          <p className="-mt-6 mb-2 text-[11px] italic text-[color:var(--gold)]">
+            Per prenotare il primo appuntamento ti chiediamo di compilare un breve questionario di presentazione.
+          </p>
+        )}
+
+        {hasQuestionnaire === true && (
+          <p className="-mt-6 mb-2 text-[11px] text-muted-foreground">
+            <Link to="/questionnaire" className="underline-offset-4 hover:underline">
+              Aggiorna il tuo questionario →
+            </Link>
+          </p>
+        )}
 
         <div className="grid gap-12 py-16 md:grid-cols-[1fr_2fr]">
           <h2 className="font-serif text-3xl text-foreground md:text-4xl">

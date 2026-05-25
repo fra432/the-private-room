@@ -17,6 +17,7 @@ function toISO(d: Date) {
 function BookPage() {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const [hasQuestionnaire, setHasQuestionnaire] = useState<boolean | null>(null);
   const [month, setMonth] = useState(() => {
     const d = new Date();
     return new Date(d.getFullYear(), d.getMonth(), 1);
@@ -26,6 +27,16 @@ function BookPage() {
   const [selected, setSelected] = useState<string | null>(null);
   const [notes, setNotes] = useState("");
   const [submitting, setSubmitting] = useState(false);
+
+  useEffect(() => {
+    if (!user) return;
+    supabase
+      .from("questionnaires")
+      .select("id")
+      .eq("user_id", user.id)
+      .maybeSingle()
+      .then(({ data }) => setHasQuestionnaire(!!data));
+  }, [user]);
 
   useEffect(() => {
     const start = toISO(month);
@@ -73,13 +84,38 @@ function BookPage() {
     <main className="theme-interior min-h-screen bg-background text-foreground">
       <header className="bg-black text-white">
         <div className="mx-auto flex max-w-3xl items-center justify-between px-6 py-4">
-          <BrandLogo className="w-[90px]" />
+          <Link to="/dashboard" className="text-white">
+            <BrandLogo variant="horizontal" className="h-9 w-auto" />
+          </Link>
           <Link to="/dashboard" className="text-[0.55rem] tracking-[0.4em] uppercase text-white/70 hover:text-white">
             ← Dashboard
           </Link>
         </div>
       </header>
 
+      {hasQuestionnaire === false && (
+        <div className="mx-auto max-w-2xl px-6 pt-12">
+          <p className="text-[0.55rem] tracking-[0.6em] uppercase text-[color:var(--gold)]">
+            Un passaggio prima
+          </p>
+          <h1 className="mt-4 font-serif text-3xl md:text-4xl">
+            Conosciamoci, poi prenotiamo
+          </h1>
+          <p className="mt-4 text-sm leading-relaxed text-muted-foreground">
+            Per riservarti il giusto tempo e i prodotti più adatti, ti chiediamo
+            di compilare un breve questionario di presentazione prima del primo
+            appuntamento.
+          </p>
+          <Link
+            to="/questionnaire"
+            className="mt-8 inline-flex h-12 items-center justify-center bg-[color:var(--gold)] px-10 text-[0.6rem] tracking-[0.5em] uppercase text-background hover:opacity-90"
+          >
+            Compila il questionario
+          </Link>
+        </div>
+      )}
+
+      {hasQuestionnaire !== false && (
       <div className="mx-auto max-w-2xl px-6 py-12">
         <h1 className="font-serif text-3xl text-[color:var(--gold)]">Scegli un giorno</h1>
         <p className="mt-2 text-xs text-muted-foreground">
@@ -161,6 +197,7 @@ function BookPage() {
           </div>
         )}
       </div>
+      )}
     </main>
   );
 }

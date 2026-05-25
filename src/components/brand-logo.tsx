@@ -20,7 +20,7 @@ export function BrandLogo({
   if (variant === "horizontal") {
     return (
       <svg
-        viewBox="0 0 260 56"
+        viewBox="0 0 240 48"
         xmlns="http://www.w3.org/2000/svg"
         role="img"
         aria-label={title}
@@ -28,64 +28,36 @@ export function BrandLogo({
         fill="none"
       >
         <title>{title}</title>
-        {/* mark */}
-        <g stroke="currentColor" strokeWidth="1.2">
-          <rect x="6" y="6" width="44" height="44" />
-        </g>
+        {/* clean editorial wordmark, single column */}
         <g fill="currentColor">
           <text
-            x="28"
-            y="24"
+            x="120"
+            y="22"
             textAnchor="middle"
             fontFamily="'Josefin Sans', system-ui, sans-serif"
-            fontWeight="300"
-            fontSize="5"
-            letterSpacing="1.6"
-          >
-            THE
-          </text>
-          <text
-            x="28"
-            y="36"
-            textAnchor="middle"
-            fontFamily="'Josefin Sans', system-ui, sans-serif"
-            fontWeight="300"
-            fontSize="9"
-            letterSpacing="1.2"
-          >
-            ROOM
-          </text>
-          {/* mini scissors */}
-          <g stroke="currentColor" strokeWidth="0.9" fill="none">
-            <line x1="25" y1="40" x2="30" y2="46" />
-            <line x1="31" y1="40" x2="26" y2="46" />
-            <circle cx="24.5" cy="46.5" r="1.2" />
-            <circle cx="31.5" cy="46.5" r="1.2" />
-          </g>
-        </g>
-        {/* wordmark */}
-        <g fill="currentColor">
-          <text
-            x="68"
-            y="26"
-            fontFamily="'Josefin Sans', system-ui, sans-serif"
-            fontWeight="300"
-            fontSize="11"
-            letterSpacing="5"
+            fontWeight="400"
+            fontSize="16"
+            letterSpacing="7"
           >
             THE ROOM
           </text>
           <text
-            x="68"
-            y="42"
+            x="120"
+            y="40"
+            textAnchor="middle"
             fontFamily="'Josefin Sans', system-ui, sans-serif"
             fontWeight="300"
             fontSize="5"
-            letterSpacing="3.4"
-            opacity="0.75"
+            letterSpacing="4"
+            opacity="0.7"
           >
             PRIVATE HAIR STUDIO
           </text>
+        </g>
+        {/* subtle separators */}
+        <g stroke="currentColor" strokeWidth="0.6" opacity="0.5">
+          <line x1="20" y1="30" x2="58" y2="30" />
+          <line x1="182" y1="30" x2="220" y2="30" />
         </g>
       </svg>
     );
