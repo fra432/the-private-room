@@ -60,53 +60,110 @@ function LoginPage() {
   }
 
   return (
-    <main className="min-h-screen bg-background text-foreground">
-      <div className="mx-auto flex min-h-screen max-w-sm flex-col px-6 py-10">
-        <Link to="/welcome" className="text-[0.6rem] tracking-[0.4em] uppercase text-muted-foreground hover:text-foreground">
+    <main className="relative min-h-screen overflow-hidden bg-background text-foreground">
+      {/* warm gold vignette */}
+      <div className="vignette pointer-events-none absolute inset-0" />
+      {/* subtle ornamental gold lines top/bottom */}
+      <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[color:var(--gold)]/40 to-transparent" />
+      <div className="pointer-events-none absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-[color:var(--gold)]/30 to-transparent" />
+
+      <div className="relative mx-auto flex min-h-screen w-full max-w-md flex-col px-8 py-10">
+        <Link
+          to="/welcome"
+          className="text-[0.6rem] tracking-[0.5em] uppercase text-muted-foreground transition-colors hover:text-[color:var(--gold)]"
+        >
           ← Indietro
         </Link>
 
-        <div className="mt-10 flex flex-col items-center text-center">
-          <BrandLogo className="w-[200px]" />
-          <h1 className="mt-10 brand-title text-sm">
-            {mode === "login" ? "Bentornato" : "Crea il tuo accesso"}
+        <div className="mt-14 flex flex-col items-center text-center">
+          <BrandLogo className="w-[180px] text-[color:var(--gold)]" />
+
+          {/* ornamental divider */}
+          <div className="mt-12 flex items-center gap-3 text-[color:var(--gold)]/60">
+            <span className="h-px w-12 bg-[color:var(--gold)]/40" />
+            <span className="text-[0.55rem] tracking-[0.6em] uppercase">
+              {mode === "login" ? "Accesso riservato" : "Nuovo accesso"}
+            </span>
+            <span className="h-px w-12 bg-[color:var(--gold)]/40" />
+          </div>
+
+          <h1 className="font-italiana mt-8 text-4xl text-foreground md:text-5xl">
+            {mode === "login" ? "Bentornata" : "Crea il tuo accesso"}
           </h1>
+          <p className="font-serif italic mt-3 text-base text-muted-foreground">
+            {mode === "login"
+              ? "Lo spazio ti aspetta."
+              : "Iscriviti per essere accolta nello studio."}
+          </p>
         </div>
 
-        <form onSubmit={onSubmit} className="mt-10 flex flex-col gap-6">
-          <Field name="email" label="Email" type="email" required />
-          <Field name="password" label="Password" type="password" required />
+        <form onSubmit={onSubmit} className="mt-12 flex flex-col gap-7">
+          <Field name="email" label="Email" type="email" required autoComplete="email" />
+          <Field
+            name="password"
+            label="Password"
+            type="password"
+            required
+            autoComplete={mode === "login" ? "current-password" : "new-password"}
+          />
 
           <button
             type="submit"
             disabled={loading}
-            className="mt-4 inline-flex h-12 items-center justify-center bg-[color:var(--gold)] px-8 text-[0.7rem] tracking-[0.4em] uppercase text-background transition-opacity hover:opacity-90 disabled:opacity-50"
+            className="group relative mt-6 inline-flex h-14 items-center justify-center overflow-hidden border border-[color:var(--gold)] bg-[color:var(--gold)] px-10 text-[0.65rem] tracking-[0.55em] uppercase text-background transition-all hover:bg-transparent hover:text-[color:var(--gold)] disabled:opacity-50"
           >
             {loading ? "…" : mode === "login" ? "Entra" : "Crea account"}
           </button>
         </form>
 
-        <button
-          type="button"
-          onClick={() => setMode(mode === "login" ? "signup" : "login")}
-          className="mt-8 text-center text-[0.6rem] tracking-[0.4em] uppercase text-muted-foreground hover:text-[color:var(--gold)]"
-        >
-          {mode === "login" ? "Non hai un account? Registrati" : "Hai già accesso? Entra"}
-        </button>
+        <div className="mt-10 flex flex-col items-center gap-4 text-center">
+          <button
+            type="button"
+            onClick={() => setMode(mode === "login" ? "signup" : "login")}
+            className="text-[0.6rem] tracking-[0.45em] uppercase text-muted-foreground transition-colors hover:text-[color:var(--gold)]"
+          >
+            {mode === "login" ? "Non hai un account? Registrati" : "Hai già accesso? Entra"}
+          </button>
+          {mode === "login" && (
+            <Link
+              to="/request-access"
+              className="font-serif italic text-sm text-[color:var(--gold-soft)] underline-offset-4 hover:underline"
+            >
+              Richiedi accesso allo studio
+            </Link>
+          )}
+        </div>
+
+        <p className="mt-auto pt-10 text-center text-[0.5rem] tracking-[0.5em] uppercase text-muted-foreground/60">
+          The Room · Private Hair Studio
+        </p>
       </div>
     </main>
   );
 }
 
-function Field({ name, label, type = "text", required }: { name: string; label: string; type?: string; required?: boolean }) {
+function Field({
+  name,
+  label,
+  type = "text",
+  required,
+  autoComplete,
+}: {
+  name: string;
+  label: string;
+  type?: string;
+  required?: boolean;
+  autoComplete?: string;
+}) {
   return (
     <label className="flex flex-col gap-2">
-      <span className="text-[0.6rem] tracking-[0.35em] uppercase text-muted-foreground">{label}</span>
+      <span className="text-[0.55rem] tracking-[0.5em] uppercase text-muted-foreground">{label}</span>
       <input
         name={name}
         type={type}
         required={required}
-        className="w-full bg-transparent border-b border-[color:var(--gold)]/40 pb-2 pt-1 text-sm text-foreground placeholder:text-muted-foreground focus:border-[color:var(--gold)] focus:outline-none transition-colors"
+        autoComplete={autoComplete}
+        className="w-full !bg-transparent border-b border-[color:var(--gold)]/40 pb-3 pt-2 font-serif text-lg tracking-wide text-foreground placeholder:text-muted-foreground/50 focus:border-[color:var(--gold)] focus:outline-none transition-colors"
       />
     </label>
   );
