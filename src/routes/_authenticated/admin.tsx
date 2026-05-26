@@ -192,7 +192,7 @@ function RequestsSection() {
   );
 }
 
-function BookingsSection() {
+function BookingsSection({ onOpenClient }: { onOpenClient: (userId: string) => void }) {
   const [tab, setTab] = useState<"pending" | "confirmed" | "cancelled" | "rejected">("pending");
   const [rows, setRows] = useState<Booking[]>([]);
   const [profiles, setProfiles] = useState<Record<string, Profile>>({});
@@ -254,7 +254,12 @@ function BookingsSection() {
                 <h2 className="font-serif text-xl">
                   {new Date(b.date).toLocaleDateString("it-IT", { weekday: "long", day: "numeric", month: "long", year: "numeric" })}
                 </h2>
-                <span className="text-[0.55rem] tracking-[0.4em] uppercase text-muted-foreground">{name}</span>
+                <button
+                  onClick={() => onOpenClient(b.user_id)}
+                  className="text-[0.55rem] tracking-[0.4em] uppercase text-[color:var(--gold)] hover:underline underline-offset-4"
+                >
+                  {name} ↗
+                </button>
               </div>
               {p?.email && <p className="mt-1 text-xs text-muted-foreground">{p.email}</p>}
               {b.notes && <p className="mt-3 text-xs text-muted-foreground italic">"{b.notes}"</p>}
