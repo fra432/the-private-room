@@ -111,12 +111,12 @@ function DashboardPage() {
 					<img
 						src="/room-bg.png"
 						alt="The Room — interno del salone"
-						className="absolute inset-0 h-full w-full object-cover object-[center_35%]"
+						className="absolute inset-0 h-full w-full object-cover object-[center_35%] brightness-110"
 						draggable={false}
 					/>
 					{/* gradient overlays: scurisce in alto per la nav, sfuma in basso nel background */}
 					<div className="absolute inset-0 bg-gradient-to-b from-black/40 via-transparent to-transparent" />
-					<div className="absolute inset-x-0 bottom-0 h-[40%] bg-gradient-to-b from-transparent via-black/25 to-[color:var(--background)]" />
+					<div className="absolute inset-x-0 bottom-0 h-[50%] bg-gradient-to-b from-transparent via-[color:var(--background)]/20 to-[color:var(--background)]" />
 
 					{/* Testo hero — centrato su mobile, in basso su desktop */}
 					<div className="absolute inset-x-0 top-1/2 z-10 -translate-y-1/2 px-6 md:top-auto md:translate-y-0 md:bottom-0 md:pb-36 md:px-10">
@@ -135,7 +135,7 @@ function DashboardPage() {
 			</section>
 
 			{/* CTA + appuntamenti */}
-			<section className="mx-auto max-w-6xl px-6 pt-4 md:px-10">
+			<section className="mx-auto max-w-6xl px-6 pt-0 md:px-10">
 				<div className="flex flex-col items-start justify-between gap-8 border-b border-[color:var(--border)] pb-12 md:flex-row md:items-end">
 					<div className="max-w-xl">
 						<p className="text-[0.55rem] tracking-[0.5em] uppercase text-muted-foreground">
