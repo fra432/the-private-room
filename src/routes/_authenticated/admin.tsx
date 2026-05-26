@@ -31,7 +31,28 @@ type Booking = {
   created_at: string;
 };
 
-type Profile = { id: string; email: string | null; first_name: string | null; last_name: string | null };
+type Profile = {
+  id: string;
+  email: string | null;
+  first_name: string | null;
+  last_name: string | null;
+  phone?: string | null;
+  instagram?: string | null;
+  created_at?: string;
+};
+
+type Questionnaire = {
+  id: string;
+  user_id: string;
+  hair_type: string;
+  hair_length: string;
+  hair_color: string;
+  treatments: string | null;
+  allergies: string | null;
+  goals: string;
+  inspiration: string | null;
+  additional: string | null;
+};
 
 const STATUS_LABEL: Record<string, string> = {
   pending: "In attesa",
@@ -41,15 +62,18 @@ const STATUS_LABEL: Record<string, string> = {
   cancelled: "Annullate",
 };
 
+const DAYS = ["Domenica", "Lunedì", "Martedì", "Mercoledì", "Giovedì", "Venerdì", "Sabato"];
+
 function AdminPage() {
   const { isAdmin, loading: authLoading } = useAuth();
-  const [section, setSection] = useState<"requests" | "bookings" | "closed">("requests");
+  const [section, setSection] = useState<"requests" | "bookings" | "availability" | "clients">("requests");
+  const [selectedClient, setSelectedClient] = useState<string | null>(null);
 
   if (!authLoading && !isAdmin) return <Navigate to="/dashboard" />;
 
   return (
     <main className="min-h-screen bg-background text-foreground">
-      <div className="mx-auto flex min-h-screen max-w-3xl flex-col px-6 py-10">
+      <div className="mx-auto flex min-h-screen max-w-4xl flex-col px-6 py-10">
         <header className="flex items-center justify-between">
           <BrandLogo className="w-[90px]" />
           <Link to="/dashboard" className="text-[0.55rem] tracking-[0.4em] uppercase text-muted-foreground hover:text-[color:var(--gold)]">
@@ -59,17 +83,18 @@ function AdminPage() {
 
         <h1 className="mt-12 font-serif text-3xl text-[color:var(--gold)]">Area Admin</h1>
 
-        <nav className="mt-8 flex gap-8 border-b border-[color:var(--gold)]/20 pb-4">
+        <nav className="mt-8 flex flex-wrap gap-x-8 gap-y-3 border-b border-[color:var(--gold)]/20 pb-4">
           {(
             [
               ["requests", "Richieste accesso"],
               ["bookings", "Prenotazioni"],
-              ["closed", "Giorni chiusi"],
+              ["availability", "Disponibilità"],
+              ["clients", "Clienti"],
             ] as const
           ).map(([key, label]) => (
             <button
               key={key}
-              onClick={() => setSection(key)}
+              onClick={() => { setSection(key); setSelectedClient(null); }}
               className={`text-[0.6rem] tracking-[0.4em] uppercase transition-colors ${
                 section === key ? "text-[color:var(--gold)]" : "text-muted-foreground hover:text-foreground"
               }`}
@@ -80,8 +105,13 @@ function AdminPage() {
         </nav>
 
         {section === "requests" && <RequestsSection />}
-        {section === "bookings" && <BookingsSection />}
-        {section === "closed" && <ClosedDaysSection />}
+        {section === "bookings" && <BookingsSection onOpenClient={(id) => { setSection("clients"); setSelectedClient(id); }} />}
+        {section === "availability" && <AvailabilitySection />}
+        {section === "clients" && (
+          selectedClient
+            ? <ClientDetail userId={selectedClient} onBack={() => setSelectedClient(null)} />
+            : <ClientsList onOpen={setSelectedClient} />
+        )}
         <div className="h-16" />
       </div>
     </main>
@@ -162,7 +192,7 @@ function RequestsSection() {
   );
 }
 
-function BookingsSection() {
+function BookingsSection({ onOpenClient }: { onOpenClient: (userId: string) => void }) {
   const [tab, setTab] = useState<"pending" | "confirmed" | "cancelled" | "rejected">("pending");
   const [rows, setRows] = useState<Booking[]>([]);
   const [profiles, setProfiles] = useState<Record<string, Profile>>({});
@@ -224,7 +254,12 @@ function BookingsSection() {
                 <h2 className="font-serif text-xl">
                   {new Date(b.date).toLocaleDateString("it-IT", { weekday: "long", day: "numeric", month: "long", year: "numeric" })}
                 </h2>
-                <span className="text-[0.55rem] tracking-[0.4em] uppercase text-muted-foreground">{name}</span>
+                <button
+                  onClick={() => onOpenClient(b.user_id)}
+                  className="text-[0.55rem] tracking-[0.4em] uppercase text-[color:var(--gold)] hover:underline underline-offset-4"
+                >
+                  {name} ↗
+                </button>
               </div>
               {p?.email && <p className="mt-1 text-xs text-muted-foreground">{p.email}</p>}
               {b.notes && <p className="mt-3 text-xs text-muted-foreground italic">"{b.notes}"</p>}
@@ -245,7 +280,101 @@ function BookingsSection() {
   );
 }
 
-function ClosedDaysSection() {
+function AvailabilitySection() {
+  return (
+    <section className="mt-2">
+      <WeeklyHoursEditor />
+      <div className="mt-12 h-px bg-[color:var(--gold)]/15" />
+      <ClosedDaysEditor />
+    </section>
+  );
+}
+
+type WeeklyRow = { day_of_week: number; is_closed: boolean; open_time: string | null; close_time: string | null };
+
+function WeeklyHoursEditor() {
+  const [rows, setRows] = useState<WeeklyRow[]>([]);
+  const [saving, setSaving] = useState<number | null>(null);
+
+  const load = useCallback(async () => {
+    const { data, error } = await supabase
+      .from("weekly_hours")
+      .select("day_of_week,is_closed,open_time,close_time")
+      .order("day_of_week");
+    if (error) return toast.error(error.message);
+    setRows((data ?? []) as WeeklyRow[]);
+  }, []);
+
+  useEffect(() => { void load(); }, [load]);
+
+  async function save(row: WeeklyRow) {
+    setSaving(row.day_of_week);
+    const { error } = await supabase
+      .from("weekly_hours")
+      .update({
+        is_closed: row.is_closed,
+        open_time: row.is_closed ? null : row.open_time,
+        close_time: row.is_closed ? null : row.close_time,
+      })
+      .eq("day_of_week", row.day_of_week);
+    setSaving(null);
+    if (error) return toast.error(error.message);
+    toast.success("Salvato");
+  }
+
+  function update(day: number, patch: Partial<WeeklyRow>) {
+    setRows((rs) => rs.map((r) => (r.day_of_week === day ? { ...r, ...patch } : r)));
+  }
+
+  return (
+    <div>
+      <h2 className="font-serif text-xl text-[color:var(--gold)]">Orari settimanali</h2>
+      <p className="mt-2 text-xs text-muted-foreground">Imposta gli orari di apertura standard. I giorni segnati come chiusi non saranno prenotabili.</p>
+      <ul className="mt-6 divide-y divide-[color:var(--gold)]/15">
+        {rows.map((r) => (
+          <li key={r.day_of_week} className="flex flex-wrap items-center gap-4 py-4">
+            <span className="w-28 font-serif text-base">{DAYS[r.day_of_week]}</span>
+            <label className="flex items-center gap-2 text-[0.6rem] tracking-[0.3em] uppercase text-muted-foreground">
+              <input
+                type="checkbox"
+                checked={r.is_closed}
+                onChange={(e) => update(r.day_of_week, { is_closed: e.target.checked })}
+                className="accent-[color:var(--gold)]"
+              />
+              Chiuso
+            </label>
+            {!r.is_closed && (
+              <>
+                <input
+                  type="time"
+                  value={r.open_time?.slice(0, 5) ?? ""}
+                  onChange={(e) => update(r.day_of_week, { open_time: e.target.value })}
+                  className="bg-transparent border-b border-[color:var(--gold)]/40 pb-1 text-sm focus:border-[color:var(--gold)] focus:outline-none"
+                />
+                <span className="text-muted-foreground">—</span>
+                <input
+                  type="time"
+                  value={r.close_time?.slice(0, 5) ?? ""}
+                  onChange={(e) => update(r.day_of_week, { close_time: e.target.value })}
+                  className="bg-transparent border-b border-[color:var(--gold)]/40 pb-1 text-sm focus:border-[color:var(--gold)] focus:outline-none"
+                />
+              </>
+            )}
+            <button
+              onClick={() => save(r)}
+              disabled={saving === r.day_of_week}
+              className="ml-auto text-[0.55rem] tracking-[0.4em] uppercase text-[color:var(--gold)] hover:underline disabled:opacity-50"
+            >
+              {saving === r.day_of_week ? "…" : "Salva"}
+            </button>
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}
+
+function ClosedDaysEditor() {
   const [rows, setRows] = useState<{ date: string; reason: string | null }[]>([]);
   const [date, setDate] = useState("");
   const [reason, setReason] = useState("");
@@ -276,7 +405,9 @@ function ClosedDaysSection() {
   }
 
   return (
-    <section className="mt-6">
+    <section className="mt-10">
+      <h2 className="font-serif text-xl text-[color:var(--gold)]">Giorni di chiusura straordinaria</h2>
+      <p className="mt-2 text-xs text-muted-foreground">Vacanze, festività o giorni di pausa al di fuori della settimana standard.</p>
       <div className="flex flex-col gap-3 sm:flex-row sm:items-end">
         <label className="flex flex-1 flex-col gap-2">
           <span className="text-[0.55rem] tracking-[0.4em] uppercase text-muted-foreground">Data</span>
@@ -301,6 +432,136 @@ function ClosedDaysSection() {
           </li>
         ))}
       </ul>
+    </section>
+  );
+}
+
+function ClientsList({ onOpen }: { onOpen: (userId: string) => void }) {
+  const [rows, setRows] = useState<Profile[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [q, setQ] = useState("");
+
+  useEffect(() => {
+    (async () => {
+      const { data, error } = await supabase
+        .from("profiles")
+        .select("id,email,first_name,last_name,phone,instagram,created_at")
+        .order("created_at", { ascending: false });
+      setLoading(false);
+      if (error) return toast.error(error.message);
+      setRows((data ?? []) as Profile[]);
+    })();
+  }, []);
+
+  const filtered = rows.filter((p) => {
+    if (!q.trim()) return true;
+    const s = `${p.first_name ?? ""} ${p.last_name ?? ""} ${p.email ?? ""}`.toLowerCase();
+    return s.includes(q.toLowerCase());
+  });
+
+  return (
+    <section className="mt-6">
+      <input
+        value={q}
+        onChange={(e) => setQ(e.target.value)}
+        placeholder="Cerca per nome o email…"
+        className="w-full bg-transparent border-b border-[color:var(--gold)]/40 pb-2 text-sm placeholder:text-muted-foreground focus:border-[color:var(--gold)] focus:outline-none"
+      />
+      <ul className="mt-8 divide-y divide-[color:var(--gold)]/15">
+        {loading && <li className="py-12 text-center text-xs text-muted-foreground">Caricamento…</li>}
+        {!loading && filtered.length === 0 && <li className="py-12 text-center text-xs text-muted-foreground">Nessuna cliente.</li>}
+        {filtered.map((p) => {
+          const name = `${p.first_name ?? ""} ${p.last_name ?? ""}`.trim() || p.email || "—";
+          return (
+            <li key={p.id}>
+              <button onClick={() => onOpen(p.id)} className="flex w-full items-center justify-between py-5 text-left hover:text-[color:var(--gold)] transition-colors">
+                <div>
+                  <p className="font-serif text-lg">{name}</p>
+                  <p className="text-xs text-muted-foreground">{p.email}</p>
+                </div>
+                <span className="text-[0.55rem] tracking-[0.4em] uppercase text-muted-foreground">Apri →</span>
+              </button>
+            </li>
+          );
+        })}
+      </ul>
+    </section>
+  );
+}
+
+function ClientDetail({ userId, onBack }: { userId: string; onBack: () => void }) {
+  const [profile, setProfile] = useState<Profile | null>(null);
+  const [quest, setQuest] = useState<Questionnaire | null>(null);
+  const [bookings, setBookings] = useState<Booking[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    (async () => {
+      setLoading(true);
+      const [{ data: p }, { data: q }, { data: b }] = await Promise.all([
+        supabase.from("profiles").select("id,email,first_name,last_name,phone,instagram,created_at").eq("id", userId).maybeSingle(),
+        supabase.from("questionnaires").select("*").eq("user_id", userId).maybeSingle(),
+        supabase.from("bookings").select("*").eq("user_id", userId).order("date", { ascending: false }),
+      ]);
+      setProfile((p ?? null) as Profile | null);
+      setQuest((q ?? null) as Questionnaire | null);
+      setBookings((b ?? []) as Booking[]);
+      setLoading(false);
+    })();
+  }, [userId]);
+
+  if (loading) return <p className="py-12 text-center text-xs text-muted-foreground">Caricamento…</p>;
+  if (!profile) return <p className="py-12 text-center text-xs text-muted-foreground">Cliente non trovata.</p>;
+
+  const name = `${profile.first_name ?? ""} ${profile.last_name ?? ""}`.trim() || profile.email || "—";
+
+  return (
+    <section className="mt-6">
+      <button onClick={onBack} className="text-[0.55rem] tracking-[0.4em] uppercase text-muted-foreground hover:text-[color:var(--gold)]">← Tutte le clienti</button>
+
+      <header className="mt-6">
+        <h2 className="font-serif text-3xl text-[color:var(--gold)]">{name}</h2>
+        <dl className="mt-4 grid gap-3 text-xs sm:grid-cols-2">
+          <Info label="Email" value={profile.email ?? "—"} />
+          {profile.phone && <Info label="Telefono" value={profile.phone} />}
+          {profile.instagram && <Info label="Instagram" value={profile.instagram} />}
+          {profile.created_at && <Info label="Cliente dal" value={new Date(profile.created_at).toLocaleDateString("it-IT")} />}
+        </dl>
+      </header>
+
+      <div className="mt-10">
+        <h3 className="font-serif text-xl text-[color:var(--gold)]">Questionario</h3>
+        {!quest ? (
+          <p className="mt-3 text-xs italic text-muted-foreground">Non ancora compilato.</p>
+        ) : (
+          <dl className="mt-4 grid gap-3 text-xs sm:grid-cols-2">
+            <Info label="Tipo di capello" value={quest.hair_type} />
+            <Info label="Lunghezza" value={quest.hair_length} />
+            <Info label="Colore" value={quest.hair_color} />
+            {quest.treatments && <Info label="Trattamenti precedenti" value={quest.treatments} />}
+            {quest.allergies && <Info label="Allergie" value={quest.allergies} />}
+            <div className="sm:col-span-2"><Info label="Obiettivi" value={quest.goals} /></div>
+            {quest.inspiration && <div className="sm:col-span-2"><Info label="Ispirazione" value={quest.inspiration} /></div>}
+            {quest.additional && <div className="sm:col-span-2"><Info label="Note aggiuntive" value={quest.additional} /></div>}
+          </dl>
+        )}
+      </div>
+
+      <div className="mt-10">
+        <h3 className="font-serif text-xl text-[color:var(--gold)]">Storico prenotazioni</h3>
+        {bookings.length === 0 ? (
+          <p className="mt-3 text-xs italic text-muted-foreground">Nessuna prenotazione.</p>
+        ) : (
+          <ul className="mt-4 divide-y divide-[color:var(--gold)]/15">
+            {bookings.map((b) => (
+              <li key={b.id} className="flex items-center justify-between py-3 text-sm">
+                <span className="font-serif">{new Date(b.date).toLocaleDateString("it-IT", { weekday: "long", day: "numeric", month: "long", year: "numeric" })}</span>
+                <span className="text-[0.55rem] tracking-[0.4em] uppercase text-muted-foreground">{STATUS_LABEL[b.status] ?? b.status}</span>
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
     </section>
   );
 }
