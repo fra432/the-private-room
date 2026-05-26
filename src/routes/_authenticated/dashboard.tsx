@@ -116,7 +116,7 @@ function DashboardPage() {
 					/>
 					{/* gradient overlays: scurisce in alto per la nav, sfuma in basso nel background */}
 					<div className="absolute inset-0 bg-gradient-to-b from-black/40 via-transparent to-transparent" />
-					<div className="absolute inset-x-0 bottom-0 h-[50%] bg-gradient-to-b from-transparent via-[color:var(--background)]/20 to-[color:var(--background)]" />
+					<div className="absolute inset-x-0 bottom-0 h-[28%] bg-gradient-to-b from-transparent via-[color:var(--background)]/30 to-[color:var(--background)]" />
 
 					{/* Testo hero — centrato su mobile, in basso su desktop */}
 					<div className="absolute inset-x-0 top-1/2 z-10 -translate-y-1/2 px-6 md:top-auto md:translate-y-0 md:bottom-0 md:pb-36 md:px-10">
