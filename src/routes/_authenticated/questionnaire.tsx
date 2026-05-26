@@ -19,6 +19,8 @@ type Form = {
 	goals: string;
 	inspiration: string;
 	additional: string;
+	drink_preference: string;
+	music_taste: string;
 };
 
 const EMPTY: Form = {
@@ -30,6 +32,8 @@ const EMPTY: Form = {
 	goals: "",
 	inspiration: "",
 	additional: "",
+	drink_preference: "",
+	music_taste: "",
 };
 
 function QuestionnairePage() {
@@ -59,6 +63,8 @@ function QuestionnairePage() {
 						goals: data.goals ?? "",
 						inspiration: data.inspiration ?? "",
 						additional: data.additional ?? "",
+						drink_preference: data.drink_preference ?? "",
+						music_taste: data.music_taste ?? "",
 					});
 				}
 				setLoading(false);
@@ -90,6 +96,8 @@ function QuestionnairePage() {
 			treatments: form.treatments.trim() || null,
 			allergies: form.allergies.trim() || null,
 			goals: form.goals.trim(),
+			drink_preference: form.drink_preference.trim() || null,
+			music_taste: form.music_taste.trim() || null,
 			inspiration: form.inspiration.trim() || null,
 			additional: form.additional.trim() || null,
 		};
@@ -201,7 +209,22 @@ function QuestionnairePage() {
 							value={form.additional}
 							onChange={(v) => set("additional", v)}
 						/>
-
+						<Select
+							label="Preferenza bevanda"
+							hint="Cosa preferisci bere durante l'appuntamento?"
+							value={form.drink_preference}
+							onChange={(v) => set("drink_preference", v)}
+							options={[
+								{ label: "Caffè", value: "caffè" },
+								{ label: "Tè", value: "tè" },
+							]}
+						/>
+						<Area
+							label="Gusti musicali"
+							hint="Raccontaci la musica che ami, quella che ti fa sentire bene."
+							value={form.music_taste}
+							onChange={(v) => set("music_taste", v)}
+						/>
 						<div className="flex items-center justify-between border-t border-[color:var(--border)] pt-8">
 							<Link
 								to="/dashboard"
@@ -274,6 +297,37 @@ function Area(props: {
 				required={props.required}
 				className="w-full resize-none bg-transparent border-b border-foreground/30 pb-2 pt-1 text-base text-foreground focus:border-[color:var(--gold)] focus:outline-none transition-colors"
 			/>
+			{props.hint && (
+				<span className="text-xs text-foreground/55">{props.hint}</span>
+			)}
+		</label>
+	);
+}
+
+function Select(props: {
+	label: string;
+	hint?: string;
+	value: string;
+	onChange: (v: string) => void;
+	options: Array<{ label: string; value: string }>;
+}) {
+	return (
+		<label className="flex flex-col gap-2">
+			<span className="text-xs font-medium tracking-[0.3em] uppercase text-foreground">
+				{props.label}
+			</span>
+			<select
+				value={props.value}
+				onChange={(e) => props.onChange(e.target.value)}
+				className="w-full bg-transparent border-b border-foreground/30 pb-2 pt-1 text-base text-foreground focus:border-[color:var(--gold)] focus:outline-none transition-colors"
+			>
+				<option value="">Scegli un'opzione</option>
+				{props.options.map((opt) => (
+					<option key={opt.value} value={opt.value}>
+						{opt.label}
+					</option>
+				))}
+			</select>
 			{props.hint && (
 				<span className="text-xs text-foreground/55">{props.hint}</span>
 			)}
