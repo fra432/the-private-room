@@ -31,7 +31,28 @@ type Booking = {
   created_at: string;
 };
 
-type Profile = { id: string; email: string | null; first_name: string | null; last_name: string | null };
+type Profile = {
+  id: string;
+  email: string | null;
+  first_name: string | null;
+  last_name: string | null;
+  phone?: string | null;
+  instagram?: string | null;
+  created_at?: string;
+};
+
+type Questionnaire = {
+  id: string;
+  user_id: string;
+  hair_type: string;
+  hair_length: string;
+  hair_color: string;
+  treatments: string | null;
+  allergies: string | null;
+  goals: string;
+  inspiration: string | null;
+  additional: string | null;
+};
 
 const STATUS_LABEL: Record<string, string> = {
   pending: "In attesa",
@@ -41,15 +62,18 @@ const STATUS_LABEL: Record<string, string> = {
   cancelled: "Annullate",
 };
 
+const DAYS = ["Domenica", "Lunedì", "Martedì", "Mercoledì", "Giovedì", "Venerdì", "Sabato"];
+
 function AdminPage() {
   const { isAdmin, loading: authLoading } = useAuth();
-  const [section, setSection] = useState<"requests" | "bookings" | "closed">("requests");
+  const [section, setSection] = useState<"requests" | "bookings" | "availability" | "clients">("requests");
+  const [selectedClient, setSelectedClient] = useState<string | null>(null);
 
   if (!authLoading && !isAdmin) return <Navigate to="/dashboard" />;
 
   return (
     <main className="min-h-screen bg-background text-foreground">
-      <div className="mx-auto flex min-h-screen max-w-3xl flex-col px-6 py-10">
+      <div className="mx-auto flex min-h-screen max-w-4xl flex-col px-6 py-10">
         <header className="flex items-center justify-between">
           <BrandLogo className="w-[90px]" />
           <Link to="/dashboard" className="text-[0.55rem] tracking-[0.4em] uppercase text-muted-foreground hover:text-[color:var(--gold)]">
@@ -59,17 +83,18 @@ function AdminPage() {
 
         <h1 className="mt-12 font-serif text-3xl text-[color:var(--gold)]">Area Admin</h1>
 
-        <nav className="mt-8 flex gap-8 border-b border-[color:var(--gold)]/20 pb-4">
+        <nav className="mt-8 flex flex-wrap gap-x-8 gap-y-3 border-b border-[color:var(--gold)]/20 pb-4">
           {(
             [
               ["requests", "Richieste accesso"],
               ["bookings", "Prenotazioni"],
-              ["closed", "Giorni chiusi"],
+              ["availability", "Disponibilità"],
+              ["clients", "Clienti"],
             ] as const
           ).map(([key, label]) => (
             <button
               key={key}
-              onClick={() => setSection(key)}
+              onClick={() => { setSection(key); setSelectedClient(null); }}
               className={`text-[0.6rem] tracking-[0.4em] uppercase transition-colors ${
                 section === key ? "text-[color:var(--gold)]" : "text-muted-foreground hover:text-foreground"
               }`}
@@ -80,8 +105,13 @@ function AdminPage() {
         </nav>
 
         {section === "requests" && <RequestsSection />}
-        {section === "bookings" && <BookingsSection />}
-        {section === "closed" && <ClosedDaysSection />}
+        {section === "bookings" && <BookingsSection onOpenClient={(id) => { setSection("clients"); setSelectedClient(id); }} />}
+        {section === "availability" && <AvailabilitySection />}
+        {section === "clients" && (
+          selectedClient
+            ? <ClientDetail userId={selectedClient} onBack={() => setSelectedClient(null)} />
+            : <ClientsList onOpen={setSelectedClient} />
+        )}
         <div className="h-16" />
       </div>
     </main>
