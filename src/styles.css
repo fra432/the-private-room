@@ -117,8 +117,8 @@
   --muted: oklch(0.72 0.025 68);
   --muted-foreground: oklch(0.40 0.018 60);
   --border: oklch(0.24 0.012 55 / 0.18);
-  --gold: oklch(0.45 0.10 55);
-  --gold-soft: oklch(0.58 0.10 65);
+  --gold: oklch(0.50 0.14 80);
+  --gold-soft: oklch(0.62 0.12 82);
 }
 
 .dark {
@@ -182,9 +182,9 @@
   input:-webkit-autofill:active,
   textarea:-webkit-autofill {
     -webkit-text-fill-color: var(--foreground) !important;
-    -webkit-box-shadow: 0 0 0px 1000px transparent inset !important;
-    box-shadow: 0 0 0px 1000px transparent inset !important;
-    transition: background-color 5000s ease-in-out 0s;
+    -webkit-box-shadow: 0 0 0 1000px var(--background) inset !important;
+    box-shadow: 0 0 0 1000px var(--background) inset !important;
+    transition: background-color 9999s ease-in-out 0s;
     caret-color: var(--gold);
   }
 }
