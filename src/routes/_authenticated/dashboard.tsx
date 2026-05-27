@@ -301,6 +301,44 @@ function DashboardPage() {
 				</div>
 			</section>
 
+			{/* Servizi — compatta, sopra il footer */}
+			<section className="border-t border-[color:var(--border)]">
+				<div className="mx-auto max-w-6xl px-6 py-12 md:px-10">
+					<p className="text-[0.5rem] tracking-[0.6em] uppercase text-muted-foreground/60 mb-6">
+						Servizi
+					</p>
+					<div className="grid gap-6 md:grid-cols-3">
+						<div>
+							<p className="text-[0.55rem] tracking-[0.4em] uppercase text-[color:var(--gold)]">
+								Taglio &amp; Colore
+							</p>
+							<p className="mt-2 text-xs leading-relaxed text-muted-foreground">
+								Consulenza su taglio e colore con analisi personalizzata della
+								cute e dei capelli.
+							</p>
+						</div>
+						<div>
+							<p className="text-[0.55rem] tracking-[0.4em] uppercase text-[color:var(--gold)]">
+								Infoltimento
+							</p>
+							<p className="mt-2 text-xs leading-relaxed text-muted-foreground">
+								Tecniche professionali per aggiungere volume, densità e vitalità
+								ai capelli.
+							</p>
+						</div>
+						<div>
+							<p className="text-[0.55rem] tracking-[0.4em] uppercase text-[color:var(--gold)]">
+								Extension
+							</p>
+							<p className="mt-2 text-xs leading-relaxed text-muted-foreground">
+								Extension per creare lunghezza, volume ed effetti di colore su
+								misura.
+							</p>
+						</div>
+					</div>
+				</div>
+			</section>
+
 			<footer className="border-t border-[color:var(--border)]">
 				<div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-10 md:px-10">
 					<BrandLogo

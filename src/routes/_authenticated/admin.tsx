@@ -84,13 +84,13 @@ function AdminPage() {
 	if (!authLoading && !isAdmin) return <Navigate to="/dashboard" />;
 
 	return (
-		<main className="min-h-screen bg-background text-foreground">
-			<div className="mx-auto flex min-h-screen max-w-4xl flex-col px-6 py-10">
+		<main className="min-h-screen bg-background font-sans text-[15px] text-foreground antialiased md:text-base">
+			<div className="mx-auto flex min-h-screen max-w-5xl flex-col px-6 py-10 md:px-8">
 				<header className="flex items-center justify-between">
 					<BrandLogo className="w-[90px]" />
 					<Link
 						to="/dashboard"
-						className="text-[0.65rem] tracking-[0.2em] uppercase text-muted-foreground hover:text-[color:var(--gold)]"
+						className="text-sm font-medium tracking-[0.08em] uppercase text-muted-foreground hover:text-[color:var(--gold)]"
 					>
 						← Dashboard
 					</Link>
@@ -115,7 +115,7 @@ function AdminPage() {
 								setSection(key);
 								setSelectedClient(null);
 							}}
-							className={`text-[0.7rem] tracking-[0.15em] uppercase font-500 transition-colors ${
+							className={`text-sm tracking-[0.08em] uppercase font-medium transition-colors ${
 								section === key
 									? "text-[color:var(--gold)]"
 									: "text-muted-foreground hover:text-foreground"
@@ -191,7 +191,7 @@ function RequestsSection() {
 					<button
 						key={t}
 						onClick={() => setTab(t)}
-						className={`text-[0.7rem] tracking-[0.15em] uppercase font-500 ${tab === t ? "text-foreground" : "text-muted-foreground hover:text-foreground"}`}
+						className={`text-sm tracking-[0.08em] uppercase font-medium ${tab === t ? "text-foreground" : "text-muted-foreground hover:text-foreground"}`}
 					>
 						{STATUS_LABEL[t]}
 					</button>
@@ -199,12 +199,12 @@ function RequestsSection() {
 			</div>
 			<section className="mt-6 flex flex-col divide-y divide-[color:var(--gold)]/15">
 				{loading && (
-					<p className="py-12 text-center text-xs text-muted-foreground">
+					<p className="py-12 text-center text-sm text-muted-foreground">
 						Caricamento…
 					</p>
 				)}
 				{!loading && rows.length === 0 && (
-					<p className="py-12 text-center text-xs text-muted-foreground">
+					<p className="py-12 text-center text-sm text-muted-foreground">
 						Nessuna richiesta {STATUS_LABEL[tab].toLowerCase()}.
 					</p>
 				)}
@@ -215,11 +215,11 @@ function RequestsSection() {
 								<h2 className="font-serif text-xl text-foreground">
 									{r.first_name} {r.last_name}
 								</h2>
-								<time className="text-[0.65rem] tracking-[0.15em] uppercase text-muted-foreground">
+								<time className="text-xs tracking-[0.08em] uppercase text-muted-foreground">
 									{new Date(r.created_at).toLocaleDateString("it-IT")}
 								</time>
 							</div>
-							<dl className="mt-4 grid gap-2 text-[0.8rem] text-muted-foreground sm:grid-cols-2">
+							<dl className="mt-4 grid gap-2 text-sm text-muted-foreground sm:grid-cols-2">
 								<Info label="Email" value={r.email} />
 								<Info label="Telefono" value={r.phone} />
 								{r.instagram && <Info label="Instagram" value={r.instagram} />}
@@ -231,13 +231,13 @@ function RequestsSection() {
 								<div className="mt-5 flex gap-3">
 									<button
 										onClick={() => review(r.id, "approved")}
-										className="inline-flex h-10 items-center justify-center bg-[color:var(--gold)] px-6 text-[0.65rem] tracking-[0.2em] uppercase font-600 text-background hover:opacity-90"
+										className="inline-flex h-10 items-center justify-center bg-[color:var(--gold)] px-6 text-xs tracking-[0.08em] uppercase font-semibold text-background hover:opacity-90"
 									>
 										Approva
 									</button>
 									<button
 										onClick={() => review(r.id, "rejected")}
-										className="inline-flex h-10 items-center justify-center brand-frame px-6 text-[0.65rem] tracking-[0.2em] uppercase font-600 text-[color:var(--gold)] hover:bg-[color:var(--gold)]/10"
+										className="inline-flex h-10 items-center justify-center brand-frame px-6 text-xs tracking-[0.08em] uppercase font-semibold text-[color:var(--gold)] hover:bg-[color:var(--gold)]/10"
 									>
 										Rifiuta
 									</button>
@@ -315,7 +315,7 @@ function BookingsSection({
 						<button
 							key={t}
 							onClick={() => setTab(t)}
-							className={`text-[0.55rem] tracking-[0.4em] uppercase ${tab === t ? "text-foreground" : "text-muted-foreground hover:text-foreground"}`}
+							className={`text-sm tracking-[0.08em] uppercase ${tab === t ? "text-foreground" : "text-muted-foreground hover:text-foreground"}`}
 						>
 							{STATUS_LABEL[t]}
 						</button>
@@ -324,12 +324,12 @@ function BookingsSection({
 			</div>
 			<section className="mt-6 flex flex-col divide-y divide-[color:var(--gold)]/15">
 				{loading && (
-					<p className="py-12 text-center text-xs text-muted-foreground">
+					<p className="py-12 text-center text-sm text-muted-foreground">
 						Caricamento…
 					</p>
 				)}
 				{!loading && rows.length === 0 && (
-					<p className="py-12 text-center text-xs text-muted-foreground">
+					<p className="py-12 text-center text-sm text-muted-foreground">
 						Nessuna prenotazione {STATUS_LABEL[tab].toLowerCase()}.
 					</p>
 				)}
@@ -352,18 +352,18 @@ function BookingsSection({
 									</h2>
 									<button
 										onClick={() => onOpenClient(b.user_id)}
-										className="text-[0.55rem] tracking-[0.4em] uppercase text-[color:var(--gold)] hover:underline underline-offset-4"
+										className="text-xs tracking-[0.08em] uppercase text-[color:var(--gold)] hover:underline underline-offset-4"
 									>
 										{name} ↗
 									</button>
 								</div>
 								{p?.email && (
-									<p className="mt-1 text-xs text-muted-foreground">
+									<p className="mt-1 text-sm text-muted-foreground">
 										{p.email}
 									</p>
 								)}
 								{b.notes && (
-									<p className="mt-3 text-xs text-muted-foreground italic">
+									<p className="mt-3 text-sm text-muted-foreground italic">
 										"{b.notes}"
 									</p>
 								)}
@@ -371,13 +371,13 @@ function BookingsSection({
 									<div className="mt-5 flex gap-3">
 										<button
 											onClick={() => setStatus(b.id, "confirmed")}
-											className="inline-flex h-10 items-center justify-center bg-[color:var(--gold)] px-6 text-[0.6rem] tracking-[0.4em] uppercase text-background hover:opacity-90"
+											className="inline-flex h-10 items-center justify-center bg-[color:var(--gold)] px-6 text-xs tracking-[0.08em] uppercase text-background hover:opacity-90"
 										>
 											Conferma
 										</button>
 										<button
 											onClick={() => setStatus(b.id, "rejected")}
-											className="inline-flex h-10 items-center justify-center brand-frame px-6 text-[0.6rem] tracking-[0.4em] uppercase text-[color:var(--gold)] hover:bg-[color:var(--gold)]/10"
+											className="inline-flex h-10 items-center justify-center brand-frame px-6 text-xs tracking-[0.08em] uppercase text-[color:var(--gold)] hover:bg-[color:var(--gold)]/10"
 										>
 											Rifiuta
 										</button>
@@ -386,7 +386,7 @@ function BookingsSection({
 								{tab === "confirmed" && (
 									<button
 										onClick={() => setStatus(b.id, "cancelled")}
-										className="mt-5 text-[0.55rem] tracking-[0.4em] uppercase text-muted-foreground hover:text-[color:var(--gold)]"
+										className="mt-5 text-xs tracking-[0.08em] uppercase text-muted-foreground hover:text-[color:var(--gold)]"
 									>
 										Annulla
 									</button>
@@ -459,7 +459,7 @@ function WeeklyHoursEditor() {
 			<h2 className="font-serif text-xl text-[color:var(--gold)]">
 				Orari settimanali
 			</h2>
-			<p className="mt-2 text-xs text-muted-foreground">
+			<p className="mt-2 text-sm text-muted-foreground">
 				Imposta gli orari di apertura standard. I giorni segnati come chiusi non
 				saranno prenotabili.
 			</p>
@@ -472,7 +472,7 @@ function WeeklyHoursEditor() {
 						<span className="w-28 font-serif text-base">
 							{DAYS[r.day_of_week]}
 						</span>
-						<label className="flex items-center gap-2 text-[0.6rem] tracking-[0.3em] uppercase text-muted-foreground">
+						<label className="flex items-center gap-2 text-xs tracking-[0.08em] uppercase text-muted-foreground">
 							<input
 								type="checkbox"
 								checked={r.is_closed}
@@ -507,7 +507,7 @@ function WeeklyHoursEditor() {
 						<button
 							onClick={() => save(r)}
 							disabled={saving === r.day_of_week}
-							className="ml-auto text-[0.55rem] tracking-[0.4em] uppercase text-[color:var(--gold)] hover:underline disabled:opacity-50"
+							className="ml-auto text-xs tracking-[0.08em] uppercase text-[color:var(--gold)] hover:underline disabled:opacity-50"
 						>
 							{saving === r.day_of_week ? "…" : "Salva"}
 						</button>
@@ -560,13 +560,13 @@ function ClosedDaysEditor() {
 			<h2 className="font-serif text-xl text-[color:var(--gold)]">
 				Giorni di chiusura straordinaria
 			</h2>
-			<p className="mt-2 text-xs text-muted-foreground">
+			<p className="mt-2 text-sm text-muted-foreground">
 				Vacanze, festività o giorni di pausa al di fuori della settimana
 				standard.
 			</p>
 			<div className="flex flex-col gap-3 sm:flex-row sm:items-end">
 				<label className="flex flex-1 flex-col gap-2">
-					<span className="text-[0.55rem] tracking-[0.4em] uppercase text-muted-foreground">
+					<span className="text-xs tracking-[0.08em] uppercase text-muted-foreground">
 						Data
 					</span>
 					<input
@@ -577,7 +577,7 @@ function ClosedDaysEditor() {
 					/>
 				</label>
 				<label className="flex flex-1 flex-col gap-2">
-					<span className="text-[0.55rem] tracking-[0.4em] uppercase text-muted-foreground">
+					<span className="text-xs tracking-[0.08em] uppercase text-muted-foreground">
 						Motivo (facoltativo)
 					</span>
 					<input
@@ -588,7 +588,7 @@ function ClosedDaysEditor() {
 				</label>
 				<button
 					onClick={add}
-					className="inline-flex h-10 items-center justify-center bg-[color:var(--gold)] px-6 text-[0.6rem] tracking-[0.4em] uppercase text-background hover:opacity-90"
+					className="inline-flex h-10 items-center justify-center bg-[color:var(--gold)] px-6 text-xs tracking-[0.08em] uppercase text-background hover:opacity-90"
 				>
 					Chiudi giorno
 				</button>
@@ -612,12 +612,12 @@ function ClosedDaysEditor() {
 								})}
 							</p>
 							{r.reason && (
-								<p className="text-xs text-muted-foreground">{r.reason}</p>
+								<p className="text-sm text-muted-foreground">{r.reason}</p>
 							)}
 						</div>
 						<button
 							onClick={() => remove(r.date)}
-							className="text-[0.55rem] tracking-[0.4em] uppercase text-muted-foreground hover:text-[color:var(--gold)]"
+							className="text-xs tracking-[0.08em] uppercase text-muted-foreground hover:text-[color:var(--gold)]"
 						>
 							Rimuovi
 						</button>
@@ -658,16 +658,16 @@ function ClientsList({ onOpen }: { onOpen: (userId: string) => void }) {
 				value={q}
 				onChange={(e) => setQ(e.target.value)}
 				placeholder="Cerca per nome o email…"
-				className="w-full bg-transparent border-b border-[color:var(--gold)]/40 pb-2 text-sm placeholder:text-muted-foreground focus:border-[color:var(--gold)] focus:outline-none"
+				className="w-full bg-transparent border-b border-[color:var(--gold)]/40 pb-2 text-base placeholder:text-muted-foreground focus:border-[color:var(--gold)] focus:outline-none"
 			/>
 			<ul className="mt-8 divide-y divide-[color:var(--gold)]/15">
 				{loading && (
-					<li className="py-12 text-center text-xs text-muted-foreground">
+					<li className="py-12 text-center text-sm text-muted-foreground">
 						Caricamento…
 					</li>
 				)}
 				{!loading && filtered.length === 0 && (
-					<li className="py-12 text-center text-xs text-muted-foreground">
+					<li className="py-12 text-center text-sm text-muted-foreground">
 						Nessuna cliente.
 					</li>
 				)}
@@ -684,9 +684,9 @@ function ClientsList({ onOpen }: { onOpen: (userId: string) => void }) {
 							>
 								<div>
 									<p className="font-serif text-lg">{name}</p>
-									<p className="text-xs text-muted-foreground">{p.email}</p>
+									<p className="text-sm text-muted-foreground">{p.email}</p>
 								</div>
-								<span className="text-[0.55rem] tracking-[0.4em] uppercase text-muted-foreground">
+								<span className="text-xs tracking-[0.08em] uppercase text-muted-foreground">
 									Apri →
 								</span>
 							</button>
@@ -790,13 +790,13 @@ function ClientDetail({
 
 	if (loading)
 		return (
-			<p className="py-12 text-center text-xs text-muted-foreground">
+			<p className="py-12 text-center text-sm text-muted-foreground">
 				Caricamento…
 			</p>
 		);
 	if (!profile)
 		return (
-			<p className="py-12 text-center text-xs text-muted-foreground">
+			<p className="py-12 text-center text-sm text-muted-foreground">
 				Cliente non trovata.
 			</p>
 		);
@@ -810,14 +810,14 @@ function ClientDetail({
 		<section className="mt-6">
 			<button
 				onClick={onBack}
-				className="text-[0.55rem] tracking-[0.4em] uppercase text-muted-foreground hover:text-[color:var(--gold)]"
+				className="text-xs tracking-[0.08em] uppercase text-muted-foreground hover:text-[color:var(--gold)]"
 			>
 				← Tutte le clienti
 			</button>
 
 			<header className="mt-6">
 				<h2 className="font-serif text-3xl text-[color:var(--gold)]">{name}</h2>
-				<dl className="mt-4 grid gap-3 text-xs sm:grid-cols-2">
+				<dl className="mt-4 grid gap-3 text-sm sm:grid-cols-2">
 					<Info label="Email" value={profile.email ?? "—"} />
 					{profile.phone && <Info label="Telefono" value={profile.phone} />}
 					{profile.instagram && (
@@ -837,11 +837,11 @@ function ClientDetail({
 					Questionario
 				</h3>
 				{!quest ? (
-					<p className="mt-3 text-xs italic text-muted-foreground">
+					<p className="mt-3 text-sm italic text-muted-foreground">
 						Non ancora compilato.
 					</p>
 				) : (
-					<dl className="mt-4 grid gap-3 text-xs sm:grid-cols-2">
+					<dl className="mt-4 grid gap-3 text-sm sm:grid-cols-2">
 						<Info label="Tipo di capello" value={quest.hair_type} />
 						<Info label="Lunghezza" value={quest.hair_length} />
 						<Info label="Colore" value={quest.hair_color} />
@@ -887,7 +887,7 @@ function ClientDetail({
 					/>
 					<button
 						onClick={() => void addNote()}
-						className="inline-flex h-10 items-center justify-center bg-[color:var(--gold)] px-6 text-[0.65rem] tracking-[0.2em] uppercase font-600 text-background hover:opacity-90"
+						className="inline-flex h-10 items-center justify-center bg-[color:var(--gold)] px-6 text-xs tracking-[0.08em] uppercase font-semibold text-background hover:opacity-90"
 					>
 						Aggiungi
 					</button>
@@ -895,7 +895,7 @@ function ClientDetail({
 
 				<div className="mt-6 divide-y divide-[color:var(--gold)]/15">
 					{notes.length === 0 ? (
-						<p className="text-xs italic text-muted-foreground">
+						<p className="text-sm italic text-muted-foreground">
 							Nessuna nota.
 						</p>
 					) : (
@@ -911,13 +911,13 @@ function ClientDetail({
 										<div className="flex gap-2">
 											<button
 												onClick={() => void updateNote(note.id)}
-												className="inline-flex h-8 items-center justify-center bg-[color:var(--gold)] px-4 text-[0.6rem] tracking-[0.15em] uppercase font-500 text-background hover:opacity-90"
+												className="inline-flex h-8 items-center justify-center bg-[color:var(--gold)] px-4 text-xs tracking-[0.08em] uppercase font-medium text-background hover:opacity-90"
 											>
 												Salva
 											</button>
 											<button
 												onClick={() => setEditingId(null)}
-												className="inline-flex h-8 items-center justify-center border border-[color:var(--gold)]/40 px-4 text-[0.6rem] tracking-[0.15em] uppercase font-500 text-foreground hover:bg-[color:var(--gold)]/10"
+												className="inline-flex h-8 items-center justify-center border border-[color:var(--gold)]/40 px-4 text-xs tracking-[0.08em] uppercase font-medium text-foreground hover:bg-[color:var(--gold)]/10"
 											>
 												Annulla
 											</button>
@@ -927,7 +927,7 @@ function ClientDetail({
 									<>
 										<p className="text-sm text-foreground">{note.content}</p>
 										<div className="mt-2 flex items-center justify-between">
-											<time className="text-[0.6rem] text-muted-foreground">
+											<time className="text-xs text-muted-foreground">
 												{new Date(note.created_at).toLocaleDateString("it-IT")}{" "}
 												{new Date(note.created_at).toLocaleTimeString("it-IT", {
 													hour: "2-digit",
@@ -940,13 +940,13 @@ function ClientDetail({
 														setEditingId(note.id);
 														setEditingContent(note.content);
 													}}
-													className="text-[0.6rem] tracking-[0.15em] uppercase text-muted-foreground hover:text-[color:var(--gold)]"
+													className="text-xs tracking-[0.08em] uppercase text-muted-foreground hover:text-[color:var(--gold)]"
 												>
 													Modifica
 												</button>
 												<button
 													onClick={() => void deleteNote(note.id)}
-													className="text-[0.6rem] tracking-[0.15em] uppercase text-muted-foreground hover:text-destructive"
+													className="text-xs tracking-[0.08em] uppercase text-muted-foreground hover:text-destructive"
 												>
 													Elimina
 												</button>
@@ -965,7 +965,7 @@ function ClientDetail({
 					Storico prenotazioni
 				</h3>
 				{bookings.length === 0 ? (
-					<p className="mt-3 text-xs italic text-muted-foreground">
+					<p className="mt-3 text-sm italic text-muted-foreground">
 						Nessuna prenotazione.
 					</p>
 				) : (
@@ -983,7 +983,7 @@ function ClientDetail({
 										year: "numeric",
 									})}
 								</span>
-								<span className="text-[0.55rem] tracking-[0.4em] uppercase text-muted-foreground">
+								<span className="text-xs tracking-[0.08em] uppercase text-muted-foreground">
 									{STATUS_LABEL[b.status] ?? b.status}
 								</span>
 							</li>
@@ -998,10 +998,12 @@ function ClientDetail({
 function Info({ label, value }: { label: string; value: string }) {
 	return (
 		<div>
-			<dt className="text-[0.55rem] tracking-[0.4em] uppercase text-muted-foreground/70">
+			<dt className="text-xs tracking-[0.08em] uppercase text-muted-foreground/80">
 				{label}
 			</dt>
-			<dd className="mt-1 text-foreground">{value}</dd>
+			<dd className="mt-1.5 text-base leading-relaxed text-foreground">
+				{value}
+			</dd>
 		</div>
 	);
 }
