@@ -86,6 +86,38 @@ export type Database = {
         }
         Relationships: []
       }
+      client_notes: {
+        Row: {
+          client_id: string
+          content: string
+          created_at: string
+          id: string
+          updated_at: string
+        }
+        Insert: {
+          client_id: string
+          content: string
+          created_at?: string
+          id?: string
+          updated_at?: string
+        }
+        Update: {
+          client_id?: string
+          content?: string
+          created_at?: string
+          id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "client_notes_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       closed_days: {
         Row: {
           created_at: string
@@ -142,12 +174,14 @@ export type Database = {
           additional: string | null
           allergies: string | null
           created_at: string
+          drink_preference: string | null
           goals: string
           hair_color: string
           hair_length: string
           hair_type: string
           id: string
           inspiration: string | null
+          music_taste: string | null
           treatments: string | null
           updated_at: string
           user_id: string
@@ -156,12 +190,14 @@ export type Database = {
           additional?: string | null
           allergies?: string | null
           created_at?: string
+          drink_preference?: string | null
           goals: string
           hair_color: string
           hair_length: string
           hair_type: string
           id?: string
           inspiration?: string | null
+          music_taste?: string | null
           treatments?: string | null
           updated_at?: string
           user_id: string
@@ -170,12 +206,14 @@ export type Database = {
           additional?: string | null
           allergies?: string | null
           created_at?: string
+          drink_preference?: string | null
           goals?: string
           hair_color?: string
           hair_length?: string
           hair_type?: string
           id?: string
           inspiration?: string | null
+          music_taste?: string | null
           treatments?: string | null
           updated_at?: string
           user_id?: string
