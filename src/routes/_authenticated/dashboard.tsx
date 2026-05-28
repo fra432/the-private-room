@@ -83,6 +83,12 @@ function DashboardPage() {
 							<BrandLogo variant="horizontal" className="h-12 w-auto md:h-14" />
 						</Link>
 						<nav className="flex items-center gap-8">
+						<Link
+							to="/services"
+							className="text-[0.55rem] tracking-[0.5em] uppercase text-white/90 hover:text-white"
+						>
+							Servizi
+						</Link>
 							<Link
 								to="/book"
 								className="text-[0.55rem] tracking-[0.5em] uppercase text-white/90 hover:text-white"
