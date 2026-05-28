@@ -307,49 +307,20 @@ function DashboardPage() {
 				</div>
 			</section>
 
-			{/* Servizi — compatta, sopra il footer */}
+			{/* Servizi — solo un accenno, il dettaglio vive in /services */}
 			<section className="border-t border-[color:var(--border)]">
-				<div className="mx-auto max-w-6xl px-6 py-12 md:px-10">
-					<div className="mb-6 flex items-end justify-between">
-						<p className="text-[0.5rem] tracking-[0.6em] uppercase text-muted-foreground/60">
-							Servizi
-						</p>
-						<Link
-							to="/services"
-							className="text-[0.55rem] tracking-[0.5em] uppercase text-[color:var(--gold)] hover:opacity-80"
-						>
-							Tutti i servizi →
-						</Link>
-					</div>
-					<div className="grid gap-6 md:grid-cols-3">
-						<div>
-							<p className="text-[0.55rem] tracking-[0.4em] uppercase text-[color:var(--gold)]">
-								Taglio &amp; Colore
-							</p>
-							<p className="mt-2 text-xs leading-relaxed text-muted-foreground">
-								Consulenza su taglio e colore con analisi personalizzata della
-								cute e dei capelli.
-							</p>
-						</div>
-						<div>
-							<p className="text-[0.55rem] tracking-[0.4em] uppercase text-[color:var(--gold)]">
-								Infoltimento
-							</p>
-							<p className="mt-2 text-xs leading-relaxed text-muted-foreground">
-								Tecniche professionali per aggiungere volume, densità e vitalità
-								ai capelli.
-							</p>
-						</div>
-						<div>
-							<p className="text-[0.55rem] tracking-[0.4em] uppercase text-[color:var(--gold)]">
-								Extension
-							</p>
-							<p className="mt-2 text-xs leading-relaxed text-muted-foreground">
-								Extension per creare lunghezza, volume ed effetti di colore su
-								misura.
-							</p>
-						</div>
-					</div>
+				<div className="mx-auto flex max-w-6xl flex-col items-start justify-between gap-6 px-6 py-14 md:flex-row md:items-center md:px-10">
+					<p className="max-w-xl font-serif text-2xl leading-snug text-foreground md:text-3xl">
+						Taglio, colore, infoltimento, extension e
+						<span className="italic text-[color:var(--gold)]"> trattamenti</span>
+						.
+					</p>
+					<Link
+						to="/services"
+						className="text-[0.55rem] tracking-[0.5em] uppercase text-[color:var(--gold)] hover:opacity-80"
+					>
+						Scopri i servizi →
+					</Link>
 				</div>
 			</section>
 
