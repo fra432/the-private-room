@@ -83,6 +83,12 @@ function DashboardPage() {
 							<BrandLogo variant="horizontal" className="h-12 w-auto md:h-14" />
 						</Link>
 						<nav className="flex items-center gap-8">
+						<Link
+							to="/services"
+							className="text-[0.55rem] tracking-[0.5em] uppercase text-white/90 hover:text-white"
+						>
+							Servizi
+						</Link>
 							<Link
 								to="/book"
 								className="text-[0.55rem] tracking-[0.5em] uppercase text-white/90 hover:text-white"
@@ -304,9 +310,17 @@ function DashboardPage() {
 			{/* Servizi — compatta, sopra il footer */}
 			<section className="border-t border-[color:var(--border)]">
 				<div className="mx-auto max-w-6xl px-6 py-12 md:px-10">
-					<p className="text-[0.5rem] tracking-[0.6em] uppercase text-muted-foreground/60 mb-6">
-						Servizi
-					</p>
+					<div className="mb-6 flex items-end justify-between">
+						<p className="text-[0.5rem] tracking-[0.6em] uppercase text-muted-foreground/60">
+							Servizi
+						</p>
+						<Link
+							to="/services"
+							className="text-[0.55rem] tracking-[0.5em] uppercase text-[color:var(--gold)] hover:opacity-80"
+						>
+							Tutti i servizi →
+						</Link>
+					</div>
 					<div className="grid gap-6 md:grid-cols-3">
 						<div>
 							<p className="text-[0.55rem] tracking-[0.4em] uppercase text-[color:var(--gold)]">
