@@ -1,5 +1,6 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
+import { ArrowLeft, ChevronLeft, ChevronRight } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
 import { BrandLogo } from "@/components/brand-logo";
@@ -87,8 +88,9 @@ function BookPage() {
           <Link to="/dashboard" className="text-white">
             <BrandLogo variant="horizontal" className="h-9 w-auto" />
           </Link>
-          <Link to="/dashboard" className="text-[0.55rem] tracking-[0.4em] uppercase text-white/70 hover:text-white">
-            ← Dashboard
+          <Link to="/dashboard" className="inline-flex items-center gap-2 text-[0.55rem] tracking-[0.4em] uppercase text-white/70 hover:text-white">
+            <ArrowLeft className="h-3.5 w-3.5" strokeWidth={1.25} />
+            Dashboard
           </Link>
         </div>
       </header>
@@ -122,53 +124,77 @@ function BookPage() {
           Uno slot disponibile per giorno. La richiesta sarà confermata personalmente.
         </p>
 
-        <div className="mt-10 flex items-center justify-between">
-          <button
-            onClick={() => setMonth(new Date(month.getFullYear(), month.getMonth() - 1, 1))}
-            className="text-[0.55rem] tracking-[0.4em] uppercase text-muted-foreground hover:text-foreground"
-          >
-            ←
-          </button>
-          <p className="text-[0.65rem] tracking-[0.5em] uppercase">
-            {month.toLocaleDateString("it-IT", { month: "long", year: "numeric" })}
-          </p>
-          <button
-            onClick={() => setMonth(new Date(month.getFullYear(), month.getMonth() + 1, 1))}
-            className="text-[0.55rem] tracking-[0.4em] uppercase text-muted-foreground hover:text-foreground"
-          >
-            →
-          </button>
-        </div>
+        <div className="mt-12 border border-[color:var(--border)] bg-card/40 p-6 md:p-8">
+          <div className="flex items-center justify-between">
+            <button
+              onClick={() => setMonth(new Date(month.getFullYear(), month.getMonth() - 1, 1))}
+              aria-label="Mese precedente"
+              className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-[color:var(--border)] text-muted-foreground transition-colors hover:border-[color:var(--gold)] hover:text-[color:var(--gold)]"
+            >
+              <ChevronLeft className="h-5 w-5" strokeWidth={1.25} />
+            </button>
+            <p className="font-serif text-xl italic capitalize text-foreground md:text-2xl">
+              {month.toLocaleDateString("it-IT", { month: "long", year: "numeric" })}
+            </p>
+            <button
+              onClick={() => setMonth(new Date(month.getFullYear(), month.getMonth() + 1, 1))}
+              aria-label="Mese successivo"
+              className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-[color:var(--border)] text-muted-foreground transition-colors hover:border-[color:var(--gold)] hover:text-[color:var(--gold)]"
+            >
+              <ChevronRight className="h-5 w-5" strokeWidth={1.25} />
+            </button>
+          </div>
 
-        <div className="mt-6 grid grid-cols-7 gap-1 text-center text-[0.55rem] tracking-[0.3em] uppercase text-muted-foreground">
-          {["Lun", "Mar", "Mer", "Gio", "Ven", "Sab", "Dom"].map((d) => (
-            <div key={d} className="py-2">{d}</div>
-          ))}
-          {days.map((d, i) => {
-            if (!d) return <div key={i} />;
-            const iso = toISO(d);
-            const isPast = iso < today;
-            const isTaken = taken.has(iso);
-            const isClosed = closed.has(iso);
-            const disabled = isPast || isTaken || isClosed;
-            const isSel = selected === iso;
-            return (
-              <button
-                key={i}
-                disabled={disabled}
-                onClick={() => setSelected(iso)}
-                className={`aspect-square text-sm transition-colors ${
-                  disabled
-                    ? "text-muted-foreground/40 line-through cursor-not-allowed"
-                    : isSel
-                    ? "bg-black text-white"
-                    : "hover:bg-[color:var(--gold)]/15"
-                }`}
-              >
-                {d.getDate()}
-              </button>
-            );
-          })}
+          <div className="mt-8 grid grid-cols-7 gap-y-1 text-center text-[0.55rem] tracking-[0.35em] uppercase text-muted-foreground/70">
+            {["Lun", "Mar", "Mer", "Gio", "Ven", "Sab", "Dom"].map((d) => (
+              <div key={d} className="pb-3">{d}</div>
+            ))}
+          </div>
+          <div className="grid grid-cols-7 gap-1.5 text-center">
+            {days.map((d, i) => {
+              if (!d) return <div key={i} />;
+              const iso = toISO(d);
+              const isPast = iso < today;
+              const isTaken = taken.has(iso);
+              const isClosed = closed.has(iso);
+              const disabled = isPast || isTaken || isClosed;
+              const isSel = selected === iso;
+              const isToday = iso === today;
+              return (
+                <button
+                  key={i}
+                  disabled={disabled}
+                  onClick={() => setSelected(iso)}
+                  className={`group relative aspect-square font-serif text-base transition-all duration-200 ${
+                    disabled
+                      ? "text-muted-foreground/30 cursor-not-allowed"
+                      : isSel
+                      ? "bg-[color:var(--gold)] text-background shadow-lg"
+                      : "text-foreground hover:bg-[color:var(--gold)]/10 hover:text-[color:var(--gold)]"
+                  }`}
+                >
+                  <span className="absolute inset-0 flex items-center justify-center">
+                    {d.getDate()}
+                  </span>
+                  {isToday && !isSel && (
+                    <span className="absolute bottom-1 left-1/2 h-1 w-1 -translate-x-1/2 rounded-full bg-[color:var(--gold)]" />
+                  )}
+                </button>
+              );
+            })}
+          </div>
+
+          <div className="mt-8 flex flex-wrap items-center justify-center gap-x-6 gap-y-2 border-t border-[color:var(--border)] pt-5 text-[0.55rem] tracking-[0.35em] uppercase text-muted-foreground">
+            <span className="inline-flex items-center gap-2">
+              <span className="h-2 w-2 rounded-full bg-[color:var(--gold)]" /> Selezionato
+            </span>
+            <span className="inline-flex items-center gap-2">
+              <span className="h-2 w-2 rounded-full border border-[color:var(--gold)]" /> Oggi
+            </span>
+            <span className="inline-flex items-center gap-2">
+              <span className="h-2 w-2 rounded-full bg-muted-foreground/30" /> Non disponibile
+            </span>
+          </div>
         </div>
 
         {selected && (
