@@ -8,6 +8,7 @@ import { useState } from "react";
 import { toast } from "sonner";
 import { z } from "zod";
 import { BrandLogo } from "@/components/brand-logo";
+import { BackArrow } from "@/components/back-arrow";
 import { useAuth } from "@/hooks/use-auth";
 import { supabase } from "@/integrations/supabase/client";
 
