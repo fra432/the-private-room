@@ -2,6 +2,7 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { BrandLogo } from "@/components/brand-logo";
+import { BackArrow } from "@/components/back-arrow";
 import { useAuth } from "@/hooks/use-auth";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -127,9 +128,10 @@ function QuestionnairePage() {
 					</Link>
 					<Link
 						to="/dashboard"
-						className="text-[0.55rem] tracking-[0.4em] uppercase text-white/70 hover:text-white"
+						className="inline-flex items-center gap-2.5 text-[0.55rem] tracking-[0.4em] uppercase text-white/70 transition-colors hover:text-white"
 					>
-						← Dashboard
+						<BackArrow className="h-7 w-7" />
+						Dashboard
 					</Link>
 				</div>
 			</header>

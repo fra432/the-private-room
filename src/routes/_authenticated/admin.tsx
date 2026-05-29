@@ -2,6 +2,8 @@ import { createFileRoute, Link, Navigate } from "@tanstack/react-router";
 import { useCallback, useEffect, useState } from "react";
 import { toast } from "sonner";
 import { BrandLogo } from "@/components/brand-logo";
+import { BackArrow } from "@/components/back-arrow";
+import { ArrowRight } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -90,9 +92,10 @@ function AdminPage() {
 					<BrandLogo className="w-[90px]" />
 					<Link
 						to="/dashboard"
-						className="text-sm font-medium tracking-[0.08em] uppercase text-muted-foreground hover:text-[color:var(--gold)]"
+						className="inline-flex items-center gap-2.5 text-sm font-medium tracking-[0.08em] uppercase text-muted-foreground transition-colors hover:text-[color:var(--gold)]"
 					>
-						← Dashboard
+						<BackArrow />
+						Dashboard
 					</Link>
 				</header>
 
@@ -686,8 +689,8 @@ function ClientsList({ onOpen }: { onOpen: (userId: string) => void }) {
 									<p className="font-serif text-lg">{name}</p>
 									<p className="text-sm text-muted-foreground">{p.email}</p>
 								</div>
-								<span className="text-xs tracking-[0.08em] uppercase text-muted-foreground">
-									Apri →
+								<span className="inline-flex items-center gap-2 text-xs tracking-[0.08em] uppercase text-muted-foreground">
+									Apri <ArrowRight className="h-3 w-3" strokeWidth={1.25} />
 								</span>
 							</button>
 						</li>
@@ -810,9 +813,10 @@ function ClientDetail({
 		<section className="mt-6">
 			<button
 				onClick={onBack}
-				className="text-xs tracking-[0.08em] uppercase text-muted-foreground hover:text-[color:var(--gold)]"
+				className="inline-flex items-center gap-2.5 text-xs tracking-[0.08em] uppercase text-muted-foreground transition-colors hover:text-[color:var(--gold)]"
 			>
-				← Tutte le clienti
+				<BackArrow />
+				Tutte le clienti
 			</button>
 
 			<header className="mt-6">

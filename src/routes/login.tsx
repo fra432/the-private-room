@@ -8,6 +8,7 @@ import { useState } from "react";
 import { toast } from "sonner";
 import { z } from "zod";
 import { BrandLogo } from "@/components/brand-logo";
+import { BackArrow } from "@/components/back-arrow";
 import { useAuth } from "@/hooks/use-auth";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -77,9 +78,10 @@ function LoginPage() {
 			<div className="relative mx-auto flex min-h-screen w-full max-w-md flex-col px-8 py-10">
 				<Link
 					to="/welcome"
-					className="text-[0.6rem] tracking-[0.5em] uppercase text-muted-foreground transition-colors hover:text-[color:var(--gold)]"
+					className="group inline-flex items-center gap-3 self-start text-[0.6rem] tracking-[0.5em] uppercase text-muted-foreground transition-colors hover:text-[color:var(--gold)]"
 				>
-					← Indietro
+					<BackArrow />
+					Indietro
 				</Link>
 
 				<div className="mt-14 flex flex-col items-center text-center">
