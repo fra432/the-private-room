@@ -4,6 +4,7 @@ import { z } from "zod";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { BrandLogo } from "@/components/brand-logo";
+import { BackArrow } from "@/components/back-arrow";
 
 export const Route = createFileRoute("/request-access")({
   head: () => ({ meta: [{ title: "Request Access — THE ROOM" }] }),
@@ -51,8 +52,9 @@ function RequestAccessPage() {
   return (
     <main className="min-h-screen bg-background text-foreground">
       <div className="mx-auto flex min-h-screen max-w-md flex-col px-6 py-10">
-        <Link to="/welcome" className="text-[0.6rem] tracking-[0.4em] uppercase text-muted-foreground hover:text-foreground">
-          ← Indietro
+        <Link to="/welcome" className="inline-flex items-center gap-3 self-start text-[0.6rem] tracking-[0.4em] uppercase text-muted-foreground transition-colors hover:text-[color:var(--gold)]">
+          <BackArrow />
+          Indietro
         </Link>
 
         <div className="mt-10 flex flex-col items-center text-center">
