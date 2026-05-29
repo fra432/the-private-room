@@ -1,5 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { BrandLogo } from "@/components/brand-logo";
+import { BackArrow } from "@/components/back-arrow";
 
 export const Route = createFileRoute("/request-received")({
   head: () => ({ meta: [{ title: "Request received — THE ROOM" }] }),
@@ -19,9 +20,10 @@ function ReceivedPage() {
         </p>
         <Link
           to="/welcome"
-          className="mt-12 text-[0.6rem] tracking-[0.5em] uppercase text-muted-foreground hover:text-[color:var(--gold)]"
+          className="mt-12 inline-flex items-center gap-3 text-[0.6rem] tracking-[0.5em] uppercase text-muted-foreground transition-colors hover:text-[color:var(--gold)]"
         >
-          ← Torna all'ingresso
+          <BackArrow />
+          Torna all'ingresso
         </Link>
       </div>
     </main>
