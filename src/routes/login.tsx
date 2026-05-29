@@ -77,9 +77,12 @@ function LoginPage() {
 			<div className="relative mx-auto flex min-h-screen w-full max-w-md flex-col px-8 py-10">
 				<Link
 					to="/welcome"
-					className="text-[0.6rem] tracking-[0.5em] uppercase text-muted-foreground transition-colors hover:text-[color:var(--gold)]"
+					className="group inline-flex items-center gap-2 self-start text-[0.6rem] tracking-[0.5em] uppercase text-muted-foreground transition-colors hover:text-[color:var(--gold)]"
 				>
-					← Indietro
+					<span className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-[color:var(--border)] transition-colors group-hover:border-[color:var(--gold)]">
+						<svg className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.25" strokeLinecap="round" strokeLinejoin="round"><path d="M19 12H5"/><path d="m12 19-7-7 7-7"/></svg>
+					</span>
+					Indietro
 				</Link>
 
 				<div className="mt-14 flex flex-col items-center text-center">
