@@ -1,6 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
 import { BrandLogo } from "@/components/brand-logo";
+import { ArrowRight } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -179,9 +180,10 @@ function DashboardPage() {
 					<p className="-mt-6 mb-2 text-[11px] text-muted-foreground">
 						<Link
 							to="/questionnaire"
-							className="underline-offset-4 hover:underline"
+							className="inline-flex items-center gap-1.5 underline-offset-4 hover:underline"
 						>
-							Aggiorna il tuo questionario →
+							Aggiorna il tuo questionario
+							<ArrowRight className="h-3 w-3" strokeWidth={1.25} />
 						</Link>
 					</p>
 				)}
@@ -317,9 +319,12 @@ function DashboardPage() {
 					</p>
 					<Link
 						to="/services"
-						className="text-[0.55rem] tracking-[0.5em] uppercase text-[color:var(--gold)] hover:opacity-80"
+						className="group inline-flex items-center gap-3 text-[0.55rem] tracking-[0.5em] uppercase text-[color:var(--gold)] hover:opacity-80"
 					>
-						Scopri i servizi →
+						Scopri i servizi
+						<span className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-current/40 transition-transform group-hover:translate-x-1">
+							<ArrowRight className="h-3.5 w-3.5" strokeWidth={1.25} />
+						</span>
 					</Link>
 				</div>
 			</section>
