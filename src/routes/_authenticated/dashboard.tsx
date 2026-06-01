@@ -21,6 +21,7 @@ function DashboardPage() {
 	const [hasQuestionnaire, setHasQuestionnaire] = useState<boolean | null>(
 		null,
 	);
+	const [firstName, setFirstName] = useState<string | null>(null);
 
 	useEffect(() => {
 		// Show intro only if not already seen in this session
@@ -39,6 +40,7 @@ function DashboardPage() {
 		supabase
 			.from("bookings")
 			.select("id,date,status")
+			.eq("user_id", user.id)
 			.gte("date", new Date().toISOString().slice(0, 10))
 			.order("date", { ascending: true })
 			.then(({ data }) => setBookings(data ?? []));
@@ -48,6 +50,12 @@ function DashboardPage() {
 			.eq("user_id", user.id)
 			.maybeSingle()
 			.then(({ data }) => setHasQuestionnaire(!!data));
+		supabase
+			.from("profiles")
+			.select("first_name")
+			.eq("id", user.id)
+			.maybeSingle()
+			.then(({ data }) => setFirstName(data?.first_name ?? null));
 	}, [user]);
 
 	return (
@@ -129,7 +137,7 @@ function DashboardPage() {
 					<div className="absolute inset-x-0 top-1/2 z-10 -translate-y-1/2 px-6 md:top-auto md:translate-y-0 md:bottom-0 md:pb-36 md:px-10">
 						<div className="mx-auto max-w-6xl">
 							<p className="text-[0.55rem] tracking-[0.6em] uppercase text-white/80">
-								Benvenuta · {user?.email}
+								Benvenuta{firstName ? ` · ${firstName}` : ""}
 							</p>
 							<h1 className="mt-6 font-serif text-5xl leading-[1.05] text-white drop-shadow-[0_2px_16px_rgba(0,0,0,0.7)] md:text-7xl">
 								Sei dentro.
