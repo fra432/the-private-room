@@ -124,6 +124,40 @@ function BookPage() {
 
       {hasQuestionnaire !== false && (
       <div className="mx-auto max-w-2xl px-6 py-12">
+        {hasQuestionnaire === true && !questionnaireConfirmed && (
+          <div className="mb-12 border border-[color:var(--gold)]/40 bg-[color:var(--gold)]/5 p-6 md:p-8">
+            <p className="text-[0.55rem] tracking-[0.5em] uppercase text-[color:var(--gold)]">
+              Prima di prenotare
+            </p>
+            <h2 className="mt-3 font-serif text-2xl md:text-3xl">
+              Conferma il tuo questionario
+            </h2>
+            <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
+              Le informazioni che ci hai dato
+              {questionnaireUpdatedAt
+                ? ` il ${new Date(questionnaireUpdatedAt).toLocaleDateString("it-IT", { day: "numeric", month: "long", year: "numeric" })}`
+                : ""}{" "}
+              sono ancora attuali? Confermale o aggiornale prima di scegliere la data.
+            </p>
+            <div className="mt-6 flex flex-wrap gap-3">
+              <button
+                onClick={() => setQuestionnaireConfirmed(true)}
+                className="inline-flex h-11 items-center justify-center bg-[color:var(--gold)] px-8 text-[0.6rem] tracking-[0.5em] uppercase text-background hover:opacity-90"
+              >
+                Confermo, sono attuali
+              </button>
+              <Link
+                to="/questionnaire"
+                className="inline-flex h-11 items-center justify-center border border-[color:var(--gold)] px-8 text-[0.6rem] tracking-[0.5em] uppercase text-[color:var(--gold)] hover:bg-[color:var(--gold)]/10"
+              >
+                Aggiorna il questionario
+              </Link>
+            </div>
+          </div>
+        )}
+
+        {(hasQuestionnaire !== true || questionnaireConfirmed) && (
+        <>
         <h1 className="font-serif text-3xl text-[color:var(--gold)]">Scegli un giorno</h1>
         <p className="mt-2 text-xs text-muted-foreground">
           Uno slot disponibile per giorno. La richiesta sarà confermata personalmente.
@@ -226,6 +260,8 @@ function BookPage() {
               {submitting ? "Invio…" : "Invia richiesta"}
             </button>
           </div>
+        )}
+        </>
         )}
       </div>
       )}
