@@ -19,6 +19,8 @@ function BookPage() {
   const { user } = useAuth();
   const navigate = useNavigate();
   const [hasQuestionnaire, setHasQuestionnaire] = useState<boolean | null>(null);
+  const [questionnaireConfirmed, setQuestionnaireConfirmed] = useState(false);
+  const [questionnaireUpdatedAt, setQuestionnaireUpdatedAt] = useState<string | null>(null);
   const [month, setMonth] = useState(() => {
     const d = new Date();
     return new Date(d.getFullYear(), d.getMonth(), 1);
@@ -33,10 +35,13 @@ function BookPage() {
     if (!user) return;
     supabase
       .from("questionnaires")
-      .select("id")
+      .select("id,updated_at")
       .eq("user_id", user.id)
       .maybeSingle()
-      .then(({ data }) => setHasQuestionnaire(!!data));
+      .then(({ data }) => {
+        setHasQuestionnaire(!!data);
+        setQuestionnaireUpdatedAt(data?.updated_at ?? null);
+      });
   }, [user]);
 
   useEffect(() => {
