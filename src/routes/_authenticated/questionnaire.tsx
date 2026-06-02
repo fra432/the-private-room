@@ -1,6 +1,7 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
+import { X, ImagePlus } from "lucide-react";
 import { BrandLogo } from "@/components/brand-logo";
 import { BackArrow } from "@/components/back-arrow";
 import { useAuth } from "@/hooks/use-auth";
@@ -37,6 +38,11 @@ const EMPTY: Form = {
 	music_taste: "",
 };
 
+type GoalImage = { path: string; url: string };
+const BUCKET = "questionnaire-images";
+const MAX_IMAGES = 6;
+const MAX_SIZE = 5 * 1024 * 1024;
+
 function QuestionnairePage() {
 	const { user } = useAuth();
 	const navigate = useNavigate();
@@ -44,6 +50,9 @@ function QuestionnairePage() {
 	const [existingId, setExistingId] = useState<string | null>(null);
 	const [loading, setLoading] = useState(true);
 	const [saving, setSaving] = useState(false);
+	const [images, setImages] = useState<GoalImage[]>([]);
+	const [uploading, setUploading] = useState(false);
+	const fileInputRef = useRef<HTMLInputElement>(null);
 
 	useEffect(() => {
 		if (!user) return;
@@ -52,7 +61,7 @@ function QuestionnairePage() {
 			.select("*")
 			.eq("user_id", user.id)
 			.maybeSingle()
-			.then(({ data }) => {
+			.then(async ({ data }) => {
 				if (data) {
 					setExistingId(data.id);
 					setForm({
@@ -67,6 +76,18 @@ function QuestionnairePage() {
 						drink_preference: data.drink_preference ?? "",
 						music_taste: data.music_taste ?? "",
 					});
+					const paths: string[] = (data as { goal_images?: string[] }).goal_images ?? [];
+					if (paths.length) {
+						const signed = await Promise.all(
+							paths.map(async (p) => {
+								const { data: s } = await supabase.storage
+									.from(BUCKET)
+									.createSignedUrl(p, 3600);
+								return { path: p, url: s?.signedUrl ?? "" };
+							}),
+						);
+						setImages(signed.filter((i) => i.url));
+					}
 				}
 				setLoading(false);
 			});
@@ -74,6 +95,49 @@ function QuestionnairePage() {
 
 	function set<K extends keyof Form>(k: K, v: string) {
 		setForm((f) => ({ ...f, [k]: v }));
+	}
+
+	async function onFiles(e: React.ChangeEvent<HTMLInputElement>) {
+		if (!user) return;
+		const files = Array.from(e.target.files ?? []);
+		e.target.value = "";
+		if (!files.length) return;
+		if (images.length + files.length > MAX_IMAGES) {
+			toast.error(`Massimo ${MAX_IMAGES} immagini.`);
+			return;
+		}
+		setUploading(true);
+		const added: GoalImage[] = [];
+		for (const file of files) {
+			if (!file.type.startsWith("image/")) {
+				toast.error(`${file.name}: non è un'immagine.`);
+				continue;
+			}
+			if (file.size > MAX_SIZE) {
+				toast.error(`${file.name}: massimo 5MB.`);
+				continue;
+			}
+			const ext = file.name.split(".").pop()?.toLowerCase() ?? "jpg";
+			const path = `${user.id}/${crypto.randomUUID()}.${ext}`;
+			const { error } = await supabase.storage
+				.from(BUCKET)
+				.upload(path, file, { contentType: file.type });
+			if (error) {
+				toast.error(`Errore caricamento ${file.name}.`);
+				continue;
+			}
+			const { data: s } = await supabase.storage
+				.from(BUCKET)
+				.createSignedUrl(path, 3600);
+			added.push({ path, url: s?.signedUrl ?? "" });
+		}
+		setImages((prev) => [...prev, ...added]);
+		setUploading(false);
+	}
+
+	async function removeImage(path: string) {
+		await supabase.storage.from(BUCKET).remove([path]);
+		setImages((prev) => prev.filter((i) => i.path !== path));
 	}
 
 	async function submit(e: React.FormEvent) {
@@ -101,6 +165,7 @@ function QuestionnairePage() {
 			music_taste: form.music_taste.trim() || null,
 			inspiration: form.inspiration.trim() || null,
 			additional: form.additional.trim() || null,
+			goal_images: images.map((i) => i.path),
 		};
 		const { error } = existingId
 			? await supabase
@@ -194,11 +259,62 @@ function QuestionnairePage() {
 						/>
 						<Area
 							label="Cosa desideri ottenere *"
-							hint="Raccontaci il tuo obiettivo per questo appuntamento."
+							hint="Raccontaci il tuo obiettivo per questo appuntamento e, se vuoi, aggiungi immagini di riferimento qui sotto."
 							value={form.goals}
 							onChange={(v) => set("goals", v)}
 							required
 						/>
+						<div className="flex flex-col gap-3 -mt-4">
+							<span className="text-[0.6rem] tracking-[0.4em] uppercase text-foreground/60">
+								Immagini di riferimento
+							</span>
+							{images.length > 0 && (
+								<div className="grid grid-cols-3 gap-3 sm:grid-cols-4">
+									{images.map((img) => (
+										<div
+											key={img.path}
+											className="relative aspect-square overflow-hidden border border-foreground/15 bg-foreground/5"
+										>
+											<img
+												src={img.url}
+												alt="Riferimento"
+												className="h-full w-full object-cover"
+											/>
+											<button
+												type="button"
+												onClick={() => removeImage(img.path)}
+												className="absolute top-1.5 right-1.5 inline-flex h-6 w-6 items-center justify-center rounded-full bg-black/70 text-white hover:bg-black"
+												aria-label="Rimuovi immagine"
+											>
+												<X className="h-3.5 w-3.5" />
+											</button>
+										</div>
+									))}
+								</div>
+							)}
+							{images.length < MAX_IMAGES && (
+								<button
+									type="button"
+									onClick={() => fileInputRef.current?.click()}
+									disabled={uploading}
+									className="inline-flex items-center justify-center gap-2 self-start border border-dashed border-foreground/30 px-5 py-3 text-[0.6rem] tracking-[0.4em] uppercase text-foreground/70 hover:border-foreground hover:text-foreground transition-colors disabled:opacity-50"
+								>
+									<ImagePlus className="h-4 w-4" />
+									{uploading ? "Caricamento…" : "Aggiungi immagini"}
+								</button>
+							)}
+							<input
+								ref={fileInputRef}
+								type="file"
+								accept="image/*"
+								multiple
+								onChange={onFiles}
+								className="hidden"
+							/>
+							<span className="text-xs text-foreground/55">
+								Fino a {MAX_IMAGES} immagini, max 5MB ciascuna.
+							</span>
+						</div>
 						<Area
 							label="Ispirazioni"
 							hint="Riferimenti, look, stili che ami."
