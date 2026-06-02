@@ -410,10 +410,10 @@ function Area(props: {
 			<textarea
 				value={props.value}
 				onChange={(e) => props.onChange(e.target.value)}
-				rows={3}
+				rows={2}
 				maxLength={2000}
 				required={props.required}
-				className="w-full resize-none bg-transparent border-b border-foreground/30 pb-2 pt-1 text-base text-foreground focus:border-[color:var(--gold)] focus:outline-none transition-colors"
+				className="w-full resize-none bg-transparent border-b border-foreground/30 pb-2 text-base text-foreground focus:border-[color:var(--gold)] focus:outline-none transition-colors"
 			/>
 			{props.hint && (
 				<span className="text-xs text-foreground/55">{props.hint}</span>
