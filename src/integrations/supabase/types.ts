@@ -175,6 +175,7 @@ export type Database = {
           allergies: string | null
           created_at: string
           drink_preference: string | null
+          goal_images: string[]
           goals: string
           hair_color: string
           hair_length: string
@@ -191,6 +192,7 @@ export type Database = {
           allergies?: string | null
           created_at?: string
           drink_preference?: string | null
+          goal_images?: string[]
           goals: string
           hair_color: string
           hair_length: string
@@ -207,6 +209,7 @@ export type Database = {
           allergies?: string | null
           created_at?: string
           drink_preference?: string | null
+          goal_images?: string[]
           goals?: string
           hair_color?: string
           hair_length?: string
