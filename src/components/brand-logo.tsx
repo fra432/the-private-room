@@ -1,13 +1,22 @@
 type Variant = "full" | "horizontal" | "mark";
 
 /**
- * BrandLogo — vector ricostruito del marchio THE ROOM.
+ * BrandLogo — marchio ufficiale THE ROOM (cornice + wordmark).
  * Usa `currentColor` per stroke e fill, quindi colora via `text-*`.
  *
- *  - full        : versione completa quadrata (welcome / login)
- *  - horizontal  : lockup orizzontale compatto (navbar)
- *  - mark        : solo monogramma quadrato
+ *  - full        : marchio + tagline "PRIVATE HAIR STUDIO / BY APPOINTMENT ONLY" (welcome / login)
+ *  - horizontal  : marchio incorniciato, compatto (navbar)
+ *  - mark        : marchio quadrato senza tagline
  */
+
+const FRAME_PATHS = (
+  <g fill="currentColor">
+    <rect x="3" y="3" width="394" height="394" fill="none" stroke="currentColor" strokeWidth="6" />
+    <path d="M155.75 168V138.108H144.188V135.1H170.79V138.108H159.228V168H155.75ZM207.93 168V135.1H211.361V168H207.93ZM183.866 168V135.1H187.344V168H183.866ZM186.968 152.819V149.764H208.259V152.819H186.968ZM229.62 168V135.1H252.18V138.108H233.098V164.992H252.885V168H229.62ZM232.722 152.772V149.811H250.112V152.772H232.722Z" />
+    <path d="M59.26 255V192H82.84C90.82 192 97.09 193.92 101.65 197.76C106.27 201.54 108.58 206.82 108.58 213.6C108.58 218.04 107.53 221.88 105.43 225.12C103.39 228.3 100.45 230.76 96.61 232.5C92.77 234.18 88.18 235.02 82.84 235.02H62.95L65.92 231.96V255H59.26ZM102.28 255L86.08 232.14H93.28L109.57 255H102.28ZM65.92 232.5L62.95 229.35H82.66C88.96 229.35 93.73 227.97 96.97 225.21C100.27 222.45 101.92 218.58 101.92 213.6C101.92 208.56 100.27 204.66 96.97 201.9C93.73 199.14 88.96 197.76 82.66 197.76H62.95L65.92 194.61V232.5ZM151.839 255.54C147.099 255.54 142.689 254.76 138.609 253.2C134.589 251.58 131.079 249.33 128.079 246.45C125.139 243.51 122.829 240.12 121.149 236.28C119.529 232.38 118.719 228.12 118.719 223.5C118.719 218.88 119.529 214.65 121.149 210.81C122.829 206.91 125.139 203.52 128.079 200.64C131.079 197.7 134.589 195.45 138.609 193.89C142.629 192.27 147.039 191.46 151.839 191.46C156.579 191.46 160.959 192.27 164.979 193.89C168.999 195.45 172.479 197.67 175.419 200.55C178.419 203.43 180.729 206.82 182.349 210.72C184.029 214.62 184.869 218.88 184.869 223.5C184.869 228.12 184.029 232.38 182.349 236.28C180.729 240.18 178.419 243.57 175.419 246.45C172.479 249.33 168.999 251.58 164.979 253.2C160.959 254.76 156.579 255.54 151.839 255.54ZM151.839 249.6C155.619 249.6 159.099 248.97 162.279 247.71C165.519 246.39 168.309 244.56 170.649 242.22C173.049 239.82 174.909 237.06 176.229 233.94C177.549 230.76 178.209 227.28 178.209 223.5C178.209 219.72 177.549 216.27 176.229 213.15C174.909 209.97 173.049 207.21 170.649 204.87C168.309 202.47 165.519 200.64 162.279 199.38C159.099 198.06 155.619 197.4 151.839 197.4C148.059 197.4 144.549 198.06 141.309 199.38C138.069 200.64 135.249 202.47 132.849 204.87C130.509 207.21 128.649 209.97 127.269 213.15C125.949 216.27 125.289 219.72 125.289 223.5C125.289 227.22 125.949 230.67 127.269 233.85C128.649 237.03 130.509 239.82 132.849 242.22C135.249 244.56 138.069 246.39 141.309 247.71C144.549 248.97 148.059 249.6 151.839 249.6ZM227.337 255.54C222.597 255.54 218.187 254.76 214.107 253.2C210.087 251.58 206.577 249.33 203.577 246.45C200.637 243.51 198.327 240.12 196.647 236.28C195.027 232.38 194.217 228.12 194.217 223.5C194.217 218.88 195.027 214.65 196.647 210.81C198.327 206.91 200.637 203.52 203.577 200.64C206.577 197.7 210.087 195.45 214.107 193.89C218.127 192.27 222.537 191.46 227.337 191.46C232.077 191.46 236.457 192.27 240.477 193.89C244.497 195.45 247.977 197.67 250.917 200.55C253.917 203.43 256.227 206.82 257.847 210.72C259.527 214.62 260.367 218.88 260.367 223.5C260.367 228.12 259.527 232.38 257.847 236.28C256.227 240.18 253.917 243.57 250.917 246.45C247.977 249.33 244.497 251.58 240.477 253.2C236.457 254.76 232.077 255.54 227.337 255.54ZM227.337 249.6C231.117 249.6 234.597 248.97 237.777 247.71C241.017 246.39 243.807 244.56 246.147 242.22C248.547 239.82 250.407 237.06 251.727 233.94C253.047 230.76 253.707 227.28 253.707 223.5C253.707 219.72 253.047 216.27 251.727 213.15C250.407 209.97 248.547 207.21 246.147 204.87C243.807 202.47 241.017 200.64 237.777 199.38C234.597 198.06 231.117 197.4 227.337 197.4C223.557 197.4 220.047 198.06 216.807 199.38C213.567 200.64 210.747 202.47 208.347 204.87C206.007 207.21 204.147 209.97 202.767 213.15C201.447 216.27 200.787 219.72 200.787 223.5C200.787 227.22 201.447 230.67 202.767 233.85C204.147 237.03 206.007 239.82 208.347 242.22C210.747 244.56 213.567 246.39 216.807 247.71C220.047 248.97 223.557 249.6 227.337 249.6ZM275.295 255V192H280.785L309.585 241.14H306.705L335.235 192H340.725V255H334.335V201.99H335.865L309.585 246.99H306.435L279.975 201.99H281.685V255H275.295Z" />
+  </g>
+);
+
 export function BrandLogo({
   className = "",
   variant = "full",
@@ -20,7 +29,7 @@ export function BrandLogo({
   if (variant === "horizontal") {
     return (
       <svg
-        viewBox="0 0 240 48"
+        viewBox="0 0 400 400"
         xmlns="http://www.w3.org/2000/svg"
         role="img"
         aria-label={title}
@@ -28,37 +37,7 @@ export function BrandLogo({
         fill="none"
       >
         <title>{title}</title>
-        {/* clean editorial wordmark, single column */}
-        <g fill="currentColor">
-          <text
-            x="120"
-            y="22"
-            textAnchor="middle"
-            fontFamily="'Josefin Sans', system-ui, sans-serif"
-            fontWeight="400"
-            fontSize="16"
-            letterSpacing="7"
-          >
-            THE ROOM
-          </text>
-          <text
-            x="120"
-            y="40"
-            textAnchor="middle"
-            fontFamily="'Josefin Sans', system-ui, sans-serif"
-            fontWeight="300"
-            fontSize="5"
-            letterSpacing="4"
-            opacity="0.7"
-          >
-            PRIVATE HAIR STUDIO
-          </text>
-        </g>
-        {/* subtle separators */}
-        <g stroke="currentColor" strokeWidth="0.6" opacity="0.5">
-          <line x1="20" y1="30" x2="58" y2="30" />
-          <line x1="182" y1="30" x2="220" y2="30" />
-        </g>
+        {FRAME_PATHS}
       </svg>
     );
   }
@@ -66,7 +45,7 @@ export function BrandLogo({
   if (variant === "mark") {
     return (
       <svg
-        viewBox="0 0 100 100"
+        viewBox="0 0 400 400"
         xmlns="http://www.w3.org/2000/svg"
         role="img"
         aria-label={title}
@@ -74,17 +53,7 @@ export function BrandLogo({
         fill="none"
       >
         <title>{title}</title>
-        <rect x="6" y="6" width="88" height="88" stroke="currentColor" strokeWidth="1" />
-        <g fill="currentColor">
-          <text x="50" y="42" textAnchor="middle" fontFamily="'Josefin Sans', system-ui, sans-serif" fontWeight="300" fontSize="9" letterSpacing="3">THE</text>
-          <text x="50" y="62" textAnchor="middle" fontFamily="'Josefin Sans', system-ui, sans-serif" fontWeight="300" fontSize="17" letterSpacing="2.2">ROOM</text>
-        </g>
-        <g stroke="currentColor" strokeWidth="1.1" fill="none">
-          <line x1="45" y1="72" x2="55" y2="84" />
-          <line x1="55" y1="72" x2="45" y2="84" />
-          <circle cx="44" cy="84.5" r="2" />
-          <circle cx="56" cy="84.5" r="2" />
-        </g>
+        {FRAME_PATHS}
       </svg>
     );
   }
@@ -92,7 +61,7 @@ export function BrandLogo({
   // full
   return (
     <svg
-      viewBox="0 0 100 130"
+      viewBox="0 0 400 480"
       xmlns="http://www.w3.org/2000/svg"
       role="img"
       aria-label={title}
@@ -100,20 +69,10 @@ export function BrandLogo({
       fill="none"
     >
       <title>{title}</title>
-      <rect x="6" y="6" width="88" height="88" stroke="currentColor" strokeWidth="0.8" />
+      {FRAME_PATHS}
       <g fill="currentColor">
-        <text x="50" y="42" textAnchor="middle" fontFamily="'Josefin Sans', system-ui, sans-serif" fontWeight="300" fontSize="9" letterSpacing="3">THE</text>
-        <text x="50" y="62" textAnchor="middle" fontFamily="'Josefin Sans', system-ui, sans-serif" fontWeight="300" fontSize="17" letterSpacing="2.2">ROOM</text>
-      </g>
-      <g stroke="currentColor" strokeWidth="1" fill="none">
-        <line x1="45" y1="72" x2="55" y2="84" />
-        <line x1="55" y1="72" x2="45" y2="84" />
-        <circle cx="44" cy="84.5" r="2" />
-        <circle cx="56" cy="84.5" r="2" />
-      </g>
-      <g fill="currentColor">
-        <text x="50" y="112" textAnchor="middle" fontFamily="'Josefin Sans', system-ui, sans-serif" fontWeight="300" fontSize="5.2" letterSpacing="3.5">PRIVATE HAIR STUDIO</text>
-        <text x="50" y="124" textAnchor="middle" fontFamily="'Josefin Sans', system-ui, sans-serif" fontWeight="300" fontSize="3.6" letterSpacing="2.6" opacity="0.7">BY APPOINTMENT ONLY</text>
+        <text x="200" y="438" textAnchor="middle" fontFamily="'Josefin Sans', system-ui, sans-serif" fontWeight="300" fontSize="22" letterSpacing="14">PRIVATE HAIR STUDIO</text>
+        <text x="200" y="468" textAnchor="middle" fontFamily="'Josefin Sans', system-ui, sans-serif" fontWeight="300" fontSize="14" letterSpacing="10" opacity="0.7">BY APPOINTMENT ONLY</text>
       </g>
     </svg>
   );
