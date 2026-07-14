@@ -61,7 +61,7 @@ export function BrandLogo({
   // full
   return (
     <svg
-      viewBox="0 0 400 480"
+      viewBox="0 0 400 470"
       xmlns="http://www.w3.org/2000/svg"
       role="img"
       aria-label={title}
@@ -71,8 +71,8 @@ export function BrandLogo({
       <title>{title}</title>
       {FRAME_PATHS}
       <g fill="currentColor">
-        <text x="200" y="438" textAnchor="middle" fontFamily="'Josefin Sans', system-ui, sans-serif" fontWeight="300" fontSize="22" letterSpacing="14">PRIVATE HAIR STUDIO</text>
-        <text x="200" y="468" textAnchor="middle" fontFamily="'Josefin Sans', system-ui, sans-serif" fontWeight="300" fontSize="14" letterSpacing="10" opacity="0.7">BY APPOINTMENT ONLY</text>
+        <text x="200" y="434" textAnchor="middle" fontFamily="'Josefin Sans', system-ui, sans-serif" fontWeight="300" fontSize="15" letterSpacing="6">PRIVATE HAIR STUDIO</text>
+        <text x="200" y="460" textAnchor="middle" fontFamily="'Josefin Sans', system-ui, sans-serif" fontWeight="300" fontSize="10" letterSpacing="4" opacity="0.7">BY APPOINTMENT ONLY</text>
       </g>
     </svg>
   );
