@@ -75,87 +75,98 @@ function LoginPage() {
 			<div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[color:var(--gold)]/40 to-transparent" />
 			<div className="pointer-events-none absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-[color:var(--gold)]/30 to-transparent" />
 
-			<div className="relative mx-auto flex min-h-screen w-full max-w-md flex-col px-8 py-10">
-				<Link
-					to="/welcome"
-					className="group inline-flex items-center gap-3 self-start text-[0.6rem] tracking-[0.5em] uppercase text-muted-foreground transition-colors hover:text-[color:var(--gold)]"
-				>
-					<BackArrow />
-					Indietro
-				</Link>
+			<div className="relative mx-auto grid min-h-screen w-full max-w-6xl grid-cols-1 lg:grid-cols-2">
+				{/* LEFT — brand panel */}
+				<aside className="relative flex flex-col justify-between px-8 py-10 lg:border-r lg:border-[color:var(--gold)]/15 lg:px-14 lg:py-16">
+					<Link
+						to="/welcome"
+						className="group inline-flex items-center gap-3 self-start text-[0.6rem] tracking-[0.5em] uppercase text-muted-foreground transition-colors hover:text-[color:var(--gold)]"
+					>
+						<BackArrow />
+						Indietro
+					</Link>
 
-				<div className="mt-14 flex flex-col items-center text-center">
-					<BrandLogo className="w-[180px] text-[color:var(--gold)]" />
-
-					{/* ornamental divider */}
-					<div className="mt-12 flex items-center gap-3 text-[color:var(--gold)]/60">
-						<span className="h-px w-12 bg-[color:var(--gold)]/40" />
-						<span className="text-[0.55rem] tracking-[0.6em] uppercase">
-							{mode === "login" ? "Accesso riservato" : "Nuovo accesso"}
-						</span>
-						<span className="h-px w-12 bg-[color:var(--gold)]/40" />
+					<div className="flex flex-col items-center text-center lg:items-start lg:text-left">
+						<BrandLogo className="w-[200px] text-[color:var(--gold)] lg:w-[280px]" />
+						<p className="font-serif italic mt-8 max-w-xs text-sm text-muted-foreground lg:text-base">
+							Uno studio privato. Un'ospite alla volta. Lo spazio ti aspetta.
+						</p>
 					</div>
 
-					<h1 className="font-italiana mt-8 text-4xl text-foreground md:text-5xl">
-						{mode === "login" ? "Bentornata" : "Crea il tuo accesso"}
-					</h1>
-					<p className="font-serif italic mt-3 text-base text-muted-foreground">
-						{mode === "login"
-							? "Lo spazio ti aspetta."
-							: "Iscriviti per essere accolta nello studio."}
+					<p className="hidden text-[0.5rem] tracking-[0.5em] uppercase text-muted-foreground/60 lg:block">
+						The Room · Private Hair Studio
 					</p>
-				</div>
+				</aside>
 
-				<form onSubmit={onSubmit} className="mt-12 flex flex-col gap-7">
-					<Field
-						name="email"
-						label="Email"
-						type="email"
-						required
-						autoComplete="email"
-					/>
-					<Field
-						name="password"
-						label="Password"
-						type="password"
-						required
-						autoComplete={
-							mode === "login" ? "current-password" : "new-password"
-						}
-					/>
+				{/* RIGHT — form panel */}
+				<section className="flex flex-col justify-center px-8 py-10 lg:px-14 lg:py-16">
+					<div className="mx-auto w-full max-w-sm">
+						{/* ornamental divider */}
+						<div className="flex items-center gap-3 text-[color:var(--gold)]/60">
+							<span className="h-px w-10 bg-[color:var(--gold)]/40" />
+							<span className="text-[0.55rem] tracking-[0.6em] uppercase">
+								{mode === "login" ? "Accesso riservato" : "Nuovo accesso"}
+							</span>
+							<span className="h-px flex-1 bg-[color:var(--gold)]/40" />
+						</div>
 
-					<button
-						type="submit"
-						disabled={loading}
-						className="group relative mt-6 inline-flex h-14 items-center justify-center overflow-hidden border border-[color:var(--gold)] bg-[color:var(--gold)] px-10 text-[0.65rem] tracking-[0.55em] uppercase text-background transition-all hover:bg-transparent hover:text-[color:var(--gold)] disabled:opacity-50"
-					>
-						{loading ? "…" : mode === "login" ? "Entra" : "Crea account"}
-					</button>
-				</form>
+						<h1 className="font-italiana mt-6 text-4xl text-foreground md:text-5xl">
+							{mode === "login" ? "Bentornata" : "Crea il tuo accesso"}
+						</h1>
+						<p className="font-serif italic mt-3 text-base text-muted-foreground">
+							{mode === "login"
+								? "Inserisci le tue credenziali per entrare."
+								: "Iscriviti per essere accolta nello studio."}
+						</p>
 
-				<div className="mt-10 flex flex-col items-center gap-4 text-center">
-					<button
-						type="button"
-						onClick={() => setMode(mode === "login" ? "signup" : "login")}
-						className="text-[0.6rem] tracking-[0.45em] uppercase text-muted-foreground transition-colors hover:text-[color:var(--gold)]"
-					>
-						{mode === "login"
-							? "Non hai un account? Registrati"
-							: "Hai già accesso? Entra"}
-					</button>
-					{mode === "login" && (
-						<Link
-							to="/request-access"
-							className="font-serif italic text-sm text-[color:var(--gold-soft)] underline-offset-4 hover:underline"
-						>
-							Richiedi accesso allo studio
-						</Link>
-					)}
-				</div>
+						<form onSubmit={onSubmit} className="mt-10 flex flex-col gap-7">
+							<Field
+								name="email"
+								label="Email"
+								type="email"
+								required
+								autoComplete="email"
+							/>
+							<Field
+								name="password"
+								label="Password"
+								type="password"
+								required
+								autoComplete={
+									mode === "login" ? "current-password" : "new-password"
+								}
+							/>
 
-				<p className="mt-auto pt-10 text-center text-[0.5rem] tracking-[0.5em] uppercase text-muted-foreground/60">
-					The Room · Private Hair Studio
-				</p>
+							<button
+								type="submit"
+								disabled={loading}
+								className="group relative mt-4 inline-flex h-14 items-center justify-center overflow-hidden border border-[color:var(--gold)] bg-[color:var(--gold)] px-10 text-[0.65rem] tracking-[0.55em] uppercase text-background transition-all hover:bg-transparent hover:text-[color:var(--gold)] disabled:opacity-50"
+							>
+								{loading ? "…" : mode === "login" ? "Entra" : "Crea account"}
+							</button>
+						</form>
+
+						<div className="mt-10 flex flex-col items-center gap-4 text-center">
+							<button
+								type="button"
+								onClick={() => setMode(mode === "login" ? "signup" : "login")}
+								className="text-[0.6rem] tracking-[0.45em] uppercase text-muted-foreground transition-colors hover:text-[color:var(--gold)]"
+							>
+								{mode === "login"
+									? "Non hai un account? Registrati"
+									: "Hai già accesso? Entra"}
+							</button>
+							{mode === "login" && (
+								<Link
+									to="/request-access"
+									className="font-serif italic text-sm text-[color:var(--gold-soft)] underline-offset-4 hover:underline"
+								>
+									Richiedi accesso allo studio
+								</Link>
+							)}
+						</div>
+					</div>
+				</section>
 			</div>
 		</main>
 	);
