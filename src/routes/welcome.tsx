@@ -7,7 +7,7 @@ export const Route = createFileRoute("/welcome")({
   head: () => ({
     meta: [
       { title: "THE ROOM — Private Hair Studio" },
-      { name: "description", content: "Access by appointment only. Barcelona." },
+      { name: "description", content: "Private Hair Studio. Accesso solo su appuntamento." },
     ],
   }),
   component: WelcomePage,
@@ -36,7 +36,7 @@ function WelcomePage() {
             show ? "opacity-100 translate-y-0" : "opacity-0 translate-y-3"
           }`}
         >
-          <BrandLogo className="w-[min(420px,80vw)]" />
+          <BrandLogo className="w-[min(440px,82vw)] text-[color:var(--gold)]" />
 
           <div className="mt-12 flex flex-col items-center gap-4 sm:flex-row sm:gap-6">
             <Link
@@ -56,7 +56,7 @@ function WelcomePage() {
 
         <footer className="text-center text-[0.6rem] tracking-[0.5em] uppercase text-muted-foreground">
           <p>Private Hair Studio</p>
-          <p className="mt-2">Solo su appuntamento · Barcelona</p>
+          <p className="mt-2">Solo su appuntamento</p>
         </footer>
       </div>
     </main>
