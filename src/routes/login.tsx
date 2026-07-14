@@ -7,8 +7,8 @@ import {
 import { useState } from "react";
 import { toast } from "sonner";
 import { z } from "zod";
-import { BrandLogo } from "@/components/brand-logo";
 import { BackArrow } from "@/components/back-arrow";
+import { BrandLogo } from "@/components/brand-logo";
 import { useAuth } from "@/hooks/use-auth";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -88,10 +88,10 @@ function LoginPage() {
 
 					<div className="flex flex-col items-center text-center lg:items-start lg:text-left">
 						<BrandLogo className="w-[200px] text-[color:var(--gold)] lg:w-[280px]" />
-					<p className="font-serif italic mt-8 max-w-xs text-lg text-foreground/70 lg:text-xl">
-						Uno studio privato. Un'ospite alla volta. Lo spazio ti aspetta.
-					</p>
-				</div>
+						<p className="font-serif italic mt-8 max-w-xs text-lg text-foreground/70 lg:text-xl">
+							Uno studio privato. Un'ospite alla volta. Lo spazio ti aspetta.
+						</p>
+					</div>
 				</aside>
 
 				{/* RIGHT — form panel */}
@@ -106,14 +106,14 @@ function LoginPage() {
 							<span className="h-px flex-1 bg-[color:var(--gold)]/40" />
 						</div>
 
-					<h1 className="font-italiana mt-6 text-5xl text-foreground md:text-6xl">
-						{mode === "login" ? "Bentornata" : "Crea il tuo accesso"}
-					</h1>
-					<p className="font-serif italic mt-3 text-lg text-foreground/70">
-						{mode === "login"
-							? "Inserisci le tue credenziali per entrare."
-							: "Iscriviti per essere accolta nello studio."}
-					</p>
+						<h1 className="font-italiana mt-6 text-5xl text-foreground md:text-6xl">
+							{mode === "login" ? "Bentornata" : "Crea il tuo accesso"}
+						</h1>
+						<p className="font-serif italic mt-3 text-lg text-foreground/70">
+							{mode === "login"
+								? "Inserisci le tue credenziali per entrare."
+								: "Iscriviti per essere accolta nello studio."}
+						</p>
 
 						<form onSubmit={onSubmit} className="mt-10 flex flex-col gap-7">
 							<Field
