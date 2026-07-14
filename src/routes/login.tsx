@@ -88,14 +88,10 @@ function LoginPage() {
 
 					<div className="flex flex-col items-center text-center lg:items-start lg:text-left">
 						<BrandLogo className="w-[200px] text-[color:var(--gold)] lg:w-[280px]" />
-						<p className="font-serif italic mt-8 max-w-xs text-sm text-muted-foreground lg:text-base">
-							Uno studio privato. Un'ospite alla volta. Lo spazio ti aspetta.
-						</p>
-					</div>
-
-					<p className="hidden text-[0.5rem] tracking-[0.5em] uppercase text-muted-foreground/60 lg:block">
-						The Room · Private Hair Studio
+					<p className="font-serif italic mt-8 max-w-xs text-lg text-foreground/70 lg:text-xl">
+						Uno studio privato. Un'ospite alla volta. Lo spazio ti aspetta.
 					</p>
+				</div>
 				</aside>
 
 				{/* RIGHT — form panel */}
@@ -104,20 +100,20 @@ function LoginPage() {
 						{/* ornamental divider */}
 						<div className="flex items-center gap-3 text-[color:var(--gold)]/60">
 							<span className="h-px w-10 bg-[color:var(--gold)]/40" />
-							<span className="text-[0.55rem] tracking-[0.6em] uppercase">
+							<span className="text-[0.65rem] tracking-[0.6em] uppercase text-foreground/80">
 								{mode === "login" ? "Accesso riservato" : "Nuovo accesso"}
 							</span>
 							<span className="h-px flex-1 bg-[color:var(--gold)]/40" />
 						</div>
 
-						<h1 className="font-italiana mt-6 text-4xl text-foreground md:text-5xl">
-							{mode === "login" ? "Bentornata" : "Crea il tuo accesso"}
-						</h1>
-						<p className="font-serif italic mt-3 text-base text-muted-foreground">
-							{mode === "login"
-								? "Inserisci le tue credenziali per entrare."
-								: "Iscriviti per essere accolta nello studio."}
-						</p>
+					<h1 className="font-italiana mt-6 text-5xl text-foreground md:text-6xl">
+						{mode === "login" ? "Bentornata" : "Crea il tuo accesso"}
+					</h1>
+					<p className="font-serif italic mt-3 text-lg text-foreground/70">
+						{mode === "login"
+							? "Inserisci le tue credenziali per entrare."
+							: "Iscriviti per essere accolta nello studio."}
+					</p>
 
 						<form onSubmit={onSubmit} className="mt-10 flex flex-col gap-7">
 							<Field
@@ -150,7 +146,7 @@ function LoginPage() {
 							<button
 								type="button"
 								onClick={() => setMode(mode === "login" ? "signup" : "login")}
-								className="text-[0.6rem] tracking-[0.45em] uppercase text-muted-foreground transition-colors hover:text-[color:var(--gold)]"
+								className="text-[0.7rem] tracking-[0.45em] uppercase text-foreground/60 transition-colors hover:text-[color:var(--gold)]"
 							>
 								{mode === "login"
 									? "Non hai un account? Registrati"
@@ -159,7 +155,7 @@ function LoginPage() {
 							{mode === "login" && (
 								<Link
 									to="/request-access"
-									className="font-serif italic text-sm text-[color:var(--gold-soft)] underline-offset-4 hover:underline"
+									className="font-serif italic text-base text-[color:var(--gold-soft)] underline-offset-4 hover:underline"
 								>
 									Richiedi accesso allo studio
 								</Link>
@@ -187,7 +183,7 @@ function Field({
 }) {
 	return (
 		<label className="flex flex-col gap-2">
-			<span className="text-[0.55rem] tracking-[0.5em] uppercase text-muted-foreground">
+			<span className="text-[0.7rem] tracking-[0.5em] uppercase text-foreground/60 font-medium">
 				{label}
 			</span>
 			<input
@@ -195,7 +191,7 @@ function Field({
 				type={type}
 				required={required}
 				autoComplete={autoComplete}
-				className="w-full !bg-transparent border-b border-[color:var(--gold)]/40 pb-3 pt-2 font-serif text-lg tracking-wide text-foreground placeholder:text-muted-foreground/50 focus:border-[color:var(--gold)] focus:outline-none transition-colors"
+				className="w-full !bg-transparent border-b border-[color:var(--gold)]/50 pb-4 pt-3 font-serif text-xl tracking-wide text-foreground placeholder:text-foreground/40 focus:border-[color:var(--gold)] focus:outline-none transition-colors"
 			/>
 		</label>
 	);

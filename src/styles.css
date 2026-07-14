@@ -173,6 +173,15 @@
   }
   .animate-door-glow { animation: door-glow 4s ease-in-out infinite; }
 
+  /* Hide scrollbar while keeping scrolling functionality */
+  .hide-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  .hide-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+
   /* Kill the white background Chrome paints on autofilled inputs */
   input:-webkit-autofill,
   input:-webkit-autofill:hover,

@@ -25,10 +25,10 @@ function WelcomePage() {
   if (!loading && session) return <Navigate to="/dashboard" />;
 
   return (
-    <main className="relative min-h-screen overflow-hidden bg-background text-foreground">
+    <main className="relative h-screen overflow-hidden bg-background text-foreground">
       <div className="absolute inset-0 vignette" aria-hidden />
 
-      <div className="relative z-10 flex min-h-screen flex-col items-center justify-between px-6 py-12">
+      <div className="relative z-10 flex h-screen flex-col items-center justify-between px-6 py-12">
         <div className="h-2" />
 
         <section
@@ -54,10 +54,7 @@ function WelcomePage() {
           </div>
         </section>
 
-        <footer className="text-center text-[0.6rem] tracking-[0.5em] uppercase text-muted-foreground">
-          <p>Private Hair Studio</p>
-          <p className="mt-2">Solo su appuntamento</p>
-        </footer>
+        <div className="h-2" />
       </div>
     </main>
   );

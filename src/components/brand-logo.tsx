@@ -72,7 +72,7 @@ export function BrandLogo({
       {FRAME_PATHS}
       <g fill="currentColor">
         <text x="200" y="434" textAnchor="middle" fontFamily="'Josefin Sans', system-ui, sans-serif" fontWeight="300" fontSize="15" letterSpacing="6">PRIVATE HAIR STUDIO</text>
-        <text x="200" y="460" textAnchor="middle" fontFamily="'Josefin Sans', system-ui, sans-serif" fontWeight="300" fontSize="10" letterSpacing="4" opacity="0.7">BY APPOINTMENT ONLY</text>
+        <text x="200" y="460" textAnchor="middle" fontFamily="'Josefin Sans', system-ui, sans-serif" fontWeight="300" fontSize="12" letterSpacing="4" opacity="1">BY APPOINTMENT ONLY</text>
       </g>
     </svg>
   );
