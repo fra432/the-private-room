@@ -1,7 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { BrandLogo } from "@/components/brand-logo";
-import { useAuth } from "@/hooks/use-auth";
-import { supabase } from "@/integrations/supabase/client";
+import { SiteNav } from "@/components/site-nav";
 
 export const Route = createFileRoute("/_authenticated/services")({
 	head: () => ({
@@ -117,55 +116,15 @@ const SERVICES: Service[] = [
 ];
 
 function ServicesPage() {
-	const { isAdmin } = useAuth();
-
 	return (
 		<main className="theme-interior min-h-screen bg-background text-foreground font-display">
-			{/* Nav */}
-			<header className="absolute inset-x-0 top-0 z-20">
-				<div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-6 md:px-10 md:py-8">
-					<Link
-						to="/dashboard"
-						className="text-foreground transition hover:opacity-80"
-					>
-						<BrandLogo variant="horizontal" className="h-12 w-auto md:h-14" />
-					</Link>
-					<nav className="flex items-center gap-8">
-						<Link
-							to="/services"
-							className="text-[0.55rem] tracking-[0.5em] uppercase text-[color:var(--gold)]"
-						>
-							Servizi
-						</Link>
-						<Link
-							to="/book"
-							className="text-[0.55rem] tracking-[0.5em] uppercase text-foreground/80 hover:text-foreground"
-						>
-							Prenota
-						</Link>
-						{isAdmin && (
-							<Link
-								to="/admin"
-								className="text-[0.55rem] tracking-[0.5em] uppercase text-foreground/80 hover:text-foreground"
-							>
-								Admin
-							</Link>
-						)}
-						<button
-							onClick={() => supabase.auth.signOut()}
-							className="text-[0.55rem] tracking-[0.5em] uppercase text-foreground/80 hover:text-foreground"
-						>
-							Esci
-						</button>
-					</nav>
-				</div>
-			</header>
+			<SiteNav tone="dark" active="services" />
 
 			{/* Hero editoriale */}
 			<section className="relative overflow-hidden border-b border-[color:var(--border)]">
 				<div className="mx-auto grid min-h-[80vh] max-w-6xl grid-cols-12 items-end px-6 pt-40 pb-20 md:px-10 md:pt-48 md:pb-28">
 					<div className="col-span-12 md:col-span-8">
-						<p className="text-[0.55rem] tracking-[0.6em] uppercase text-muted-foreground">
+						<p className="text-xs tracking-[0.5em] uppercase text-muted-foreground md:text-[0.75rem]">
 							Listino · Edizione corrente
 						</p>
 						<h1 className="mt-10 font-serif text-[3.5rem] leading-[0.95] text-foreground md:text-[8rem]">
@@ -180,7 +139,7 @@ function ServicesPage() {
 							Nessuna fretta, nessuna sovrapposizione — solo tempo dedicato.
 						</p>
 						<div className="mt-8 h-px w-16 bg-[color:var(--gold)]" />
-						<p className="mt-6 text-[0.55rem] tracking-[0.5em] uppercase text-muted-foreground">
+						<p className="mt-6 text-xs tracking-[0.5em] uppercase text-muted-foreground md:text-[0.75rem]">
 							11 servizi · su appuntamento
 						</p>
 					</div>
@@ -221,7 +180,7 @@ function ServicesPage() {
 										reverse ? "md:[direction:ltr]" : ""
 									}`}
 								>
-									<p className="text-[0.55rem] tracking-[0.5em] uppercase text-muted-foreground">
+									<p className="text-xs tracking-[0.4em] uppercase text-muted-foreground md:text-[0.7rem]">
 										{s.tagline}
 									</p>
 									<h2 className="mt-4 font-serif text-4xl text-foreground transition-transform duration-500 group-hover:translate-x-1 md:text-6xl">
@@ -239,7 +198,7 @@ function ServicesPage() {
 								>
 									<div className="flex flex-col items-start gap-6 border-l border-[color:var(--border)] pl-6 md:items-end md:border-l-0 md:border-r md:pl-0 md:pr-6 md:text-right">
 										<div>
-											<p className="text-[0.5rem] tracking-[0.5em] uppercase text-muted-foreground">
+											<p className="text-[0.65rem] tracking-[0.5em] uppercase text-muted-foreground md:text-[0.7rem]">
 												Tariffa
 											</p>
 											<p className="mt-2 font-serif text-4xl italic text-foreground md:text-5xl">
@@ -257,7 +216,7 @@ function ServicesPage() {
 			{/* Nota prezzi */}
 			<section className="border-b border-[color:var(--border)] bg-[color:var(--card)]/50">
 				<div className="mx-auto max-w-6xl px-6 py-16 md:px-10">
-					<p className="text-[0.55rem] tracking-[0.5em] uppercase text-[color:var(--gold)]">
+					<p className="text-xs tracking-[0.5em] uppercase text-[color:var(--gold)] md:text-[0.75rem]">
 						Nota
 					</p>
 					<p className="mt-4 max-w-3xl font-serif text-2xl leading-snug text-foreground md:text-3xl">
@@ -272,7 +231,7 @@ function ServicesPage() {
 			<section className="border-b border-[color:var(--border)]">
 				<div className="mx-auto flex max-w-6xl flex-col items-start justify-between gap-10 px-6 py-24 md:flex-row md:items-end md:px-10">
 					<div className="max-w-xl">
-						<p className="text-[0.55rem] tracking-[0.6em] uppercase text-muted-foreground">
+						<p className="text-xs tracking-[0.5em] uppercase text-muted-foreground md:text-[0.75rem]">
 							Pronta?
 						</p>
 						<h2 className="mt-6 font-serif text-5xl leading-[1.05] text-foreground md:text-7xl">
@@ -286,7 +245,7 @@ function ServicesPage() {
 					</div>
 					<Link
 						to="/book"
-						className="inline-flex h-14 items-center justify-center border border-[color:var(--gold)] bg-[color:var(--gold)] px-12 text-[0.6rem] tracking-[0.6em] uppercase text-background transition hover:bg-transparent hover:text-[color:var(--gold)]"
+						className="inline-flex h-14 items-center justify-center border border-[color:var(--gold)] bg-[color:var(--gold)] px-12 text-xs tracking-[0.5em] uppercase text-background transition hover:bg-transparent hover:text-[color:var(--gold)] md:text-[0.8rem]"
 					>
 						Prenota appuntamento
 					</Link>

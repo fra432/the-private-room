@@ -4,6 +4,7 @@ import { BrandLogo } from "@/components/brand-logo";
 import { ArrowRight } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
 import { supabase } from "@/integrations/supabase/client";
+import { SiteNav } from "@/components/site-nav";
 
 export const Route = createFileRoute("/_authenticated/dashboard")({
 	head: () => ({ meta: [{ title: "The Room" }] }),
@@ -11,7 +12,7 @@ export const Route = createFileRoute("/_authenticated/dashboard")({
 });
 
 function DashboardPage() {
-	const { user, isAdmin } = useAuth();
+	const { user } = useAuth();
 	// Start as true (SSR safe). Client mount will set to false if intro hasn't been seen yet.
 	const [introDone, setIntroDone] = useState(true);
 	const videoRef = useRef<HTMLVideoElement>(null);
@@ -82,45 +83,7 @@ function DashboardPage() {
 
 			{/* Hero: la foto del salone come "porta aperta" — fonde con il background */}
 			<section className="relative">
-				{/* Navbar flottante sopra l'immagine */}
-				<header className="absolute inset-x-0 top-0 z-20">
-					<div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-6 md:px-10 md:py-8">
-						<Link
-							to="/dashboard"
-							className="text-white drop-shadow-[0_1px_8px_rgba(0,0,0,0.5)] transition hover:opacity-80"
-						>
-							<BrandLogo variant="horizontal" className="h-12 w-auto md:h-14" />
-						</Link>
-						<nav className="flex items-center gap-8">
-						<Link
-							to="/services"
-							className="text-[0.55rem] tracking-[0.5em] uppercase text-white/90 hover:text-white"
-						>
-							Servizi
-						</Link>
-							<Link
-								to="/book"
-								className="text-[0.55rem] tracking-[0.5em] uppercase text-white/90 hover:text-white"
-							>
-								Prenota
-							</Link>
-							{isAdmin && (
-								<Link
-									to="/admin"
-									className="text-[0.55rem] tracking-[0.5em] uppercase text-white/90 hover:text-white"
-								>
-									Admin
-								</Link>
-							)}
-							<button
-								onClick={() => supabase.auth.signOut()}
-								className="text-[0.55rem] tracking-[0.5em] uppercase text-white/90 hover:text-white"
-							>
-								Esci
-							</button>
-						</nav>
-					</div>
-				</header>
+				<SiteNav tone="light" active="dashboard" />
 
 				<div className="relative h-screen min-h-[560px] w-full overflow-hidden">
 					<img
