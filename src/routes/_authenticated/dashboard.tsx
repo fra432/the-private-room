@@ -12,7 +12,7 @@ export const Route = createFileRoute("/_authenticated/dashboard")({
 });
 
 function DashboardPage() {
-	const { user, isAdmin } = useAuth();
+	const { user } = useAuth();
 	// Start as true (SSR safe). Client mount will set to false if intro hasn't been seen yet.
 	const [introDone, setIntroDone] = useState(true);
 	const videoRef = useRef<HTMLVideoElement>(null);
