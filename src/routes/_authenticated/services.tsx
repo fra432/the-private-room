@@ -22,86 +22,97 @@ type Service = {
 	name: string;
 	tagline: string;
 	description: string;
-	details: string[];
 	price: string;
-	duration: string;
 };
 
 const SERVICES: Service[] = [
 	{
 		num: "01",
-		name: "Taglio & Colore",
+		name: "Taglio",
 		tagline: "La firma del salone",
 		description:
-			"Una consulenza approfondita, un'analisi di cute e capelli, e un taglio costruito sui tuoi lineamenti. Il colore nasce dopo: studiato sulla luce della tua pelle.",
-		details: [
-			"Analisi cute & capelli",
-			"Consulenza visagistica",
-			"Colore su misura",
-			"Piega finale",
-		],
-		price: "€ 180",
-		duration: "3 h",
+			"Un taglio costruito sui tuoi lineamenti, dopo una consulenza attenta a viso, portamento e stile di vita.",
+		price: "€ 20",
 	},
 	{
 		num: "02",
-		name: "Infoltimento",
-		tagline: "Densità e vitalità",
+		name: "Taglio bambino",
+		tagline: "Piccoli ospiti",
 		description:
-			"Tecniche professionali per restituire volume e corpo ai capelli. Un protocollo discreto, naturale, costruito sulla tua chioma.",
-		details: [
-			"Diagnosi del bulbo",
-			"Protocollo personalizzato",
-			"Trattamento d'urto",
-			"Piano di mantenimento",
-		],
-		price: "€ 240",
-		duration: "2 h 30",
+			"Un taglio dedicato ai più piccoli, in un ambiente tranquillo e senza fretta.",
+		price: "€ 15",
 	},
 	{
 		num: "03",
-		name: "Extension",
-		tagline: "Lunghezza & volume",
+		name: "Taglio uomo",
+		tagline: "Su misura",
 		description:
-			"Extension di altissima qualità per creare lunghezza, volume o effetti di colore. Selezione e applicazione su misura, invisibili al tatto.",
-		details: [
-			"Ciocche cucite o cheratina",
-			"Colore matchato a mano",
-			"Applicazione invisibile",
-			"Manutenzione inclusa",
-		],
-		price: "€ 350",
-		duration: "4 h",
+			"Taglio maschile studiato sul volto e sulla texture del capello, con rifinitura di precisione.",
+		price: "€ 20",
 	},
 	{
 		num: "04",
-		name: "Trattamenti Botanici",
-		tagline: "Cura profonda",
+		name: "Colore base",
+		tagline: "Il tuo colore",
 		description:
-			"Rituali ristrutturanti con principi attivi botanici. Per capelli stressati, secchi, dopo decolorazione o semplicemente da coccolare.",
-		details: [
-			"Diagnosi sensoriale",
-			"Maschera ristrutturante",
-			"Massaggio cuoio capelluto",
-			"Piega leggera",
-		],
-		price: "€ 90",
-		duration: "1 h 30",
+			"Colorazione uniforme e naturale, studiata sulla luce della tua pelle e sulla base di partenza.",
+		price: "da € 40",
 	},
 	{
 		num: "05",
-		name: "Consulenza Privata",
-		tagline: "Solo conversazione",
+		name: "Tonalizzazione",
+		tagline: "Riflessi & nuance",
 		description:
-			"Un'ora dedicata a capire cosa desideri davvero, senza forbici. Ideale prima di un grande cambio o di un evento importante.",
-		details: [
-			"Analisi del look attuale",
-			"Studio dei riferimenti",
-			"Proposta scritta",
-			"Costo scalato sul primo servizio",
-		],
-		price: "€ 60",
-		duration: "1 h",
+			"Un velo di colore per ravvivare i riflessi, ammorbidire il contrasto o rinfrescare la tonalità.",
+		price: "da € 15",
+	},
+	{
+		num: "06",
+		name: "Schiariture / Balayage",
+		tagline: "Luce su misura",
+		description:
+			"Schiariture dipinte a mano libera per un effetto naturale, luminoso e cucito sulla tua chioma.",
+		price: "da € 30",
+	},
+	{
+		num: "07",
+		name: "Piega",
+		tagline: "Il tocco finale",
+		description:
+			"Piega finale con styling personalizzato — liscia, mossa o con movimento, sempre naturale.",
+		price: "da € 15",
+	},
+	{
+		num: "08",
+		name: "Ristrutturazione",
+		tagline: "Cura profonda",
+		description:
+			"Trattamento ristrutturante per capelli stressati, secchi o dopo decolorazione. Nutre e ripristina la fibra.",
+		price: "da € 5",
+	},
+	{
+		num: "09",
+		name: "Extension",
+		tagline: "Lunghezza & volume",
+		description:
+			"Extension di alta qualità per lunghezza, volume o effetti di colore. Selezione e applicazione su misura.",
+		price: "Da definire in salone",
+	},
+	{
+		num: "10",
+		name: "Stiratura",
+		tagline: "Liscio duraturo",
+		description:
+			"Trattamento liscio personalizzato in base al tipo di capello. Preventivo definito in consulenza.",
+		price: "Da definire in salone",
+	},
+	{
+		num: "11",
+		name: "Sposa",
+		tagline: "Il tuo giorno",
+		description:
+			"Un percorso dedicato: consulenza, prova, trucco e acconciatura per il giorno più importante. Contattaci per costruire insieme il servizio su misura.",
+		price: "Da definire",
 	},
 ];
 
