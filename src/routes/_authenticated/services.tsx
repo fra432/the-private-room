@@ -22,86 +22,97 @@ type Service = {
 	name: string;
 	tagline: string;
 	description: string;
-	details: string[];
 	price: string;
-	duration: string;
 };
 
 const SERVICES: Service[] = [
 	{
 		num: "01",
-		name: "Taglio & Colore",
+		name: "Taglio",
 		tagline: "La firma del salone",
 		description:
-			"Una consulenza approfondita, un'analisi di cute e capelli, e un taglio costruito sui tuoi lineamenti. Il colore nasce dopo: studiato sulla luce della tua pelle.",
-		details: [
-			"Analisi cute & capelli",
-			"Consulenza visagistica",
-			"Colore su misura",
-			"Piega finale",
-		],
-		price: "€ 180",
-		duration: "3 h",
+			"Un taglio costruito sui tuoi lineamenti, dopo una consulenza attenta a viso, portamento e stile di vita.",
+		price: "€ 20",
 	},
 	{
 		num: "02",
-		name: "Infoltimento",
-		tagline: "Densità e vitalità",
+		name: "Taglio bambino",
+		tagline: "Piccoli ospiti",
 		description:
-			"Tecniche professionali per restituire volume e corpo ai capelli. Un protocollo discreto, naturale, costruito sulla tua chioma.",
-		details: [
-			"Diagnosi del bulbo",
-			"Protocollo personalizzato",
-			"Trattamento d'urto",
-			"Piano di mantenimento",
-		],
-		price: "€ 240",
-		duration: "2 h 30",
+			"Un taglio dedicato ai più piccoli, in un ambiente tranquillo e senza fretta.",
+		price: "€ 15",
 	},
 	{
 		num: "03",
-		name: "Extension",
-		tagline: "Lunghezza & volume",
+		name: "Taglio uomo",
+		tagline: "Su misura",
 		description:
-			"Extension di altissima qualità per creare lunghezza, volume o effetti di colore. Selezione e applicazione su misura, invisibili al tatto.",
-		details: [
-			"Ciocche cucite o cheratina",
-			"Colore matchato a mano",
-			"Applicazione invisibile",
-			"Manutenzione inclusa",
-		],
-		price: "€ 350",
-		duration: "4 h",
+			"Taglio maschile studiato sul volto e sulla texture del capello, con rifinitura di precisione.",
+		price: "€ 20",
 	},
 	{
 		num: "04",
-		name: "Trattamenti Botanici",
-		tagline: "Cura profonda",
+		name: "Colore base",
+		tagline: "Il tuo colore",
 		description:
-			"Rituali ristrutturanti con principi attivi botanici. Per capelli stressati, secchi, dopo decolorazione o semplicemente da coccolare.",
-		details: [
-			"Diagnosi sensoriale",
-			"Maschera ristrutturante",
-			"Massaggio cuoio capelluto",
-			"Piega leggera",
-		],
-		price: "€ 90",
-		duration: "1 h 30",
+			"Colorazione uniforme e naturale, studiata sulla luce della tua pelle e sulla base di partenza.",
+		price: "da € 40",
 	},
 	{
 		num: "05",
-		name: "Consulenza Privata",
-		tagline: "Solo conversazione",
+		name: "Tonalizzazione",
+		tagline: "Riflessi & nuance",
 		description:
-			"Un'ora dedicata a capire cosa desideri davvero, senza forbici. Ideale prima di un grande cambio o di un evento importante.",
-		details: [
-			"Analisi del look attuale",
-			"Studio dei riferimenti",
-			"Proposta scritta",
-			"Costo scalato sul primo servizio",
-		],
-		price: "€ 60",
-		duration: "1 h",
+			"Un velo di colore per ravvivare i riflessi, ammorbidire il contrasto o rinfrescare la tonalità.",
+		price: "da € 15",
+	},
+	{
+		num: "06",
+		name: "Schiariture / Balayage",
+		tagline: "Luce su misura",
+		description:
+			"Schiariture dipinte a mano libera per un effetto naturale, luminoso e cucito sulla tua chioma.",
+		price: "da € 30",
+	},
+	{
+		num: "07",
+		name: "Piega",
+		tagline: "Il tocco finale",
+		description:
+			"Piega finale con styling personalizzato — liscia, mossa o con movimento, sempre naturale.",
+		price: "da € 15",
+	},
+	{
+		num: "08",
+		name: "Ristrutturazione",
+		tagline: "Cura profonda",
+		description:
+			"Trattamento ristrutturante per capelli stressati, secchi o dopo decolorazione. Nutre e ripristina la fibra.",
+		price: "da € 5",
+	},
+	{
+		num: "09",
+		name: "Extension",
+		tagline: "Lunghezza & volume",
+		description:
+			"Extension di alta qualità per lunghezza, volume o effetti di colore. Selezione e applicazione su misura.",
+		price: "Da definire in salone",
+	},
+	{
+		num: "10",
+		name: "Stiratura",
+		tagline: "Liscio duraturo",
+		description:
+			"Trattamento liscio personalizzato in base al tipo di capello. Preventivo definito in consulenza.",
+		price: "Da definire in salone",
+	},
+	{
+		num: "11",
+		name: "Sposa",
+		tagline: "Il tuo giorno",
+		description:
+			"Un percorso dedicato: consulenza, prova, trucco e acconciatura per il giorno più importante. Contattaci per costruire insieme il servizio su misura.",
+		price: "Da definire",
 	},
 ];
 
@@ -170,7 +181,7 @@ function ServicesPage() {
 						</p>
 						<div className="mt-8 h-px w-16 bg-[color:var(--gold)]" />
 						<p className="mt-6 text-[0.55rem] tracking-[0.5em] uppercase text-muted-foreground">
-							05 servizi · su appuntamento
+							11 servizi · su appuntamento
 						</p>
 					</div>
 				</div>
@@ -219,18 +230,6 @@ function ServicesPage() {
 									<p className="mt-6 max-w-lg text-sm leading-relaxed text-muted-foreground md:text-base">
 										{s.description}
 									</p>
-
-									<ul className="mt-8 grid grid-cols-2 gap-x-6 gap-y-2">
-										{s.details.map((d) => (
-											<li
-												key={d}
-												className="flex items-baseline gap-3 text-xs text-foreground/80"
-											>
-												<span className="text-[color:var(--gold)]">—</span>
-												<span>{d}</span>
-											</li>
-										))}
-									</ul>
 								</div>
 
 								<div
@@ -241,18 +240,10 @@ function ServicesPage() {
 									<div className="flex flex-col items-start gap-6 border-l border-[color:var(--border)] pl-6 md:items-end md:border-l-0 md:border-r md:pl-0 md:pr-6 md:text-right">
 										<div>
 											<p className="text-[0.5rem] tracking-[0.5em] uppercase text-muted-foreground">
-												Da
+												Tariffa
 											</p>
-											<p className="mt-2 font-serif text-5xl italic text-foreground">
+											<p className="mt-2 font-serif text-4xl italic text-foreground md:text-5xl">
 												{s.price}
-											</p>
-										</div>
-										<div>
-											<p className="text-[0.5rem] tracking-[0.5em] uppercase text-muted-foreground">
-												Durata
-											</p>
-											<p className="mt-2 font-serif text-2xl text-foreground/80">
-												{s.duration}
 											</p>
 										</div>
 									</div>
