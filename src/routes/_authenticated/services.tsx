@@ -1,7 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { BrandLogo } from "@/components/brand-logo";
-import { useAuth } from "@/hooks/use-auth";
-import { supabase } from "@/integrations/supabase/client";
+import { SiteNav } from "@/components/site-nav";
 
 export const Route = createFileRoute("/_authenticated/services")({
 	head: () => ({
@@ -117,49 +116,9 @@ const SERVICES: Service[] = [
 ];
 
 function ServicesPage() {
-	const { isAdmin } = useAuth();
-
 	return (
 		<main className="theme-interior min-h-screen bg-background text-foreground font-display">
-			{/* Nav */}
-			<header className="absolute inset-x-0 top-0 z-20">
-				<div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-6 md:px-10 md:py-8">
-					<Link
-						to="/dashboard"
-						className="text-foreground transition hover:opacity-80"
-					>
-						<BrandLogo variant="horizontal" className="h-12 w-auto md:h-14" />
-					</Link>
-					<nav className="flex items-center gap-8">
-						<Link
-							to="/services"
-							className="text-[0.55rem] tracking-[0.5em] uppercase text-[color:var(--gold)]"
-						>
-							Servizi
-						</Link>
-						<Link
-							to="/book"
-							className="text-[0.55rem] tracking-[0.5em] uppercase text-foreground/80 hover:text-foreground"
-						>
-							Prenota
-						</Link>
-						{isAdmin && (
-							<Link
-								to="/admin"
-								className="text-[0.55rem] tracking-[0.5em] uppercase text-foreground/80 hover:text-foreground"
-							>
-								Admin
-							</Link>
-						)}
-						<button
-							onClick={() => supabase.auth.signOut()}
-							className="text-[0.55rem] tracking-[0.5em] uppercase text-foreground/80 hover:text-foreground"
-						>
-							Esci
-						</button>
-					</nav>
-				</div>
-			</header>
+			<SiteNav tone="dark" active="services" />
 
 			{/* Hero editoriale */}
 			<section className="relative overflow-hidden border-b border-[color:var(--border)]">
