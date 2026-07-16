@@ -219,7 +219,7 @@ function QuestionnairePage() {
 				</p>
 
 				{loading ? (
-					<p className="mt-16 text-xs tracking-[0.4em] uppercase text-muted-foreground">
+					<p className="mt-16 text-sm tracking-[0.4em] uppercase text-muted-foreground">
 						…
 					</p>
 				) : (
@@ -311,7 +311,7 @@ function QuestionnairePage() {
 								onChange={onFiles}
 								className="hidden"
 							/>
-							<span className="text-xs text-foreground/55">
+							<span className="text-sm text-foreground/55">
 								Fino a {MAX_IMAGES} immagini, max 5MB ciascuna.
 							</span>
 						</div>
@@ -378,7 +378,7 @@ function Field(props: {
 }) {
 	return (
 		<label className="flex flex-col gap-2">
-			<span className="text-xs font-medium tracking-[0.3em] uppercase text-foreground">
+			<span className="text-sm font-medium tracking-[0.3em] uppercase text-foreground">
 				{props.label}
 			</span>
 			<input
@@ -389,7 +389,7 @@ function Field(props: {
 				className="w-full bg-transparent border-b border-foreground/30 pb-2 pt-1 text-base text-foreground focus:border-[color:var(--gold)] focus:outline-none transition-colors"
 			/>
 			{props.hint && (
-				<span className="text-xs text-foreground/55">{props.hint}</span>
+				<span className="text-sm text-foreground/55">{props.hint}</span>
 			)}
 		</label>
 	);
@@ -404,7 +404,7 @@ function Area(props: {
 }) {
 	return (
 		<label className="flex flex-col gap-2">
-			<span className="text-xs font-medium tracking-[0.3em] uppercase text-foreground">
+			<span className="text-sm font-medium tracking-[0.3em] uppercase text-foreground">
 				{props.label}
 			</span>
 			<textarea
@@ -416,7 +416,7 @@ function Area(props: {
 				className="w-full resize-none bg-transparent border-b border-foreground/30 pb-2 text-base text-foreground focus:border-[color:var(--gold)] focus:outline-none transition-colors"
 			/>
 			{props.hint && (
-				<span className="text-xs text-foreground/55">{props.hint}</span>
+				<span className="text-sm text-foreground/55">{props.hint}</span>
 			)}
 		</label>
 	);
@@ -431,7 +431,7 @@ function Select(props: {
 }) {
 	return (
 		<label className="flex flex-col gap-2">
-			<span className="text-xs font-medium tracking-[0.3em] uppercase text-foreground">
+			<span className="text-sm font-medium tracking-[0.3em] uppercase text-foreground">
 				{props.label}
 			</span>
 			<select
@@ -447,7 +447,7 @@ function Select(props: {
 				))}
 			</select>
 			{props.hint && (
-				<span className="text-xs text-foreground/55">{props.hint}</span>
+				<span className="text-sm text-foreground/55">{props.hint}</span>
 			)}
 		</label>
 	);

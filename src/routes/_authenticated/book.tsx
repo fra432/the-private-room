@@ -159,7 +159,7 @@ function BookPage() {
         {(hasQuestionnaire !== true || questionnaireConfirmed) && (
         <>
         <h1 className="font-serif text-3xl text-[color:var(--gold)]">Scegli un giorno</h1>
-        <p className="mt-2 text-xs text-muted-foreground">
+        <p className="mt-2 text-sm text-muted-foreground">
           Uno slot disponibile per giorno. La richiesta sarà confermata personalmente.
         </p>
 

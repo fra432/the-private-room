@@ -15,7 +15,7 @@ function ReceivedPage() {
         <h1 className="mt-12 font-serif text-3xl leading-tight text-[color:var(--gold)]">
           Richiesta ricevuta.
         </h1>
-        <p className="mt-6 max-w-xs text-xs leading-relaxed tracking-wider text-muted-foreground">
+        <p className="mt-6 max-w-xs text-sm leading-relaxed tracking-wider text-muted-foreground">
           Le richieste vengono valutate personalmente entro 24–48 ore.
         </p>
         <Link

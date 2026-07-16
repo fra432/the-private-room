@@ -1,10 +1,10 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { ArrowRight } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { BrandLogo } from "@/components/brand-logo";
-import { ArrowRight } from "lucide-react";
+import { SiteNav } from "@/components/site-nav";
 import { useAuth } from "@/hooks/use-auth";
 import { supabase } from "@/integrations/supabase/client";
-import { SiteNav } from "@/components/site-nav";
 
 export const Route = createFileRoute("/_authenticated/dashboard")({
 	head: () => ({ meta: [{ title: "The Room" }] }),
@@ -74,7 +74,7 @@ function DashboardPage() {
 					/>
 					<button
 						onClick={markIntroDone}
-						className="absolute bottom-8 right-8 text-[0.55rem] tracking-[0.5em] uppercase text-white/60 hover:text-white"
+						className="absolute bottom-8 right-8 text-sm tracking-[0.5em] uppercase text-white/60 hover:text-white"
 					>
 						Salta
 					</button>
@@ -99,7 +99,7 @@ function DashboardPage() {
 					{/* Testo hero — centrato su mobile, in basso su desktop */}
 					<div className="absolute inset-x-0 top-1/2 z-10 -translate-y-1/2 px-6 md:top-auto md:translate-y-0 md:bottom-0 md:pb-36 md:px-10">
 						<div className="mx-auto max-w-6xl">
-							<p className="text-[0.55rem] tracking-[0.6em] uppercase text-white/80">
+							<p className="text-sm tracking-[0.6em] uppercase text-white/80">
 								Benvenuta{firstName ? ` · ${firstName}` : ""}
 							</p>
 							<h1 className="mt-6 font-serif text-5xl leading-[1.05] text-white drop-shadow-[0_2px_16px_rgba(0,0,0,0.7)] md:text-7xl">
@@ -116,7 +116,7 @@ function DashboardPage() {
 			<section className="mx-auto max-w-6xl px-6 pt-0 md:px-10">
 				<div className="flex flex-col items-start justify-between gap-8 border-b border-[color:var(--border)] pb-12 md:flex-row md:items-end">
 					<div className="max-w-xl">
-						<p className="text-[0.55rem] tracking-[0.5em] uppercase text-muted-foreground">
+						<p className="text-sm tracking-[0.5em] uppercase text-muted-foreground">
 							The Room — Private Hair Studio
 						</p>
 						<p className="mt-4 font-serif text-2xl leading-snug text-foreground">
@@ -183,7 +183,7 @@ function DashboardPage() {
 										month: "long",
 									})}
 								</span>
-								<span className="text-[0.55rem] tracking-[0.5em] uppercase text-muted-foreground">
+								<span className="text-sm tracking-[0.5em] uppercase text-muted-foreground">
 									{b.status === "pending"
 										? "In attesa"
 										: b.status === "confirmed"
@@ -201,7 +201,7 @@ function DashboardPage() {
 			{/* Informazioni — il "manifesto" dello studio */}
 			<section className="border-t border-[color:var(--border)] bg-[color:var(--card)]">
 				<div className="mx-auto max-w-6xl px-6 py-24 md:px-10 md:py-32">
-					<p className="text-[0.55rem] tracking-[0.6em] uppercase text-muted-foreground">
+					<p className="text-sm tracking-[0.6em] uppercase text-muted-foreground">
 						Manifesto
 					</p>
 					<h2 className="mt-4 max-w-3xl font-serif text-4xl leading-tight text-foreground md:text-6xl">
@@ -219,13 +219,13 @@ function DashboardPage() {
 
 					<div className="mt-20 grid gap-16 md:grid-cols-2">
 						<article>
-							<p className="text-[0.55rem] tracking-[0.5em] uppercase text-[color:var(--gold)]">
+							<p className="text-sm tracking-[0.5em] uppercase text-[color:var(--gold)]">
 								01 — Appuntamenti
 							</p>
 							<h3 className="mt-3 font-serif text-2xl text-foreground">
 								Un cliente al giorno
 							</h3>
-							<p className="mt-4 text-sm leading-relaxed text-muted-foreground">
+							<p className="mt-4 text-base leading-relaxed text-muted-foreground">
 								Fino a febbraio è disponibile un solo appuntamento al giorno,
 								dalle 9:00 alle 12:30. Da marzo la disponibilità si estende fino
 								alle 15:00, mantenendo la stessa qualità del servizio. Ogni
@@ -235,13 +235,13 @@ function DashboardPage() {
 						</article>
 
 						<article>
-							<p className="text-[0.55rem] tracking-[0.5em] uppercase text-[color:var(--gold)]">
+							<p className="text-sm tracking-[0.5em] uppercase text-[color:var(--gold)]">
 								02 — Prenotazione
 							</p>
 							<h3 className="mt-3 font-serif text-2xl text-foreground">
 								Agenda autonoma
 							</h3>
-							<p className="mt-4 text-sm leading-relaxed text-muted-foreground">
+							<p className="mt-4 text-base leading-relaxed text-muted-foreground">
 								Visualizza la disponibilità delle giornate e prenota il tuo
 								appuntamento in autonomia. Scegli il momento più conveniente,
 								con flessibilità e comodità.
@@ -249,13 +249,13 @@ function DashboardPage() {
 						</article>
 
 						<article>
-							<p className="text-[0.55rem] tracking-[0.5em] uppercase text-[color:var(--gold)]">
+							<p className="text-sm tracking-[0.5em] uppercase text-[color:var(--gold)]">
 								03 — Questionario
 							</p>
 							<h3 className="mt-3 font-serif text-2xl text-foreground">
 								Conoscersi prima
 							</h3>
-							<p className="mt-4 text-sm leading-relaxed text-muted-foreground">
+							<p className="mt-4 text-base leading-relaxed text-muted-foreground">
 								Ti invitiamo a compilare un breve questionario di presentazione:
 								ci aiuta a comprendere le caratteristiche dei tuoi capelli e le
 								tue preferenze, per prepararci al meglio per il tuo
@@ -264,13 +264,13 @@ function DashboardPage() {
 						</article>
 
 						<article>
-							<p className="text-[0.55rem] tracking-[0.5em] uppercase text-[color:var(--gold)]">
+							<p className="text-sm tracking-[0.5em] uppercase text-[color:var(--gold)]">
 								04 — L'esperienza
 							</p>
 							<h3 className="mt-3 font-serif text-2xl text-foreground">
 								Senza fretta
 							</h3>
-							<p className="mt-4 text-sm leading-relaxed text-muted-foreground">
+							<p className="mt-4 text-base leading-relaxed text-muted-foreground">
 								Discuteremo insieme il look desiderato, per raggiungere il
 								risultato che meglio esprime il tuo stile unico. Un'esperienza
 								esclusiva, progettata per valorizzare la tua bellezza.
@@ -285,12 +285,15 @@ function DashboardPage() {
 				<div className="mx-auto flex max-w-6xl flex-col items-start justify-between gap-6 px-6 py-14 md:flex-row md:items-center md:px-10">
 					<p className="max-w-xl font-serif text-2xl leading-snug text-foreground md:text-3xl">
 						Taglio, colore, infoltimento, extension e
-						<span className="italic text-[color:var(--gold)]"> trattamenti</span>
+						<span className="italic text-[color:var(--gold)]">
+							{" "}
+							trattamenti
+						</span>
 						.
 					</p>
 					<Link
 						to="/services"
-						className="group inline-flex items-center gap-3 text-[0.55rem] tracking-[0.5em] uppercase text-[color:var(--gold)] hover:opacity-80"
+						className="group inline-flex items-center gap-3 text-sm tracking-[0.5em] uppercase text-[color:var(--gold)] hover:opacity-80"
 					>
 						Scopri i servizi
 						<span className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-current/40 transition-transform group-hover:translate-x-1">
@@ -306,7 +309,7 @@ function DashboardPage() {
 						variant="horizontal"
 						className="h-8 w-auto text-foreground/60"
 					/>
-					<p className="text-[0.5rem] tracking-[0.5em] uppercase text-muted-foreground">
+					<p className="text-sm tracking-[0.5em] uppercase text-muted-foreground">
 						Access by appointment only
 					</p>
 				</div>

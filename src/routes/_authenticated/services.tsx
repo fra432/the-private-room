@@ -124,7 +124,7 @@ function ServicesPage() {
 			<section className="relative overflow-hidden border-b border-[color:var(--border)]">
 				<div className="mx-auto grid min-h-[80vh] max-w-6xl grid-cols-12 items-end px-6 pt-40 pb-20 md:px-10 md:pt-48 md:pb-28">
 					<div className="col-span-12 md:col-span-8">
-						<p className="text-xs tracking-[0.5em] uppercase text-muted-foreground md:text-[0.75rem]">
+						<p className="text-sm tracking-[0.5em] uppercase text-muted-foreground md:text-[0.75rem]">
 							Listino · Edizione corrente
 						</p>
 						<h1 className="mt-10 font-serif text-[3.5rem] leading-[0.95] text-foreground md:text-[8rem]">
@@ -139,7 +139,7 @@ function ServicesPage() {
 							Nessuna fretta, nessuna sovrapposizione — solo tempo dedicato.
 						</p>
 						<div className="mt-8 h-px w-16 bg-[color:var(--gold)]" />
-						<p className="mt-6 text-xs tracking-[0.5em] uppercase text-muted-foreground md:text-[0.75rem]">
+						<p className="mt-6 text-sm tracking-[0.5em] uppercase text-muted-foreground md:text-[0.75rem]">
 							11 servizi · su appuntamento
 						</p>
 					</div>
@@ -180,13 +180,13 @@ function ServicesPage() {
 										reverse ? "md:[direction:ltr]" : ""
 									}`}
 								>
-									<p className="text-xs tracking-[0.4em] uppercase text-muted-foreground md:text-[0.7rem]">
+									<p className="text-sm tracking-[0.4em] uppercase text-muted-foreground md:text-[0.7rem]">
 										{s.tagline}
 									</p>
 									<h2 className="mt-4 font-serif text-4xl text-foreground transition-transform duration-500 group-hover:translate-x-1 md:text-6xl">
 										{s.name}
 									</h2>
-									<p className="mt-6 max-w-lg text-sm leading-relaxed text-muted-foreground md:text-base">
+									<p className="mt-6 max-w-lg text-base leading-relaxed text-muted-foreground md:text-base">
 										{s.description}
 									</p>
 								</div>
@@ -216,7 +216,7 @@ function ServicesPage() {
 			{/* Nota prezzi */}
 			<section className="border-b border-[color:var(--border)] bg-[color:var(--card)]/50">
 				<div className="mx-auto max-w-6xl px-6 py-16 md:px-10">
-					<p className="text-xs tracking-[0.5em] uppercase text-[color:var(--gold)] md:text-[0.75rem]">
+					<p className="text-sm tracking-[0.5em] uppercase text-[color:var(--gold)] md:text-[0.75rem]">
 						Nota
 					</p>
 					<p className="mt-4 max-w-3xl font-serif text-2xl leading-snug text-foreground md:text-3xl">
@@ -231,7 +231,7 @@ function ServicesPage() {
 			<section className="border-b border-[color:var(--border)]">
 				<div className="mx-auto flex max-w-6xl flex-col items-start justify-between gap-10 px-6 py-24 md:flex-row md:items-end md:px-10">
 					<div className="max-w-xl">
-						<p className="text-xs tracking-[0.5em] uppercase text-muted-foreground md:text-[0.75rem]">
+						<p className="text-sm tracking-[0.5em] uppercase text-muted-foreground md:text-[0.75rem]">
 							Pronta?
 						</p>
 						<h2 className="mt-6 font-serif text-5xl leading-[1.05] text-foreground md:text-7xl">
@@ -245,7 +245,7 @@ function ServicesPage() {
 					</div>
 					<Link
 						to="/book"
-						className="inline-flex h-14 items-center justify-center border border-[color:var(--gold)] bg-[color:var(--gold)] px-12 text-xs tracking-[0.5em] uppercase text-background transition hover:bg-transparent hover:text-[color:var(--gold)] md:text-[0.8rem]"
+						className="inline-flex h-14 items-center justify-center border border-[color:var(--gold)] bg-[color:var(--gold)] px-12 text-sm tracking-[0.5em] uppercase text-background transition hover:bg-transparent hover:text-[color:var(--gold)] md:text-[0.8rem]"
 					>
 						Prenota appuntamento
 					</Link>
