@@ -88,8 +88,7 @@ function AdminPage() {
 	return (
 		<main className="theme-interior min-h-screen bg-background font-display text-[16px] text-foreground antialiased md:text-[17px]">
 			<div className="mx-auto flex min-h-screen max-w-5xl flex-col px-6 py-10 md:px-8">
-				<header className="flex items-center justify-between">
-					<BrandLogo className="w-[90px] text-[color:var(--gold)]" />
+				<header className="flex items-center justify-end">
 					<Link
 						to="/dashboard"
 						className="inline-flex items-center gap-2.5 text-lg font-medium tracking-[0.08em] uppercase text-foreground/70 transition-colors hover:text-[color:var(--gold)]"
