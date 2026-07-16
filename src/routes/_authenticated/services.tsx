@@ -181,7 +181,7 @@ function ServicesPage() {
 						</p>
 						<div className="mt-8 h-px w-16 bg-[color:var(--gold)]" />
 						<p className="mt-6 text-[0.55rem] tracking-[0.5em] uppercase text-muted-foreground">
-							05 servizi · su appuntamento
+							11 servizi · su appuntamento
 						</p>
 					</div>
 				</div>
