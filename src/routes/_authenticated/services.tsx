@@ -230,18 +230,6 @@ function ServicesPage() {
 									<p className="mt-6 max-w-lg text-sm leading-relaxed text-muted-foreground md:text-base">
 										{s.description}
 									</p>
-
-									<ul className="mt-8 grid grid-cols-2 gap-x-6 gap-y-2">
-										{s.details.map((d) => (
-											<li
-												key={d}
-												className="flex items-baseline gap-3 text-xs text-foreground/80"
-											>
-												<span className="text-[color:var(--gold)]">—</span>
-												<span>{d}</span>
-											</li>
-										))}
-									</ul>
 								</div>
 
 								<div
@@ -252,18 +240,10 @@ function ServicesPage() {
 									<div className="flex flex-col items-start gap-6 border-l border-[color:var(--border)] pl-6 md:items-end md:border-l-0 md:border-r md:pl-0 md:pr-6 md:text-right">
 										<div>
 											<p className="text-[0.5rem] tracking-[0.5em] uppercase text-muted-foreground">
-												Da
+												Tariffa
 											</p>
-											<p className="mt-2 font-serif text-5xl italic text-foreground">
+											<p className="mt-2 font-serif text-4xl italic text-foreground md:text-5xl">
 												{s.price}
-											</p>
-										</div>
-										<div>
-											<p className="text-[0.5rem] tracking-[0.5em] uppercase text-muted-foreground">
-												Durata
-											</p>
-											<p className="mt-2 font-serif text-2xl text-foreground/80">
-												{s.duration}
 											</p>
 										</div>
 									</div>
