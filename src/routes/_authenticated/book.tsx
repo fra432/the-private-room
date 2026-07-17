@@ -72,15 +72,18 @@ function BookPage() {
   async function submit() {
     if (!selected || !user) return;
     setSubmitting(true);
-    const { error } = await supabase.from("bookings").insert({
+    const { data: inserted, error } = await supabase.from("bookings").insert({
       user_id: user.id,
       date: selected,
       notes: notes.trim() || null,
-    });
+    }).select("id").maybeSingle();
     setSubmitting(false);
     if (error) {
       toast.error("Impossibile inviare la richiesta.");
       return;
+    }
+    if (inserted?.id) {
+      notifyBookingCreated({ data: { id: inserted.id } }).catch(() => {});
     }
     toast.success("Richiesta inviata.");
     navigate({ to: "/dashboard" });
