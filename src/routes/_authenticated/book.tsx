@@ -2,6 +2,7 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { ArrowLeft, ChevronLeft, ChevronRight } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { notifyBookingCreated } from "@/lib/email.functions";
 import { useAuth } from "@/hooks/use-auth";
 import { BrandLogo } from "@/components/brand-logo";
 import { toast } from "sonner";
@@ -72,15 +73,18 @@ function BookPage() {
   async function submit() {
     if (!selected || !user) return;
     setSubmitting(true);
-    const { error } = await supabase.from("bookings").insert({
+    const { data: inserted, error } = await supabase.from("bookings").insert({
       user_id: user.id,
       date: selected,
       notes: notes.trim() || null,
-    });
+    }).select("id").maybeSingle();
     setSubmitting(false);
     if (error) {
       toast.error("Impossibile inviare la richiesta.");
       return;
+    }
+    if (inserted?.id) {
+      notifyBookingCreated({ data: { id: inserted.id } }).catch(() => {});
     }
     toast.success("Richiesta inviata.");
     navigate({ to: "/dashboard" });

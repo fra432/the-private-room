@@ -5,6 +5,7 @@ import { z } from "zod";
 import { BackArrow } from "@/components/back-arrow";
 import { BrandLogo } from "@/components/brand-logo";
 import { supabase } from "@/integrations/supabase/client";
+import { notifyAccessRequestCreated } from "@/lib/email.functions";
 
 export const Route = createFileRoute("/request-access")({
 	head: () => ({ meta: [{ title: "Request Access — THE ROOM" }] }),
@@ -33,18 +34,21 @@ function RequestAccessPage() {
 			return;
 		}
 		setLoading(true);
-		const { error } = await supabase.from("access_requests").insert({
+		const { data: inserted, error } = await supabase.from("access_requests").insert({
 			first_name: parsed.data.first_name,
 			last_name: parsed.data.last_name,
 			email: parsed.data.email,
 			phone: parsed.data.phone,
 			instagram: parsed.data.instagram || null,
 			how_heard: parsed.data.how_heard || null,
-		});
+		}).select("id").maybeSingle();
 		setLoading(false);
 		if (error) {
 			toast.error("Invio non riuscito. Riprova.");
 			return;
+		}
+		if (inserted?.id) {
+			notifyAccessRequestCreated({ data: { id: inserted.id } }).catch(() => {});
 		}
 		navigate({ to: "/request-received" });
 	}
