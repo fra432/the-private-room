@@ -6,6 +6,7 @@ import { BackArrow } from "@/components/back-arrow";
 import { BrandLogo } from "@/components/brand-logo";
 import { useAuth } from "@/hooks/use-auth";
 import { supabase } from "@/integrations/supabase/client";
+import { notifyAccessRequestDecision, notifyBookingDecision } from "@/lib/email.functions";
 
 export const Route = createFileRoute("/_authenticated/admin")({
 	head: () => ({ meta: [{ title: "Admin — THE ROOM" }] }),
@@ -182,6 +183,7 @@ function RequestsSection() {
 			.update({ status, reviewed_at: new Date().toISOString() })
 			.eq("id", id);
 		if (error) return toast.error(error.message);
+		notifyAccessRequestDecision({ data: { id, status } }).catch(() => {});
 		toast.success(status === "approved" ? "Approvata" : "Rifiutata");
 		void load();
 	}
@@ -305,6 +307,7 @@ function BookingsSection({
 			.update({ status })
 			.eq("id", id);
 		if (error) return toast.error(error.message);
+		notifyBookingDecision({ data: { id, status } }).catch(() => {});
 		toast.success("Aggiornato");
 		void load();
 	}
