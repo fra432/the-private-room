@@ -5,6 +5,7 @@ import { z } from "zod";
 import { BackArrow } from "@/components/back-arrow";
 import { BrandLogo } from "@/components/brand-logo";
 import { supabase } from "@/integrations/supabase/client";
+import { notifyAccessRequestCreated } from "@/lib/email.functions";
 
 export const Route = createFileRoute("/request-access")({
 	head: () => ({ meta: [{ title: "Request Access — THE ROOM" }] }),
