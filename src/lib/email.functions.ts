@@ -1,11 +1,8 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 
-const OWNER_EMAIL = "theroomjf@gmail.com";
-// Uses Resend's shared sender until a custom domain is verified in Resend.
-// Note: onboarding@resend.dev only delivers reliably to the Resend account owner.
-// To reach clients, verify inside-theroom.it in Resend and swap FROM below.
-const FROM = "THE ROOM <onboarding@resend.dev>";
+const OWNER_EMAIL = "info@inside-theroom.it";
+const FROM = "THE ROOM <info@inside-theroom.it>";
 
 type Payload = {
 	to: string;
@@ -42,7 +39,12 @@ async function sendMail(p: Payload) {
 	return { ok: true as const };
 }
 
-function shell(title: string, intro: string, body: string, cta?: { label: string; url: string }) {
+function shell(
+	title: string,
+	intro: string,
+	body: string,
+	cta?: { label: string; url: string },
+) {
 	return `<!doctype html><html><body style="margin:0;padding:0;background:#0b0b0b;font-family:Georgia,'Times New Roman',serif;color:#f5f2ea">
 	<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#0b0b0b;padding:40px 16px">
 		<tr><td align="center">
@@ -67,17 +69,23 @@ function shell(title: string, intro: string, body: string, cta?: { label: string
 }
 
 async function loadAccessRequest(id: string) {
-	const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+	const { supabaseAdmin } = await import(
+		"@/integrations/supabase/client.server"
+	);
 	const { data } = await supabaseAdmin
 		.from("access_requests")
-		.select("id, first_name, last_name, email, phone, instagram, how_heard, status")
+		.select(
+			"id, first_name, last_name, email, phone, instagram, how_heard, status",
+		)
 		.eq("id", id)
 		.maybeSingle();
 	return data;
 }
 
 async function loadBooking(id: string) {
-	const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+	const { supabaseAdmin } = await import(
+		"@/integrations/supabase/client.server"
+	);
 	const { data } = await supabaseAdmin
 		.from("bookings")
 		.select("id, user_id, date, status, notes")
@@ -125,7 +133,10 @@ export const notifyAccessRequestCreated = createServerFn({ method: "POST" })
 				"Nuova richiesta d'accesso",
 				"Una nuova cliente ha richiesto di entrare in THE ROOM.",
 				body,
-				{ label: "Rivedi in Admin", url: "https://www.inside-theroom.it/admin" },
+				{
+					label: "Rivedi in Admin",
+					url: "https://www.inside-theroom.it/admin",
+				},
 			),
 			reply_to: r.email,
 		});
@@ -134,7 +145,12 @@ export const notifyAccessRequestCreated = createServerFn({ method: "POST" })
 // 2. Decisione richiesta d'accesso → notifica cliente
 export const notifyAccessRequestDecision = createServerFn({ method: "POST" })
 	.inputValidator((d) =>
-		z.object({ id: z.string().uuid(), status: z.enum(["approved", "rejected"]) }).parse(d),
+		z
+			.object({
+				id: z.string().uuid(),
+				status: z.enum(["approved", "rejected"]),
+			})
+			.parse(d),
 	)
 	.handler(async ({ data }) => {
 		const r = await loadAccessRequest(data.id);
@@ -169,7 +185,9 @@ export const notifyBookingCreated = createServerFn({ method: "POST" })
 		const res = await loadBooking(data.id);
 		if (!res) return { ok: false };
 		const { booking, profile } = res;
-		const name = profile ? `${profile.first_name ?? ""} ${profile.last_name ?? ""}`.trim() : "una cliente";
+		const name = profile
+			? `${profile.first_name ?? ""} ${profile.last_name ?? ""}`.trim()
+			: "una cliente";
 		const body = `
 			<p><strong>Cliente:</strong> ${name || "—"}</p>
 			${profile?.email ? `<p><strong>Email:</strong> ${profile.email}</p>` : ""}
@@ -184,7 +202,10 @@ export const notifyBookingCreated = createServerFn({ method: "POST" })
 				"Nuova richiesta d'appuntamento",
 				`${name || "Una cliente"} ha richiesto un appuntamento.`,
 				body,
-				{ label: "Rivedi in Admin", url: "https://www.inside-theroom.it/admin" },
+				{
+					label: "Rivedi in Admin",
+					url: "https://www.inside-theroom.it/admin",
+				},
 			),
 			reply_to: profile?.email ?? undefined,
 		});
@@ -225,7 +246,10 @@ export const notifyBookingDecision = createServerFn({ method: "POST" })
 					`Ciao ${first}`.trim(),
 					`Purtroppo non è possibile confermare l'appuntamento del ${dateStr}.`,
 					"<p>Ti invitiamo a scegliere un'altra data dall'area riservata.</p>",
-					{ label: "Scegli un'altra data", url: "https://www.inside-theroom.it/book" },
+					{
+						label: "Scegli un'altra data",
+						url: "https://www.inside-theroom.it/book",
+					},
 				),
 			});
 		}
