@@ -1,0 +1,1 @@
+DROP POLICY IF EXISTS "Enable insert for anonymous users" ON public.access_requests;
