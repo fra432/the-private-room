@@ -50,6 +50,32 @@ function LoginPage() {
 				sessionStorage.removeItem("room:intro");
 			navigate({ to: "/dashboard" });
 		} else {
+			// Signup is gated: email must have an approved access request
+			const { data: statusData } = await supabase.rpc("check_access_email_status", {
+				_email: parsed.data.email,
+			});
+			const status = (statusData as string | null) ?? "none";
+			if (status === "account_exists") {
+				setLoading(false);
+				toast.error("Esiste già un account con questa email. Accedi.");
+				setMode("login");
+				return;
+			}
+			if (status === "pending") {
+				setLoading(false);
+				toast.error("La tua richiesta è in valutazione. Ti scriveremo appena approvata.");
+				return;
+			}
+			if (status === "rejected" || status === "none") {
+				setLoading(false);
+				toast.error(
+					status === "none"
+						? "Per creare un account devi prima richiedere l'accesso."
+						: "La tua richiesta d'accesso non è stata approvata.",
+				);
+				if (status === "none") navigate({ to: "/request-access" });
+				return;
+			}
 			const { error } = await supabase.auth.signUp({
 				email: parsed.data.email,
 				password: parsed.data.password,

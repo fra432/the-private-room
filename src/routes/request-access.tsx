@@ -34,6 +34,28 @@ function RequestAccessPage() {
 			return;
 		}
 		setLoading(true);
+		// Pre-check: block duplicates and existing accounts before insert
+		const { data: statusData } = await supabase.rpc("check_access_email_status", {
+			_email: parsed.data.email,
+		});
+		const status = (statusData as string | null) ?? "none";
+		if (status === "account_exists") {
+			setLoading(false);
+			toast.error("Esiste già un account con questa email. Accedi invece.");
+			navigate({ to: "/login" });
+			return;
+		}
+		if (status === "pending") {
+			setLoading(false);
+			toast.error("La tua richiesta è già in valutazione. Ti contatteremo via email.");
+			return;
+		}
+		if (status === "approved") {
+			setLoading(false);
+			toast.error("La tua richiesta è già stata approvata. Controlla la tua email o accedi.");
+			navigate({ to: "/login" });
+			return;
+		}
 		const { data: inserted, error } = await supabase.from("access_requests").insert({
 			first_name: parsed.data.first_name,
 			last_name: parsed.data.last_name,
@@ -44,7 +66,16 @@ function RequestAccessPage() {
 		}).select("id").maybeSingle();
 		setLoading(false);
 		if (error) {
-			toast.error("Invio non riuscito. Riprova.");
+			// Race condition fallback: DB trigger / unique index caught it
+			const msg = error.message || "";
+			if (msg.includes("account_exists")) {
+				toast.error("Esiste già un account con questa email. Accedi invece.");
+				navigate({ to: "/login" });
+			} else if (msg.includes("access_requests_unique_active_email") || error.code === "23505") {
+				toast.error("Hai già una richiesta attiva per questa email.");
+			} else {
+				toast.error("Invio non riuscito. Riprova.");
+			}
 			return;
 		}
 		if (inserted?.id) {
