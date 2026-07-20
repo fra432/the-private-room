@@ -88,7 +88,7 @@ async function loadBooking(id: string) {
 	);
 	const { data } = await supabaseAdmin
 		.from("bookings")
-		.select("id, user_id, date, status, notes")
+		.select("id, user_id, date, arrival_time, status, notes")
 		.eq("id", id)
 		.maybeSingle();
 	if (!data) return null;
@@ -193,6 +193,7 @@ export const notifyBookingCreated = createServerFn({ method: "POST" })
 			${profile?.email ? `<p><strong>Email:</strong> ${profile.email}</p>` : ""}
 			${profile?.phone ? `<p><strong>Telefono:</strong> ${profile.phone}</p>` : ""}
 			<p><strong>Data richiesta:</strong> ${fmtDate(booking.date)}</p>
+			${(booking as any).arrival_time ? `<p><strong>Orario di arrivo:</strong> ${String((booking as any).arrival_time).slice(0, 5)}</p>` : ""}
 			${booking.notes ? `<p><strong>Note:</strong> ${booking.notes}</p>` : ""}
 		`;
 		return sendMail({
@@ -234,7 +235,7 @@ export const notifyBookingDecision = createServerFn({ method: "POST" })
 				html: shell(
 					`Ci vediamo ${first ? first + "," : ""} ${dateStr}`.trim(),
 					"Il tuo appuntamento in THE ROOM è confermato.",
-					`<p><strong>Data:</strong> ${dateStr}</p>${booking.notes ? `<p><strong>Le tue note:</strong> ${booking.notes}</p>` : ""}<p style="margin-top:16px">Se hai bisogno di modificare, rispondi a questa email.</p>`,
+					`<p><strong>Data:</strong> ${dateStr}</p>${(booking as any).arrival_time ? `<p><strong>Orario:</strong> ${String((booking as any).arrival_time).slice(0, 5)}</p>` : ""}${booking.notes ? `<p><strong>Le tue note:</strong> ${booking.notes}</p>` : ""}<p style="margin-top:16px">Se hai bisogno di modificare, rispondi a questa email.</p>`,
 				),
 			});
 		}

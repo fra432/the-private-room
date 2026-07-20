@@ -31,6 +31,8 @@ function BookPage() {
   const [selected, setSelected] = useState<string | null>(null);
   const [notes, setNotes] = useState("");
   const [submitting, setSubmitting] = useState(false);
+  const [weeklyHours, setWeeklyHours] = useState<Array<{ day_of_week: number; is_closed: boolean; open_time: string | null; close_time: string | null }>>([]);
+  const [arrivalTime, setArrivalTime] = useState<string | null>(null);
 
   useEffect(() => {
     if (!user) return;
@@ -58,6 +60,38 @@ function BookPage() {
     })();
   }, [month]);
 
+  useEffect(() => {
+    supabase
+      .from("weekly_hours")
+      .select("day_of_week,is_closed,open_time,close_time")
+      .then(({ data }) => setWeeklyHours(data ?? []));
+  }, []);
+
+  const slots = useMemo(() => {
+    if (!selected) return [] as string[];
+    const d = new Date(selected + "T00:00:00");
+    const dow = d.getDay();
+    const row = weeklyHours.find((r) => r.day_of_week === dow);
+    if (!row || row.is_closed || !row.open_time || !row.close_time) return [];
+    const [oh, om] = row.open_time.split(":").map(Number);
+    const [ch, cm] = row.close_time.split(":").map(Number);
+    const openMin = oh * 60 + om;
+    const closeMin = ch * 60 + cm;
+    // ultimo arrivo: almeno 1 ora prima della chiusura
+    const lastMin = closeMin - 60;
+    const out: string[] = [];
+    for (let m = openMin; m <= lastMin; m += 30) {
+      const hh = String(Math.floor(m / 60)).padStart(2, "0");
+      const mm = String(m % 60).padStart(2, "0");
+      out.push(`${hh}:${mm}`);
+    }
+    return out;
+  }, [selected, weeklyHours]);
+
+  useEffect(() => {
+    setArrivalTime(null);
+  }, [selected]);
+
   const days = useMemo(() => {
     const first = new Date(month);
     const startWeekday = (first.getDay() + 6) % 7; // Lunedì=0
@@ -71,11 +105,12 @@ function BookPage() {
   const today = toISO(new Date());
 
   async function submit() {
-    if (!selected || !user) return;
+    if (!selected || !user || !arrivalTime) return;
     setSubmitting(true);
     const { data: inserted, error } = await supabase.from("bookings").insert({
       user_id: user.id,
       date: selected,
+      arrival_time: arrivalTime,
       notes: notes.trim() || null,
     }).select("id").maybeSingle();
     setSubmitting(false);
@@ -246,6 +281,39 @@ function BookPage() {
             <p className="font-serif text-2xl">
               {new Date(selected).toLocaleDateString("it-IT", { weekday: "long", day: "numeric", month: "long" })}
             </p>
+
+            <div className="mt-2 border-l-2 border-[color:var(--gold)] bg-[color:var(--gold)]/5 px-4 py-3">
+              <p className="text-[0.6rem] tracking-[0.35em] uppercase text-[color:var(--gold)]">Nota importante</p>
+              <p className="mt-1.5 text-sm leading-relaxed text-muted-foreground">
+                Per servizi di colore, schiariture o trattamenti lunghi, ti consigliamo di scegliere la <strong>prima ora disponibile</strong> per avere tutto il tempo necessario.
+              </p>
+            </div>
+
+            <div className="mt-2">
+              <p className="text-[0.6rem] tracking-[0.4em] uppercase text-muted-foreground">Orario di arrivo</p>
+              {slots.length === 0 ? (
+                <p className="mt-3 text-sm italic text-muted-foreground">
+                  Nessun orario configurato per questo giorno.
+                </p>
+              ) : (
+                <div className="mt-3 flex flex-wrap gap-2">
+                  {slots.map((s) => (
+                    <button
+                      key={s}
+                      onClick={() => setArrivalTime(s)}
+                      className={`h-10 min-w-[4.5rem] px-3 font-serif text-base transition-all ${
+                        arrivalTime === s
+                          ? "bg-[color:var(--gold)] text-background"
+                          : "border border-[color:var(--border)] text-foreground hover:border-[color:var(--gold)] hover:text-[color:var(--gold)]"
+                      }`}
+                    >
+                      {s}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+
             <label className="mt-4 flex flex-col gap-2">
               <span className="text-[0.6rem] tracking-[0.35em] uppercase text-muted-foreground">Note (facoltativo)</span>
               <textarea
@@ -258,7 +326,7 @@ function BookPage() {
             </label>
             <button
               onClick={submit}
-              disabled={submitting}
+              disabled={submitting || !arrivalTime}
               className="mt-4 inline-flex h-12 items-center justify-center bg-black px-8 text-[0.65rem] tracking-[0.5em] uppercase text-white hover:opacity-90 disabled:opacity-50"
             >
               {submitting ? "Invio…" : "Invia richiesta"}
