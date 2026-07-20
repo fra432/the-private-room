@@ -19,6 +19,9 @@ function DashboardPage() {
 	const [bookings, setBookings] = useState<
 		{ id: string; date: string; status: string }[]
 	>([]);
+	const [showAllBookings, setShowAllBookings] = useState(false);
+	const [bookingsPage, setBookingsPage] = useState(1);
+	const bookingsPerPage = 5;
 	const [hasQuestionnaire, setHasQuestionnaire] = useState<boolean | null>(
 		null,
 	);
@@ -133,7 +136,7 @@ function DashboardPage() {
 					) : (
 						<Link
 							to="/book"
-							className="inline-flex h-14 items-center justify-center border border-foreground/80 bg-foreground px-12 text-[0.6rem] tracking-[0.6em] uppercase text-background transition hover:bg-transparent hover:text-foreground"
+							className="inline-flex h-14 items-center justify-center border-2 border-[color:var(--gold)] bg-[color:var(--gold)] px-12 text-[0.6rem] tracking-[0.6em] uppercase text-background font-semibold transition duration-300 hover:scale-105 hover:shadow-[0_8px_24px_rgba(120,110,80,0.4)]"
 						>
 							Prenota appuntamento
 						</Link>
@@ -167,34 +170,127 @@ function DashboardPage() {
 							appuntamenti
 						</span>
 					</h2>
-					<ul className="divide-y divide-[color:var(--border)]">
-						{bookings.length === 0 && (
-							<li className="py-6 text-sm text-muted-foreground">
-								Nessun appuntamento in programma. Quando sei pronta, prenota il
-								tuo momento.
-							</li>
+					<div>
+						{/* Preview dei prossimi 3 — nascosta quando il desplegable è aperto */}
+						{!showAllBookings && (
+							<ul className="divide-y divide-[color:var(--border)]">
+								{bookings.length === 0 && (
+									<li className="py-6 text-sm text-muted-foreground">
+										Nessun appuntamento in programma. Quando sei pronta, prenota
+										il tuo momento.
+									</li>
+								)}
+								{bookings.slice(0, 3).map((b) => (
+									<li
+										key={b.id}
+										className="flex items-center justify-between py-6"
+									>
+										<span className="font-serif text-2xl capitalize text-foreground">
+											{new Date(b.date).toLocaleDateString("it-IT", {
+												weekday: "long",
+												day: "numeric",
+												month: "long",
+											})}
+										</span>
+										<span className="text-sm tracking-[0.5em] uppercase text-muted-foreground">
+											{b.status === "pending"
+												? "In attesa"
+												: b.status === "confirmed"
+													? "Confermato"
+													: b.status === "cancelled"
+														? "Annullato"
+														: "Rifiutato"}
+										</span>
+									</li>
+								))}
+							</ul>
 						)}
-						{bookings.map((b) => (
-							<li key={b.id} className="flex items-center justify-between py-6">
-								<span className="font-serif text-2xl capitalize text-foreground">
-									{new Date(b.date).toLocaleDateString("it-IT", {
-										weekday: "long",
-										day: "numeric",
-										month: "long",
-									})}
-								</span>
-								<span className="text-sm tracking-[0.5em] uppercase text-muted-foreground">
-									{b.status === "pending"
-										? "In attesa"
-										: b.status === "confirmed"
-											? "Confermato"
-											: b.status === "cancelled"
-												? "Annullato"
-												: "Rifiutato"}
-								</span>
-							</li>
-						))}
-					</ul>
+
+						{/* Button "Vedi tutti" se ci sono più di 3 appuntamenti */}
+						{bookings.length > 3 && (
+							<button
+								onClick={() => {
+									setShowAllBookings(!showAllBookings);
+									setBookingsPage(1);
+								}}
+								className="mt-6 text-sm tracking-[0.08em] uppercase text-[color:var(--gold)] hover:underline"
+							>
+								{showAllBookings
+									? "Nascondi"
+									: `Vedi tutti (${bookings.length})`}
+							</button>
+						)}
+
+						{/* Lista completa con paginazione */}
+						{showAllBookings && (
+							<div className="mt-8 border-t border-[color:var(--border)] pt-6">
+								<ul className="divide-y divide-[color:var(--border)]">
+									{bookings
+										.slice(
+											(bookingsPage - 1) * bookingsPerPage,
+											bookingsPage * bookingsPerPage,
+										)
+										.map((b) => (
+											<li
+												key={b.id}
+												className="flex items-center justify-between py-6"
+											>
+												<span className="font-serif text-2xl capitalize text-foreground">
+													{new Date(b.date).toLocaleDateString("it-IT", {
+														weekday: "long",
+														day: "numeric",
+														month: "long",
+													})}
+												</span>
+												<span className="text-sm tracking-[0.5em] uppercase text-muted-foreground">
+													{b.status === "pending"
+														? "In attesa"
+														: b.status === "confirmed"
+															? "Confermato"
+															: b.status === "cancelled"
+																? "Annullato"
+																: "Rifiutato"}
+												</span>
+											</li>
+										))}
+								</ul>
+
+								{/* Paginazione */}
+								{Math.ceil(bookings.length / bookingsPerPage) > 1 && (
+									<div className="mt-6 flex items-center justify-center gap-2">
+										<button
+											onClick={() => setBookingsPage((p) => Math.max(1, p - 1))}
+											disabled={bookingsPage === 1}
+											className="px-3 py-2 text-sm tracking-[0.08em] uppercase text-[color:var(--gold)] hover:bg-[color:var(--gold)]/10 disabled:opacity-30"
+										>
+											← Precedente
+										</button>
+										<span className="text-sm text-muted-foreground">
+											{bookingsPage} /{" "}
+											{Math.ceil(bookings.length / bookingsPerPage)}
+										</span>
+										<button
+											onClick={() =>
+												setBookingsPage((p) =>
+													Math.min(
+														Math.ceil(bookings.length / bookingsPerPage),
+														p + 1,
+													),
+												)
+											}
+											disabled={
+												bookingsPage ===
+												Math.ceil(bookings.length / bookingsPerPage)
+											}
+											className="px-3 py-2 text-sm tracking-[0.08em] uppercase text-[color:var(--gold)] hover:bg-[color:var(--gold)]/10 disabled:opacity-30"
+										>
+											Successivo →
+										</button>
+									</div>
+								)}
+							</div>
+						)}
+					</div>
 				</div>
 			</section>
 
