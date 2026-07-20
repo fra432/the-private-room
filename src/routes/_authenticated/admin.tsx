@@ -1,5 +1,5 @@
 import { createFileRoute, Link, Navigate } from "@tanstack/react-router";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, ChevronLeft, ChevronRight, X } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import { toast } from "sonner";
 import { BackArrow } from "@/components/back-arrow";
@@ -260,20 +260,31 @@ function BookingsSection({
 }: {
 	onOpenClient: (userId: string) => void;
 }) {
+	const [view, setView] = useState<"calendar" | "list">("calendar");
 	const [tab, setTab] = useState<
 		"pending" | "confirmed" | "cancelled" | "rejected"
 	>("pending");
 	const [rows, setRows] = useState<Booking[]>([]);
 	const [profiles, setProfiles] = useState<Record<string, Profile>>({});
 	const [loading, setLoading] = useState(true);
+	const [month, setMonth] = useState(() => {
+		const d = new Date();
+		return new Date(d.getFullYear(), d.getMonth(), 1);
+	});
+	const [openBookingId, setOpenBookingId] = useState<string | null>(null);
 
 	const load = useCallback(async () => {
 		setLoading(true);
-		const { data, error } = await supabase
-			.from("bookings")
-			.select("*")
-			.eq("status", tab)
-			.order("date", { ascending: true });
+		let q = supabase.from("bookings").select("*");
+		if (view === "list") {
+			q = q.eq("status", tab);
+		} else {
+			const start = `${month.getFullYear()}-${String(month.getMonth() + 1).padStart(2, "0")}-01`;
+			const endDate = new Date(month.getFullYear(), month.getMonth() + 1, 0);
+			const end = `${endDate.getFullYear()}-${String(endDate.getMonth() + 1).padStart(2, "0")}-${String(endDate.getDate()).padStart(2, "0")}`;
+			q = q.gte("date", start).lte("date", end).in("status", ["pending", "confirmed"]);
+		}
+		const { data, error } = await q.order("date", { ascending: true });
 		if (error) {
 			setLoading(false);
 			return toast.error(error.message);
@@ -284,16 +295,18 @@ function BookingsSection({
 			const ids = Array.from(new Set(list.map((b) => b.user_id)));
 			const { data: ps } = await supabase
 				.from("profiles")
-				.select("id,email,first_name,last_name")
+				.select("id,email,first_name,last_name,phone,instagram")
 				.in("id", ids);
 			const map: Record<string, Profile> = {};
 			(ps ?? []).forEach((p) => {
 				map[p.id] = p as Profile;
 			});
 			setProfiles(map);
+		} else {
+			setProfiles({});
 		}
 		setLoading(false);
-	}, [tab]);
+	}, [tab, view, month]);
 
 	useEffect(() => {
 		void load();
@@ -313,8 +326,34 @@ function BookingsSection({
 		void load();
 	}
 
+	function nameOf(b: Booking) {
+		const p = profiles[b.user_id];
+		return p
+			? `${p.first_name ?? ""} ${p.last_name ?? ""}`.trim() || p.email || "—"
+			: b.user_id.slice(0, 8);
+	}
+
 	return (
 		<>
+			<div className="mt-6 flex flex-wrap items-center gap-3">
+				<div className="inline-flex border border-[color:var(--gold)]/40">
+					{(["calendar", "list"] as const).map((v) => (
+						<button
+							key={v}
+							onClick={() => setView(v)}
+							className={`px-4 py-2 text-sm tracking-[0.08em] uppercase ${
+								view === v
+									? "bg-[color:var(--gold)] text-background"
+									: "text-foreground/70 hover:text-foreground"
+							}`}
+						>
+							{v === "calendar" ? "Calendario" : "Lista"}
+						</button>
+					))}
+				</div>
+			</div>
+
+			{view === "list" && (
 			<div className="mt-6 flex flex-wrap gap-6">
 				{(["pending", "confirmed", "cancelled", "rejected"] as const).map(
 					(t) => (
@@ -328,6 +367,18 @@ function BookingsSection({
 					),
 				)}
 			</div>
+			)}
+
+			{view === "calendar" ? (
+				<CalendarView
+					month={month}
+					setMonth={setMonth}
+					rows={rows}
+					loading={loading}
+					nameOf={nameOf}
+					onOpen={setOpenBookingId}
+				/>
+			) : (
 			<section className="mt-6 flex flex-col divide-y divide-[color:var(--gold)]/15">
 				{loading && (
 					<p className="py-12 text-center text-lg text-foreground/70">
@@ -342,9 +393,7 @@ function BookingsSection({
 				{!loading &&
 					rows.map((b) => {
 						const p = profiles[b.user_id];
-						const name = p
-							? `${p.first_name ?? ""} ${p.last_name ?? ""}`.trim() || p.email
-							: b.user_id.slice(0, 8);
+						const name = nameOf(b);
 						return (
 							<article key={b.id} className="py-6">
 								<div className="flex flex-wrap items-baseline justify-between gap-2">
@@ -355,13 +404,26 @@ function BookingsSection({
 											month: "long",
 											year: "numeric",
 										})}
+										{b.arrival_time && (
+											<span className="ml-3 text-lg text-[color:var(--gold)]">
+												{String(b.arrival_time).slice(0, 5)}
+											</span>
+										)}
 									</h2>
-									<button
-										onClick={() => onOpenClient(b.user_id)}
-										className="text-lg tracking-[0.08em] uppercase text-[color:var(--gold)] hover:underline underline-offset-4"
-									>
-										{name} ↗
-									</button>
+									<div className="flex gap-4">
+										<button
+											onClick={() => setOpenBookingId(b.id)}
+											className="text-lg tracking-[0.08em] uppercase text-[color:var(--gold)] hover:underline underline-offset-4"
+										>
+											Dettagli
+										</button>
+										<button
+											onClick={() => onOpenClient(b.user_id)}
+											className="text-lg tracking-[0.08em] uppercase text-foreground/70 hover:text-[color:var(--gold)]"
+										>
+											{name} ↗
+										</button>
+									</div>
 								</div>
 								{p?.email && (
 									<p className="mt-1 text-lg text-foreground/70">{p.email}</p>
@@ -399,7 +461,343 @@ function BookingsSection({
 						);
 					})}
 			</section>
+			)}
+
+			{openBookingId && (
+				<BookingDetailModal
+					bookingId={openBookingId}
+					onClose={() => setOpenBookingId(null)}
+					onOpenClient={(uid) => {
+						setOpenBookingId(null);
+						onOpenClient(uid);
+					}}
+					onChanged={() => void load()}
+				/>
+			)}
 		</>
+	);
+}
+
+function CalendarView({
+	month,
+	setMonth,
+	rows,
+	loading,
+	nameOf,
+	onOpen,
+}: {
+	month: Date;
+	setMonth: (d: Date) => void;
+	rows: Booking[];
+	loading: boolean;
+	nameOf: (b: Booking) => string;
+	onOpen: (id: string) => void;
+}) {
+	const byDate = new Map<string, Booking[]>();
+	for (const b of rows) {
+		const arr = byDate.get(b.date) ?? [];
+		arr.push(b);
+		byDate.set(b.date, arr);
+	}
+	const first = new Date(month.getFullYear(), month.getMonth(), 1);
+	const startWeekday = (first.getDay() + 6) % 7;
+	const daysInMonth = new Date(month.getFullYear(), month.getMonth() + 1, 0).getDate();
+	const cells: (Date | null)[] = [];
+	for (let i = 0; i < startWeekday; i++) cells.push(null);
+	for (let d = 1; d <= daysInMonth; d++)
+		cells.push(new Date(month.getFullYear(), month.getMonth(), d));
+	const today = new Date().toISOString().slice(0, 10);
+	function iso(d: Date) {
+		return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+	}
+	return (
+		<section className="mt-6 border border-[color:var(--gold)]/20 bg-card/40 p-4 md:p-6">
+			<div className="flex items-center justify-between">
+				<button
+					onClick={() => setMonth(new Date(month.getFullYear(), month.getMonth() - 1, 1))}
+					aria-label="Mese precedente"
+					className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-[color:var(--gold)]/40 text-foreground/70 hover:border-[color:var(--gold)] hover:text-[color:var(--gold)]"
+				>
+					<ChevronLeft className="h-5 w-5" strokeWidth={1.25} />
+				</button>
+				<p className="font-serif text-xl italic capitalize md:text-2xl">
+					{month.toLocaleDateString("it-IT", { month: "long", year: "numeric" })}
+				</p>
+				<button
+					onClick={() => setMonth(new Date(month.getFullYear(), month.getMonth() + 1, 1))}
+					aria-label="Mese successivo"
+					className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-[color:var(--gold)]/40 text-foreground/70 hover:border-[color:var(--gold)] hover:text-[color:var(--gold)]"
+				>
+					<ChevronRight className="h-5 w-5" strokeWidth={1.25} />
+				</button>
+			</div>
+			<div className="mt-4 grid grid-cols-7 gap-1 text-center text-[0.6rem] tracking-[0.35em] uppercase text-foreground/60">
+				{["Lun", "Mar", "Mer", "Gio", "Ven", "Sab", "Dom"].map((d) => (
+					<div key={d} className="pb-2">{d}</div>
+				))}
+			</div>
+			<div className="grid grid-cols-7 gap-1">
+				{cells.map((d, i) => {
+					if (!d) return <div key={i} className="min-h-24" />;
+					const day = iso(d);
+					const list = byDate.get(day) ?? [];
+					const isToday = day === today;
+					return (
+						<div
+							key={i}
+							className={`min-h-24 border p-1.5 text-left ${
+								isToday
+									? "border-[color:var(--gold)] bg-[color:var(--gold)]/5"
+									: "border-[color:var(--gold)]/15"
+							}`}
+						>
+							<div className="mb-1 font-serif text-sm text-foreground/80">
+								{d.getDate()}
+							</div>
+							<div className="flex flex-col gap-1">
+								{list.map((b) => (
+									<button
+										key={b.id}
+										onClick={() => onOpen(b.id)}
+										className={`truncate px-1.5 py-1 text-left text-[11px] leading-tight transition-colors ${
+											b.status === "confirmed"
+												? "bg-[color:var(--gold)] text-background hover:opacity-90"
+												: "border border-[color:var(--gold)]/50 text-[color:var(--gold)] hover:bg-[color:var(--gold)]/10"
+										}`}
+										title={`${b.arrival_time ? String(b.arrival_time).slice(0, 5) + " · " : ""}${nameOf(b)}`}
+									>
+										{b.arrival_time && (
+											<span className="font-medium">{String(b.arrival_time).slice(0, 5)} </span>
+										)}
+										{nameOf(b)}
+									</button>
+								))}
+							</div>
+						</div>
+					);
+				})}
+			</div>
+			{loading && (
+				<p className="mt-4 text-center text-sm text-foreground/60">Caricamento…</p>
+			)}
+			<div className="mt-4 flex flex-wrap items-center justify-center gap-4 border-t border-[color:var(--gold)]/15 pt-3 text-[0.6rem] tracking-[0.3em] uppercase text-foreground/60">
+				<span className="inline-flex items-center gap-2">
+					<span className="h-2 w-4 bg-[color:var(--gold)]" /> Confermato
+				</span>
+				<span className="inline-flex items-center gap-2">
+					<span className="h-2 w-4 border border-[color:var(--gold)]/50" /> In attesa
+				</span>
+			</div>
+		</section>
+	);
+}
+
+function BookingDetailModal({
+	bookingId,
+	onClose,
+	onOpenClient,
+	onChanged,
+}: {
+	bookingId: string;
+	onClose: () => void;
+	onOpenClient: (userId: string) => void;
+	onChanged: () => void;
+}) {
+	const [booking, setBooking] = useState<Booking | null>(null);
+	const [profile, setProfile] = useState<Profile | null>(null);
+	const [quest, setQuest] = useState<Questionnaire | null>(null);
+	const [loading, setLoading] = useState(true);
+	const [acting, setActing] = useState(false);
+
+	useEffect(() => {
+		(async () => {
+			setLoading(true);
+			const { data: b } = await supabase
+				.from("bookings")
+				.select("*")
+				.eq("id", bookingId)
+				.maybeSingle();
+			setBooking((b ?? null) as Booking | null);
+			if (b) {
+				const [{ data: p }, { data: q }] = await Promise.all([
+					supabase
+						.from("profiles")
+						.select("id,email,first_name,last_name,phone,instagram,created_at")
+						.eq("id", b.user_id)
+						.maybeSingle(),
+					supabase
+						.from("questionnaires")
+						.select("*")
+						.eq("user_id", b.user_id)
+						.maybeSingle(),
+				]);
+				setProfile((p ?? null) as Profile | null);
+				setQuest((q ?? null) as Questionnaire | null);
+			}
+			setLoading(false);
+		})();
+	}, [bookingId]);
+
+	async function act(status: "confirmed" | "rejected" | "cancelled") {
+		if (!booking) return;
+		setActing(true);
+		const { error } = await supabase
+			.from("bookings")
+			.update({ status })
+			.eq("id", booking.id);
+		setActing(false);
+		if (error) return toast.error(error.message);
+		notifyBookingDecision({ data: { id: booking.id, status } }).catch(() => {});
+		toast.success("Aggiornato");
+		onChanged();
+		onClose();
+	}
+
+	const name = profile
+		? `${profile.first_name ?? ""} ${profile.last_name ?? ""}`.trim() ||
+			profile.email ||
+			"—"
+		: "—";
+
+	return (
+		<div
+			className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-black/70 p-4 md:p-8"
+			onClick={onClose}
+		>
+			<div
+				className="relative w-full max-w-2xl bg-background text-foreground shadow-2xl"
+				onClick={(e) => e.stopPropagation()}
+			>
+				<button
+					onClick={onClose}
+					aria-label="Chiudi"
+					className="absolute right-3 top-3 inline-flex h-9 w-9 items-center justify-center text-foreground/60 hover:text-[color:var(--gold)]"
+				>
+					<X className="h-5 w-5" />
+				</button>
+				{loading || !booking ? (
+					<p className="p-12 text-center text-foreground/70">Caricamento…</p>
+				) : (
+					<div className="p-6 md:p-8">
+						<p className="text-[0.6rem] tracking-[0.5em] uppercase text-[color:var(--gold)]">
+							Appuntamento · {STATUS_LABEL[booking.status] ?? booking.status}
+						</p>
+						<h2 className="mt-2 font-serif text-2xl md:text-3xl">
+							{new Date(booking.date).toLocaleDateString("it-IT", {
+								weekday: "long",
+								day: "numeric",
+								month: "long",
+								year: "numeric",
+							})}
+							{booking.arrival_time && (
+								<span className="ml-3 text-[color:var(--gold)]">
+									{String(booking.arrival_time).slice(0, 5)}
+								</span>
+							)}
+						</h2>
+						{booking.notes && (
+							<p className="mt-3 italic text-foreground/70">"{booking.notes}"</p>
+						)}
+
+						<div className="mt-6 border-t border-[color:var(--gold)]/20 pt-5">
+							<div className="flex flex-wrap items-baseline justify-between gap-2">
+								<h3 className="font-serif text-xl">{name}</h3>
+								<button
+									onClick={() => onOpenClient(booking.user_id)}
+									className="text-sm tracking-[0.08em] uppercase text-[color:var(--gold)] hover:underline"
+								>
+									Scheda cliente ↗
+								</button>
+							</div>
+							<dl className="mt-3 grid gap-2 text-base sm:grid-cols-2">
+								{profile?.email && <Info label="Email" value={profile.email} />}
+								{profile?.phone && <Info label="Telefono" value={profile.phone} />}
+								{profile?.instagram && (
+									<Info label="Instagram" value={profile.instagram} />
+								)}
+							</dl>
+						</div>
+
+						<div className="mt-6 border-t border-[color:var(--gold)]/20 pt-5">
+							<h3 className="font-serif text-xl text-[color:var(--gold)]">
+								Questionario
+							</h3>
+							{!quest ? (
+								<p className="mt-2 italic text-foreground/70">
+									Non ancora compilato.
+								</p>
+							) : (
+								<dl className="mt-3 grid gap-2 text-base sm:grid-cols-2">
+									<Info label="Tipo di capello" value={quest.hair_type} />
+									<Info label="Lunghezza" value={quest.hair_length} />
+									<Info label="Colore" value={quest.hair_color} />
+									{quest.treatments && (
+										<Info label="Trattamenti" value={quest.treatments} />
+									)}
+									{quest.allergies && (
+										<Info label="Allergie" value={quest.allergies} />
+									)}
+									<div className="sm:col-span-2">
+										<Info label="Obiettivi" value={quest.goals} />
+									</div>
+									{quest.inspiration && (
+										<div className="sm:col-span-2">
+											<Info label="Ispirazione" value={quest.inspiration} />
+										</div>
+									)}
+									{quest.additional && (
+										<div className="sm:col-span-2">
+											<Info label="Note aggiuntive" value={quest.additional} />
+										</div>
+									)}
+									{quest.drink_preference && (
+										<Info
+											label="Bevanda preferita"
+											value={quest.drink_preference}
+										/>
+									)}
+									{quest.music_taste && (
+										<div className="sm:col-span-2">
+											<Info label="Musica" value={quest.music_taste} />
+										</div>
+									)}
+								</dl>
+							)}
+						</div>
+
+						<div className="mt-8 flex flex-wrap gap-3 border-t border-[color:var(--gold)]/20 pt-5">
+							{booking.status === "pending" && (
+								<>
+									<button
+										onClick={() => act("confirmed")}
+										disabled={acting}
+										className="inline-flex h-11 items-center justify-center bg-[color:var(--gold)] px-6 text-sm tracking-[0.15em] uppercase text-background hover:opacity-90 disabled:opacity-50"
+									>
+										Conferma
+									</button>
+									<button
+										onClick={() => act("rejected")}
+										disabled={acting}
+										className="inline-flex h-11 items-center justify-center brand-frame px-6 text-sm tracking-[0.15em] uppercase text-[color:var(--gold)] hover:bg-[color:var(--gold)]/10 disabled:opacity-50"
+									>
+										Rifiuta
+									</button>
+								</>
+							)}
+							{booking.status === "confirmed" && (
+								<button
+									onClick={() => act("cancelled")}
+									disabled={acting}
+									className="inline-flex h-11 items-center justify-center border border-[color:var(--gold)]/40 px-6 text-sm tracking-[0.15em] uppercase text-foreground/80 hover:text-[color:var(--gold)] disabled:opacity-50"
+								>
+									Annulla appuntamento
+								</button>
+							)}
+						</div>
+					</div>
+				)}
+			</div>
+		</div>
 	);
 }
 
