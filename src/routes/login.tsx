@@ -51,9 +51,12 @@ function LoginPage() {
 			navigate({ to: "/dashboard" });
 		} else {
 			// Signup is gated: email must have an approved access request
-			const { data: statusData } = await supabase.rpc("check_access_email_status", {
-				_email: parsed.data.email,
-			});
+			const { data: statusData } = await supabase.rpc(
+				"check_access_email_status",
+				{
+					_email: parsed.data.email,
+				},
+			);
 			const status = (statusData as string | null) ?? "none";
 			if (status === "account_exists") {
 				setLoading(false);
@@ -63,7 +66,9 @@ function LoginPage() {
 			}
 			if (status === "pending") {
 				setLoading(false);
-				toast.error("La tua richiesta è in valutazione. Ti scriveremo appena approvata.");
+				toast.error(
+					"La tua richiesta è in valutazione. Ti scriveremo appena approvata.",
+				);
 				return;
 			}
 			if (status === "rejected" || status === "none") {
@@ -94,7 +99,7 @@ function LoginPage() {
 	}
 
 	return (
-		<main className="relative min-h-screen overflow-hidden bg-background text-foreground">
+		<main className="relative min-h-screen overflow-visible lg:overflow-hidden bg-background text-foreground">
 			{/* warm gold vignette */}
 			<div className="vignette pointer-events-none absolute inset-0" />
 			{/* subtle ornamental gold lines top/bottom */}
@@ -109,7 +114,7 @@ function LoginPage() {
 						className="group inline-flex items-center gap-3 self-start text-[0.6rem] tracking-[0.5em] uppercase text-muted-foreground transition-colors hover:text-[color:var(--gold)]"
 					>
 						<BackArrow />
-						Indietro
+						<span className="hidden md:inline">Indietro</span>
 					</Link>
 
 					<div className="flex flex-col items-center text-center lg:items-start lg:text-left">
@@ -121,7 +126,7 @@ function LoginPage() {
 				</aside>
 
 				{/* RIGHT — form panel */}
-				<section className="flex flex-col justify-center px-8 py-10 lg:px-14 lg:py-16">
+				<section className="flex flex-col justify-center overflow-y-auto hide-scrollbar px-8 py-10 lg:overflow-visible lg:px-14 lg:py-16">
 					<div className="mx-auto w-full max-w-sm">
 						{/* ornamental divider */}
 						<div className="flex items-center gap-3 text-[color:var(--gold)]/60">

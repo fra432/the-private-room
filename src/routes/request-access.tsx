@@ -99,22 +99,22 @@ function RequestAccessPage() {
 	}
 
 	return (
-		<main className="relative h-screen overflow-hidden bg-background text-foreground">
+		<main className="relative min-h-screen overflow-visible lg:overflow-hidden bg-background text-foreground">
 			{/* warm gold vignette */}
 			<div className="vignette pointer-events-none absolute inset-0" />
 			{/* subtle ornamental gold lines top/bottom */}
 			<div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[color:var(--gold)]/40 to-transparent" />
 			<div className="pointer-events-none absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-[color:var(--gold)]/30 to-transparent" />
 
-			<div className="relative mx-auto grid h-screen w-full max-w-6xl grid-cols-1 lg:grid-cols-2">
+			<div className="relative mx-auto grid min-h-screen w-full max-w-6xl grid-cols-1 lg:grid-cols-2">
 				{/* LEFT — brand panel */}
-				<aside className="relative flex flex-col justify-between px-8 py-10 lg:border-r lg:border-[color:var(--gold)]/15 lg:px-14 lg:py-16 h-screen overflow-hidden">
+				<aside className="relative flex flex-col justify-between px-8 py-10 lg:border-r lg:border-[color:var(--gold)]/15 lg:px-14 lg:py-16 lg:h-screen overflow-hidden">
 					<Link
 						to="/welcome"
 						className="group inline-flex items-center gap-3 self-start text-[0.6rem] tracking-[0.5em] uppercase text-muted-foreground transition-colors hover:text-[color:var(--gold)]"
 					>
 						<BackArrow />
-						Indietro
+						<span className="hidden md:inline">Indietro</span>
 					</Link>
 
 					<div className="flex flex-col items-center text-center lg:items-start lg:text-left">
@@ -127,7 +127,7 @@ function RequestAccessPage() {
 				</aside>
 
 				{/* RIGHT — form panel */}
-				<section className="flex flex-col justify-start px-8 py-10 lg:px-14 lg:py-16 overflow-y-auto hide-scrollbar">
+				<section className="flex flex-col justify-start overflow-y-auto hide-scrollbar px-8 py-10 lg:overflow-visible lg:px-14 lg:py-16">
 					<div className="mx-auto w-full max-w-sm">
 						{/* ornamental divider */}
 						<div className="flex items-center gap-3 text-[color:var(--gold)]/60">
