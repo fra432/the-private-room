@@ -92,7 +92,7 @@ function DashboardPage() {
 					<img
 						src="/room-bg.png"
 						alt="The Room — interno del salone"
-						className="absolute inset-0 h-full w-full object-cover object-[center_35%] brightness-110"
+						className="absolute inset-0 h-full w-full object-cover object-[center_20%] md:object-center brightness-110"
 						draggable={false}
 					/>
 					{/* gradient overlays: scurisce in alto per la nav, sfuma in basso nel background */}
