@@ -29,6 +29,7 @@ type Booking = {
 	id: string;
 	user_id: string;
 	date: string;
+	arrival_time: string | null;
 	status: "pending" | "confirmed" | "cancelled" | "rejected";
 	notes: string | null;
 	created_at: string;
@@ -81,7 +82,7 @@ function AdminPage() {
 	const { isAdmin, loading: authLoading } = useAuth();
 	const [section, setSection] = useState<
 		"requests" | "bookings" | "availability" | "clients"
-	>("requests");
+	>("bookings");
 	const [selectedClient, setSelectedClient] = useState<string | null>(null);
 
 	if (!authLoading && !isAdmin) return <Navigate to="/dashboard" />;
@@ -106,8 +107,8 @@ function AdminPage() {
 				<nav className="mt-8 flex flex-wrap gap-x-6 gap-y-3 border-b border-[color:var(--gold)]/20 pb-4">
 					{(
 						[
-							["requests", "Richieste accesso"],
 							["bookings", "Prenotazioni"],
+							["requests", "Richieste accesso"],
 							["availability", "Disponibilità"],
 							["clients", "Clienti"],
 						] as const
