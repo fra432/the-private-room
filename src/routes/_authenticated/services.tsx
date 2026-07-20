@@ -95,7 +95,7 @@ const SERVICES: Service[] = [
 		tagline: "Lunghezza & volume",
 		description:
 			"Extension di alta qualità per lunghezza, volume o effetti di colore. Selezione e applicazione su misura.",
-		price: "Da definire in salone",
+		price: "Da consultare",
 	},
 	{
 		num: "10",
@@ -103,7 +103,7 @@ const SERVICES: Service[] = [
 		tagline: "Liscio duraturo",
 		description:
 			"Trattamento liscio personalizzato in base al tipo di capello. Preventivo definito in consulenza.",
-		price: "Da definire in salone",
+		price: "Da consultare",
 	},
 	{
 		num: "11",
@@ -111,7 +111,7 @@ const SERVICES: Service[] = [
 		tagline: "Il tuo giorno",
 		description:
 			"Un percorso dedicato: consulenza, prova, trucco e acconciatura per il giorno più importante. Contattaci per costruire insieme il servizio su misura.",
-		price: "Da definire",
+		price: "Da consultare",
 	},
 ];
 
