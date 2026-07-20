@@ -101,7 +101,7 @@ function LoginPage() {
 	return (
 		<main className="relative min-h-screen overflow-visible lg:overflow-hidden bg-background text-foreground">
 			{/* warm gold vignette */}
-			<div className="vignette pointer-events-none absolute inset-0" />
+			<div className="vignette pointer-events-none absolute inset-0 hidden md:block" />
 			{/* subtle ornamental gold lines top/bottom */}
 			<div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[color:var(--gold)]/40 to-transparent" />
 			<div className="pointer-events-none absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-[color:var(--gold)]/30 to-transparent" />
