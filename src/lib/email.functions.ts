@@ -219,6 +219,7 @@ export const notifyBookingDecision = createServerFn({ method: "POST" })
 			.object({
 				id: z.string().uuid(),
 				status: z.enum(["confirmed", "rejected", "cancelled"]),
+				reason: z.string().optional(),
 			})
 			.parse(d),
 	)
@@ -228,6 +229,10 @@ export const notifyBookingDecision = createServerFn({ method: "POST" })
 		const { booking, profile } = res;
 		const first = profile.first_name ?? "";
 		const dateStr = fmtDate(booking.date);
+		console.log("[email] notifyBookingDecision:", {
+			status: data.status,
+			reason: data.reason,
+		});
 		if (data.status === "confirmed") {
 			return sendMail({
 				to: profile.email!,
@@ -260,7 +265,7 @@ export const notifyBookingDecision = createServerFn({ method: "POST" })
 			html: shell(
 				`Ciao ${first}`.trim(),
 				`Il tuo appuntamento del ${dateStr} è stato annullato.`,
-				"<p>Puoi prenotare una nuova data dall'area riservata quando vuoi.</p>",
+				`<p>Puoi prenotare una nuova data dall'area riservata quando vuoi.</p>${data.reason ? `<p style="margin-top:12px"><strong>Motivo:</strong> ${data.reason}</p>` : ""}<p style="margin-top:16px"><a href="https://www.inside-theroom.it/book" style="color:#c9a243">Prenota un nuovo appuntamento</a></p>`,
 				{ label: "Prenota", url: "https://www.inside-theroom.it/book" },
 			),
 		});

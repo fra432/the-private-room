@@ -6,7 +6,10 @@ import { BackArrow } from "@/components/back-arrow";
 import { BrandLogo } from "@/components/brand-logo";
 import { useAuth } from "@/hooks/use-auth";
 import { supabase } from "@/integrations/supabase/client";
-import { notifyAccessRequestDecision, notifyBookingDecision } from "@/lib/email.functions";
+import {
+	notifyAccessRequestDecision,
+	notifyBookingDecision,
+} from "@/lib/email.functions";
 
 export const Route = createFileRoute("/_authenticated/admin")({
 	head: () => ({ meta: [{ title: "Admin — THE ROOM" }] }),
@@ -282,7 +285,10 @@ function BookingsSection({
 			const start = `${month.getFullYear()}-${String(month.getMonth() + 1).padStart(2, "0")}-01`;
 			const endDate = new Date(month.getFullYear(), month.getMonth() + 1, 0);
 			const end = `${endDate.getFullYear()}-${String(endDate.getMonth() + 1).padStart(2, "0")}-${String(endDate.getDate()).padStart(2, "0")}`;
-			q = q.gte("date", start).lte("date", end).in("status", ["pending", "confirmed"]);
+			q = q
+				.gte("date", start)
+				.lte("date", end)
+				.in("status", ["pending", "confirmed"]);
 		}
 		const { data, error } = await q.order("date", { ascending: true });
 		if (error) {
@@ -315,13 +321,19 @@ function BookingsSection({
 	async function setStatus(
 		id: string,
 		status: "confirmed" | "rejected" | "cancelled",
+		reason?: string,
 	) {
 		const { error } = await supabase
 			.from("bookings")
-			.update({ status })
+			.update({
+				status,
+				...(status === "cancelled" && reason
+					? { cancellation_reason: reason }
+					: {}),
+			})
 			.eq("id", id);
 		if (error) return toast.error(error.message);
-		notifyBookingDecision({ data: { id, status } }).catch(() => {});
+		notifyBookingDecision({ data: { id, status, reason } }).catch(() => {});
 		toast.success("Aggiornato");
 		void load();
 	}
@@ -354,19 +366,19 @@ function BookingsSection({
 			</div>
 
 			{view === "list" && (
-			<div className="mt-6 flex flex-wrap gap-6">
-				{(["pending", "confirmed", "cancelled", "rejected"] as const).map(
-					(t) => (
-						<button
-							key={t}
-							onClick={() => setTab(t)}
-							className={`text-lg tracking-[0.08em] uppercase ${tab === t ? "text-foreground" : "text-foreground/70 hover:text-foreground"}`}
-						>
-							{STATUS_LABEL[t]}
-						</button>
-					),
-				)}
-			</div>
+				<div className="mt-6 flex flex-wrap gap-6">
+					{(["pending", "confirmed", "cancelled", "rejected"] as const).map(
+						(t) => (
+							<button
+								key={t}
+								onClick={() => setTab(t)}
+								className={`text-lg tracking-[0.08em] uppercase ${tab === t ? "text-foreground" : "text-foreground/70 hover:text-foreground"}`}
+							>
+								{STATUS_LABEL[t]}
+							</button>
+						),
+					)}
+				</div>
 			)}
 
 			{view === "calendar" ? (
@@ -379,88 +391,88 @@ function BookingsSection({
 					onOpen={setOpenBookingId}
 				/>
 			) : (
-			<section className="mt-6 flex flex-col divide-y divide-[color:var(--gold)]/15">
-				{loading && (
-					<p className="py-12 text-center text-lg text-foreground/70">
-						Caricamento…
-					</p>
-				)}
-				{!loading && rows.length === 0 && (
-					<p className="py-12 text-center text-lg text-foreground/70">
-						Nessuna prenotazione {STATUS_LABEL[tab].toLowerCase()}.
-					</p>
-				)}
-				{!loading &&
-					rows.map((b) => {
-						const p = profiles[b.user_id];
-						const name = nameOf(b);
-						return (
-							<article key={b.id} className="py-6">
-								<div className="flex flex-wrap items-baseline justify-between gap-2">
-									<h2 className="font-serif text-xl">
-										{new Date(b.date).toLocaleDateString("it-IT", {
-											weekday: "long",
-											day: "numeric",
-											month: "long",
-											year: "numeric",
-										})}
-										{b.arrival_time && (
-											<span className="ml-3 text-lg text-[color:var(--gold)]">
-												{String(b.arrival_time).slice(0, 5)}
-											</span>
-										)}
-									</h2>
-									<div className="flex gap-4">
-										<button
-											onClick={() => setOpenBookingId(b.id)}
-											className="text-lg tracking-[0.08em] uppercase text-[color:var(--gold)] hover:underline underline-offset-4"
-										>
-											Dettagli
-										</button>
-										<button
-											onClick={() => onOpenClient(b.user_id)}
-											className="text-lg tracking-[0.08em] uppercase text-foreground/70 hover:text-[color:var(--gold)]"
-										>
-											{name} ↗
-										</button>
+				<section className="mt-6 flex flex-col divide-y divide-[color:var(--gold)]/15">
+					{loading && (
+						<p className="py-12 text-center text-lg text-foreground/70">
+							Caricamento…
+						</p>
+					)}
+					{!loading && rows.length === 0 && (
+						<p className="py-12 text-center text-lg text-foreground/70">
+							Nessuna prenotazione {STATUS_LABEL[tab].toLowerCase()}.
+						</p>
+					)}
+					{!loading &&
+						rows.map((b) => {
+							const p = profiles[b.user_id];
+							const name = nameOf(b);
+							return (
+								<article key={b.id} className="py-6">
+									<div className="flex flex-wrap items-baseline justify-between gap-2">
+										<h2 className="font-serif text-xl">
+											{new Date(b.date).toLocaleDateString("it-IT", {
+												weekday: "long",
+												day: "numeric",
+												month: "long",
+												year: "numeric",
+											})}
+											{b.arrival_time && (
+												<span className="ml-3 text-lg text-[color:var(--gold)]">
+													{String(b.arrival_time).slice(0, 5)}
+												</span>
+											)}
+										</h2>
+										<div className="flex gap-4">
+											<button
+												onClick={() => setOpenBookingId(b.id)}
+												className="text-lg tracking-[0.08em] uppercase text-[color:var(--gold)] hover:underline underline-offset-4"
+											>
+												Dettagli
+											</button>
+											<button
+												onClick={() => onOpenClient(b.user_id)}
+												className="text-lg tracking-[0.08em] uppercase text-foreground/70 hover:text-[color:var(--gold)]"
+											>
+												{name} ↗
+											</button>
+										</div>
 									</div>
-								</div>
-								{p?.email && (
-									<p className="mt-1 text-lg text-foreground/70">{p.email}</p>
-								)}
-								{b.notes && (
-									<p className="mt-3 text-lg text-foreground/70 italic">
-										"{b.notes}"
-									</p>
-								)}
-								{tab === "pending" && (
-									<div className="mt-5 flex gap-3">
+									{p?.email && (
+										<p className="mt-1 text-lg text-foreground/70">{p.email}</p>
+									)}
+									{b.notes && (
+										<p className="mt-3 text-lg text-foreground/70 italic">
+											"{b.notes}"
+										</p>
+									)}
+									{tab === "pending" && (
+										<div className="mt-5 flex gap-3">
+											<button
+												onClick={() => setStatus(b.id, "confirmed")}
+												className="inline-flex h-10 items-center justify-center bg-[color:var(--gold)] px-6 text-lg tracking-[0.08em] uppercase text-background hover:opacity-90"
+											>
+												Conferma
+											</button>
+											<button
+												onClick={() => setStatus(b.id, "rejected")}
+												className="inline-flex h-10 items-center justify-center brand-frame px-6 text-lg tracking-[0.08em] uppercase text-[color:var(--gold)] hover:bg-[color:var(--gold)]/10"
+											>
+												Rifiuta
+											</button>
+										</div>
+									)}
+									{tab === "confirmed" && (
 										<button
-											onClick={() => setStatus(b.id, "confirmed")}
-											className="inline-flex h-10 items-center justify-center bg-[color:var(--gold)] px-6 text-lg tracking-[0.08em] uppercase text-background hover:opacity-90"
+											onClick={() => setStatus(b.id, "cancelled")}
+											className="mt-5 text-lg tracking-[0.08em] uppercase text-foreground/70 hover:text-[color:var(--gold)]"
 										>
-											Conferma
+											Annulla
 										</button>
-										<button
-											onClick={() => setStatus(b.id, "rejected")}
-											className="inline-flex h-10 items-center justify-center brand-frame px-6 text-lg tracking-[0.08em] uppercase text-[color:var(--gold)] hover:bg-[color:var(--gold)]/10"
-										>
-											Rifiuta
-										</button>
-									</div>
-								)}
-								{tab === "confirmed" && (
-									<button
-										onClick={() => setStatus(b.id, "cancelled")}
-										className="mt-5 text-lg tracking-[0.08em] uppercase text-foreground/70 hover:text-[color:var(--gold)]"
-									>
-										Annulla
-									</button>
-								)}
-							</article>
-						);
-					})}
-			</section>
+									)}
+								</article>
+							);
+						})}
+				</section>
 			)}
 
 			{openBookingId && (
@@ -501,7 +513,11 @@ function CalendarView({
 	}
 	const first = new Date(month.getFullYear(), month.getMonth(), 1);
 	const startWeekday = (first.getDay() + 6) % 7;
-	const daysInMonth = new Date(month.getFullYear(), month.getMonth() + 1, 0).getDate();
+	const daysInMonth = new Date(
+		month.getFullYear(),
+		month.getMonth() + 1,
+		0,
+	).getDate();
 	const cells: (Date | null)[] = [];
 	for (let i = 0; i < startWeekday; i++) cells.push(null);
 	for (let d = 1; d <= daysInMonth; d++)
@@ -514,17 +530,24 @@ function CalendarView({
 		<section className="mt-6 border border-[color:var(--gold)]/20 bg-card/40 p-4 md:p-6">
 			<div className="flex items-center justify-between">
 				<button
-					onClick={() => setMonth(new Date(month.getFullYear(), month.getMonth() - 1, 1))}
+					onClick={() =>
+						setMonth(new Date(month.getFullYear(), month.getMonth() - 1, 1))
+					}
 					aria-label="Mese precedente"
 					className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-[color:var(--gold)]/40 text-foreground/70 hover:border-[color:var(--gold)] hover:text-[color:var(--gold)]"
 				>
 					<ChevronLeft className="h-5 w-5" strokeWidth={1.25} />
 				</button>
 				<p className="font-serif text-xl italic capitalize md:text-2xl">
-					{month.toLocaleDateString("it-IT", { month: "long", year: "numeric" })}
+					{month.toLocaleDateString("it-IT", {
+						month: "long",
+						year: "numeric",
+					})}
 				</p>
 				<button
-					onClick={() => setMonth(new Date(month.getFullYear(), month.getMonth() + 1, 1))}
+					onClick={() =>
+						setMonth(new Date(month.getFullYear(), month.getMonth() + 1, 1))
+					}
 					aria-label="Mese successivo"
 					className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-[color:var(--gold)]/40 text-foreground/70 hover:border-[color:var(--gold)] hover:text-[color:var(--gold)]"
 				>
@@ -533,7 +556,9 @@ function CalendarView({
 			</div>
 			<div className="mt-4 grid grid-cols-7 gap-1 text-center text-[0.6rem] tracking-[0.35em] uppercase text-foreground/60">
 				{["Lun", "Mar", "Mer", "Gio", "Ven", "Sab", "Dom"].map((d) => (
-					<div key={d} className="pb-2">{d}</div>
+					<div key={d} className="pb-2">
+						{d}
+					</div>
 				))}
 			</div>
 			<div className="grid grid-cols-7 gap-1">
@@ -567,7 +592,9 @@ function CalendarView({
 										title={`${b.arrival_time ? String(b.arrival_time).slice(0, 5) + " · " : ""}${nameOf(b)}`}
 									>
 										{b.arrival_time && (
-											<span className="font-medium">{String(b.arrival_time).slice(0, 5)} </span>
+											<span className="font-medium">
+												{String(b.arrival_time).slice(0, 5)}{" "}
+											</span>
 										)}
 										{nameOf(b)}
 									</button>
@@ -578,14 +605,17 @@ function CalendarView({
 				})}
 			</div>
 			{loading && (
-				<p className="mt-4 text-center text-sm text-foreground/60">Caricamento…</p>
+				<p className="mt-4 text-center text-sm text-foreground/60">
+					Caricamento…
+				</p>
 			)}
 			<div className="mt-4 flex flex-wrap items-center justify-center gap-4 border-t border-[color:var(--gold)]/15 pt-3 text-[0.6rem] tracking-[0.3em] uppercase text-foreground/60">
 				<span className="inline-flex items-center gap-2">
 					<span className="h-2 w-4 bg-[color:var(--gold)]" /> Confermato
 				</span>
 				<span className="inline-flex items-center gap-2">
-					<span className="h-2 w-4 border border-[color:var(--gold)]/50" /> In attesa
+					<span className="h-2 w-4 border border-[color:var(--gold)]/50" /> In
+					attesa
 				</span>
 			</div>
 		</section>
@@ -608,6 +638,8 @@ function BookingDetailModal({
 	const [quest, setQuest] = useState<Questionnaire | null>(null);
 	const [loading, setLoading] = useState(true);
 	const [acting, setActing] = useState(false);
+	const [cancellationReason, setCancellationReason] = useState("");
+	const [showCancelConfirm, setShowCancelConfirm] = useState(false);
 
 	useEffect(() => {
 		(async () => {
@@ -643,11 +675,22 @@ function BookingDetailModal({
 		setActing(true);
 		const { error } = await supabase
 			.from("bookings")
-			.update({ status })
+			.update({
+				status,
+				...(status === "cancelled" && cancellationReason
+					? { cancellation_reason: cancellationReason }
+					: {}),
+			})
 			.eq("id", booking.id);
 		setActing(false);
 		if (error) return toast.error(error.message);
-		notifyBookingDecision({ data: { id: booking.id, status } }).catch(() => {});
+		console.log("[admin] Sending email:", {
+			status,
+			reason: cancellationReason,
+		});
+		notifyBookingDecision({
+			data: { id: booking.id, status, reason: cancellationReason },
+		}).catch(() => {});
 		toast.success("Aggiornato");
 		onChanged();
 		onClose();
@@ -696,7 +739,9 @@ function BookingDetailModal({
 							)}
 						</h2>
 						{booking.notes && (
-							<p className="mt-3 italic text-foreground/70">"{booking.notes}"</p>
+							<p className="mt-3 italic text-foreground/70">
+								"{booking.notes}"
+							</p>
 						)}
 
 						<div className="mt-6 border-t border-[color:var(--gold)]/20 pt-5">
@@ -711,7 +756,9 @@ function BookingDetailModal({
 							</div>
 							<dl className="mt-3 grid gap-2 text-base sm:grid-cols-2">
 								{profile?.email && <Info label="Email" value={profile.email} />}
-								{profile?.phone && <Info label="Telefono" value={profile.phone} />}
+								{profile?.phone && (
+									<Info label="Telefono" value={profile.phone} />
+								)}
 								{profile?.instagram && (
 									<Info label="Instagram" value={profile.instagram} />
 								)}
@@ -785,18 +832,100 @@ function BookingDetailModal({
 								</>
 							)}
 							{booking.status === "confirmed" && (
-								<button
-									onClick={() => act("cancelled")}
-									disabled={acting}
-									className="inline-flex h-11 items-center justify-center border border-[color:var(--gold)]/40 px-6 text-sm tracking-[0.15em] uppercase text-foreground/80 hover:text-[color:var(--gold)] disabled:opacity-50"
-								>
-									Annulla appuntamento
-								</button>
+								<div className="mt-4 space-y-3">
+									<label className="flex flex-col gap-2">
+										<span className="text-[0.7rem] tracking-[0.5em] uppercase text-foreground/60 font-medium">
+											Motivo annullamento (opzionale)
+										</span>
+										<textarea
+											value={cancellationReason}
+											onChange={(e) =>
+												setCancellationReason(e.currentTarget.value)
+											}
+											placeholder="Scrivi il motivo dell'annullamento..."
+											rows={3}
+											className="w-full bg-transparent border border-[color:var(--gold)]/40 p-3 font-serif text-base text-foreground placeholder:text-foreground/40 focus:border-[color:var(--gold)] focus:outline-none transition-colors resize-none"
+										/>
+									</label>
+									<button
+										onClick={() => setShowCancelConfirm(true)}
+										disabled={acting}
+										className="inline-flex h-11 items-center justify-center border border-[color:var(--gold)]/40 px-6 text-sm tracking-[0.15em] uppercase text-foreground/80 hover:text-[color:var(--gold)] disabled:opacity-50"
+									>
+										Annulla appuntamento
+									</button>
+								</div>
 							)}
 						</div>
 					</div>
 				)}
 			</div>
+
+			{/* Cancellation Confirmation Dialog */}
+			{showCancelConfirm && booking && (
+				<div
+					className="fixed inset-0 z-[60] flex items-center justify-center bg-black/70 p-4"
+					onClick={() => setShowCancelConfirm(false)}
+				>
+					<div
+						className="relative w-full max-w-md bg-background text-foreground shadow-2xl p-6"
+						onClick={(e) => e.stopPropagation()}
+					>
+						<h3 className="font-serif text-xl md:text-2xl">
+							Conferma annullamento
+						</h3>
+						<p className="mt-3 text-base text-foreground/70">
+							{new Date(booking.date).toLocaleDateString("it-IT", {
+								weekday: "long",
+								day: "numeric",
+								month: "long",
+								year: "numeric",
+							})}
+							{booking.arrival_time && (
+								<span className="ml-2 text-[color:var(--gold)]">
+									{String(booking.arrival_time).slice(0, 5)}
+								</span>
+							)}
+						</p>
+
+						<div className="mt-4">
+							<label className="flex flex-col gap-2">
+								<span className="text-[0.7rem] tracking-[0.5em] uppercase text-foreground/60 font-medium">
+									Motivo annullamento
+								</span>
+								<textarea
+									onClick={(e) => e.stopPropagation()}
+									value={cancellationReason}
+									onChange={(e) => setCancellationReason(e.currentTarget.value)}
+									placeholder="Scrivi il motivo (facoltativo)..."
+									rows={3}
+									className="w-full bg-transparent border border-[color:var(--gold)]/40 p-3 font-serif text-base text-foreground placeholder:text-foreground/40 focus:border-[color:var(--gold)] focus:outline-none transition-colors resize-none"
+								/>
+							</label>
+						</div>
+
+						<div className="mt-6 flex flex-wrap gap-3">
+							<button
+								onClick={() => {
+									setShowCancelConfirm(false);
+									act("cancelled");
+								}}
+								disabled={acting}
+								className="inline-flex h-11 items-center justify-center bg-[color:var(--gold)]/20 px-6 text-sm tracking-[0.15em] uppercase text-[color:var(--gold)] hover:bg-[color:var(--gold)]/30 disabled:opacity-50"
+							>
+								{acting ? "Annullamento…" : "Conferma annullamento"}
+							</button>
+							<button
+								onClick={() => setShowCancelConfirm(false)}
+								disabled={acting}
+								className="inline-flex h-11 items-center justify-center border border-[color:var(--gold)]/40 px-6 text-sm tracking-[0.15em] uppercase text-foreground/80 hover:text-[color:var(--gold)] disabled:opacity-50"
+							>
+								Annulla
+							</button>
+						</div>
+					</div>
+				</div>
+			)}
 		</div>
 	);
 }
