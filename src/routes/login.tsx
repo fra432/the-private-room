@@ -11,6 +11,7 @@ import { BackArrow } from "@/components/back-arrow";
 import { BrandLogo } from "@/components/brand-logo";
 import { useAuth } from "@/hooks/use-auth";
 import { supabase } from "@/integrations/supabase/client";
+import { sendPasswordReset } from "@/lib/auth.functions";
 
 export const Route = createFileRoute("/login")({
 	head: () => ({ meta: [{ title: "Login — THE ROOM" }] }),
@@ -27,6 +28,9 @@ function LoginPage() {
 	const { session, loading: authLoading } = useAuth();
 	const [mode, setMode] = useState<"login" | "signup">("login");
 	const [loading, setLoading] = useState(false);
+	const [forgotOpen, setForgotOpen] = useState(false);
+	const [forgotEmail, setForgotEmail] = useState("");
+	const [forgotLoading, setForgotLoading] = useState(false);
 
 	if (!authLoading && session) return <Navigate to="/dashboard" />;
 
@@ -184,17 +188,88 @@ function LoginPage() {
 									: "Hai già accesso? Entra"}
 							</button>
 							{mode === "login" && (
-								<Link
-									to="/request-access"
-									className="font-serif italic text-base text-[color:var(--gold-soft)] underline-offset-4 hover:underline"
-								>
-									Richiedi accesso allo studio
-								</Link>
+								<>
+									<button
+										type="button"
+										onClick={() => setForgotOpen(true)}
+										className="text-[0.7rem] tracking-[0.45em] uppercase text-foreground/60 transition-colors hover:text-[color:var(--gold)]"
+									>
+										Password dimenticata?
+									</button>
+									<Link
+										to="/request-access"
+										className="font-serif italic text-base text-[color:var(--gold-soft)] underline-offset-4 hover:underline"
+									>
+										Richiedi accesso allo studio
+									</Link>
+								</>
 							)}
 						</div>
 					</div>
 				</section>
 			</div>
+
+			{forgotOpen && (
+				<div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 px-4">
+					<div className="w-full max-w-md border border-[color:var(--gold)]/40 bg-background p-8">
+						<div className="flex items-center justify-between">
+							<h2 className="font-italiana text-2xl">Recupera la password</h2>
+							<button
+								type="button"
+								onClick={() => setForgotOpen(false)}
+								className="text-foreground/60 hover:text-foreground"
+								aria-label="Chiudi"
+							>
+								✕
+							</button>
+						</div>
+						<p className="mt-3 text-sm text-foreground/70">
+							Inserisci l'email del tuo account. Ti invieremo un link per
+							scegliere una nuova password.
+						</p>
+						<form
+							onSubmit={async (e) => {
+								e.preventDefault();
+								if (!forgotEmail) return;
+								setForgotLoading(true);
+								try {
+									await sendPasswordReset({ data: { email: forgotEmail } });
+									toast.success(
+										"Se l'account esiste, ti abbiamo inviato un'email.",
+									);
+									setForgotOpen(false);
+									setForgotEmail("");
+								} catch {
+									toast.error("Errore. Riprova più tardi.");
+								} finally {
+									setForgotLoading(false);
+								}
+							}}
+							className="mt-6 flex flex-col gap-6"
+						>
+							<label className="flex flex-col gap-2">
+								<span className="text-[0.7rem] tracking-[0.5em] uppercase text-foreground/60">
+									Email
+								</span>
+								<input
+									type="email"
+									required
+									value={forgotEmail}
+									onChange={(e) => setForgotEmail(e.target.value)}
+									className="w-full !bg-transparent border-b border-[color:var(--gold)]/50 pb-3 pt-2 font-serif text-lg text-foreground focus:border-[color:var(--gold)] focus:outline-none"
+								/>
+							</label>
+							<button
+								type="submit"
+								disabled={forgotLoading}
+								className="inline-flex h-12 items-center justify-center border border-[color:var(--gold)] bg-[color:var(--gold)] px-8 text-[0.65rem] tracking-[0.55em] uppercase text-background transition hover:bg-transparent hover:text-[color:var(--gold)] disabled:opacity-50"
+							>
+								{forgotLoading ? "…" : "Invia link"}
+							</button>
+						</form>
+					</div>
+				</div>
+			)}
 		</main>
 	);
 }
