@@ -13,11 +13,11 @@ import { Route as WelcomeRouteImport } from './routes/welcome'
 import { Route as SetPasswordRouteImport } from './routes/set-password'
 import { Route as RequestReceivedRouteImport } from './routes/request-received'
 import { Route as RequestAccessRouteImport } from './routes/request-access'
+import { Route as QuestionnaireRouteImport } from './routes/questionnaire'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as AuthenticatedRouteImport } from './routes/_authenticated'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthenticatedServicesRouteImport } from './routes/_authenticated/services'
-import { Route as AuthenticatedQuestionnaireRouteImport } from './routes/_authenticated/questionnaire'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
 import { Route as AuthenticatedBookRouteImport } from './routes/_authenticated/book'
 import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
@@ -43,6 +43,11 @@ const RequestAccessRoute = RequestAccessRouteImport.update({
   path: '/request-access',
   getParentRoute: () => rootRouteImport,
 } as any)
+const QuestionnaireRoute = QuestionnaireRouteImport.update({
+  id: '/questionnaire',
+  path: '/questionnaire',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const LoginRoute = LoginRouteImport.update({
   id: '/login',
   path: '/login',
@@ -62,12 +67,6 @@ const AuthenticatedServicesRoute = AuthenticatedServicesRouteImport.update({
   path: '/services',
   getParentRoute: () => AuthenticatedRoute,
 } as any)
-const AuthenticatedQuestionnaireRoute =
-  AuthenticatedQuestionnaireRouteImport.update({
-    id: '/questionnaire',
-    path: '/questionnaire',
-    getParentRoute: () => AuthenticatedRoute,
-  } as any)
 const AuthenticatedDashboardRoute = AuthenticatedDashboardRouteImport.update({
   id: '/dashboard',
   path: '/dashboard',
@@ -92,6 +91,7 @@ const AuthenticatedAccountRoute = AuthenticatedAccountRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
+  '/questionnaire': typeof QuestionnaireRoute
   '/request-access': typeof RequestAccessRoute
   '/request-received': typeof RequestReceivedRoute
   '/set-password': typeof SetPasswordRoute
@@ -100,12 +100,12 @@ export interface FileRoutesByFullPath {
   '/admin': typeof AuthenticatedAdminRoute
   '/book': typeof AuthenticatedBookRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
-  '/questionnaire': typeof AuthenticatedQuestionnaireRoute
   '/services': typeof AuthenticatedServicesRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
+  '/questionnaire': typeof QuestionnaireRoute
   '/request-access': typeof RequestAccessRoute
   '/request-received': typeof RequestReceivedRoute
   '/set-password': typeof SetPasswordRoute
@@ -114,7 +114,6 @@ export interface FileRoutesByTo {
   '/admin': typeof AuthenticatedAdminRoute
   '/book': typeof AuthenticatedBookRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
-  '/questionnaire': typeof AuthenticatedQuestionnaireRoute
   '/services': typeof AuthenticatedServicesRoute
 }
 export interface FileRoutesById {
@@ -122,6 +121,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/_authenticated': typeof AuthenticatedRouteWithChildren
   '/login': typeof LoginRoute
+  '/questionnaire': typeof QuestionnaireRoute
   '/request-access': typeof RequestAccessRoute
   '/request-received': typeof RequestReceivedRoute
   '/set-password': typeof SetPasswordRoute
@@ -130,7 +130,6 @@ export interface FileRoutesById {
   '/_authenticated/admin': typeof AuthenticatedAdminRoute
   '/_authenticated/book': typeof AuthenticatedBookRoute
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
-  '/_authenticated/questionnaire': typeof AuthenticatedQuestionnaireRoute
   '/_authenticated/services': typeof AuthenticatedServicesRoute
 }
 export interface FileRouteTypes {
@@ -138,6 +137,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/login'
+    | '/questionnaire'
     | '/request-access'
     | '/request-received'
     | '/set-password'
@@ -146,12 +146,12 @@ export interface FileRouteTypes {
     | '/admin'
     | '/book'
     | '/dashboard'
-    | '/questionnaire'
     | '/services'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/login'
+    | '/questionnaire'
     | '/request-access'
     | '/request-received'
     | '/set-password'
@@ -160,13 +160,13 @@ export interface FileRouteTypes {
     | '/admin'
     | '/book'
     | '/dashboard'
-    | '/questionnaire'
     | '/services'
   id:
     | '__root__'
     | '/'
     | '/_authenticated'
     | '/login'
+    | '/questionnaire'
     | '/request-access'
     | '/request-received'
     | '/set-password'
@@ -175,7 +175,6 @@ export interface FileRouteTypes {
     | '/_authenticated/admin'
     | '/_authenticated/book'
     | '/_authenticated/dashboard'
-    | '/_authenticated/questionnaire'
     | '/_authenticated/services'
   fileRoutesById: FileRoutesById
 }
@@ -183,6 +182,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthenticatedRoute: typeof AuthenticatedRouteWithChildren
   LoginRoute: typeof LoginRoute
+  QuestionnaireRoute: typeof QuestionnaireRoute
   RequestAccessRoute: typeof RequestAccessRoute
   RequestReceivedRoute: typeof RequestReceivedRoute
   SetPasswordRoute: typeof SetPasswordRoute
@@ -219,6 +219,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof RequestAccessRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/questionnaire': {
+      id: '/questionnaire'
+      path: '/questionnaire'
+      fullPath: '/questionnaire'
+      preLoaderRoute: typeof QuestionnaireRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/login': {
       id: '/login'
       path: '/login'
@@ -245,13 +252,6 @@ declare module '@tanstack/react-router' {
       path: '/services'
       fullPath: '/services'
       preLoaderRoute: typeof AuthenticatedServicesRouteImport
-      parentRoute: typeof AuthenticatedRoute
-    }
-    '/_authenticated/questionnaire': {
-      id: '/_authenticated/questionnaire'
-      path: '/questionnaire'
-      fullPath: '/questionnaire'
-      preLoaderRoute: typeof AuthenticatedQuestionnaireRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
     '/_authenticated/dashboard': {
@@ -290,7 +290,6 @@ interface AuthenticatedRouteChildren {
   AuthenticatedAdminRoute: typeof AuthenticatedAdminRoute
   AuthenticatedBookRoute: typeof AuthenticatedBookRoute
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
-  AuthenticatedQuestionnaireRoute: typeof AuthenticatedQuestionnaireRoute
   AuthenticatedServicesRoute: typeof AuthenticatedServicesRoute
 }
 
@@ -299,7 +298,6 @@ const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
   AuthenticatedAdminRoute: AuthenticatedAdminRoute,
   AuthenticatedBookRoute: AuthenticatedBookRoute,
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
-  AuthenticatedQuestionnaireRoute: AuthenticatedQuestionnaireRoute,
   AuthenticatedServicesRoute: AuthenticatedServicesRoute,
 }
 
@@ -311,6 +309,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthenticatedRoute: AuthenticatedRouteWithChildren,
   LoginRoute: LoginRoute,
+  QuestionnaireRoute: QuestionnaireRoute,
   RequestAccessRoute: RequestAccessRoute,
   RequestReceivedRoute: RequestReceivedRoute,
   SetPasswordRoute: SetPasswordRoute,
