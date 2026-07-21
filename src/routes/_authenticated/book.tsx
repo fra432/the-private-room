@@ -297,7 +297,13 @@ function BookPage() {
 										const isPast = iso < today;
 										const isTaken = taken.has(iso);
 										const isClosed = closed.has(iso);
-										const disabled = isPast || isTaken || isClosed;
+										const dow = d.getDay();
+										const hourRow = weeklyHours.find(
+											(r) => r.day_of_week === dow,
+										);
+										const isWeeklyClosed = !hourRow || hourRow.is_closed;
+										const disabled =
+											isPast || isTaken || isClosed || isWeeklyClosed;
 										const isSel = selected === iso;
 										const isToday = iso === today;
 										return (
