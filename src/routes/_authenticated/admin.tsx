@@ -138,11 +138,12 @@ function ChangeRequestsSection() {
 		status: "approved" | "rejected",
 	) {
 		if (status === "approved") {
-			// applica la modifica al booking
-			const patch: Record<string, unknown> = {};
+			const patch: {
+				date?: string;
+				arrival_time?: string | null;
+			} = {};
 			if (cr.requested_date) patch.date = cr.requested_date;
-			if (cr.requested_arrival_time)
-				patch.arrival_time = cr.requested_arrival_time;
+			if (cr.requested_arrival_time) patch.arrival_time = cr.requested_arrival_time;
 			if (Object.keys(patch).length) {
 				const { error: bErr } = await supabase
 					.from("bookings")
