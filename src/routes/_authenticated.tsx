@@ -15,25 +15,27 @@ export const Route = createFileRoute("/_authenticated")({
 function AuthGate() {
 	const { session, loading } = useAuth();
 	const location = useLocation();
-	const [hasProfile, setHasProfile] = useState<boolean | null>(null);
+	const [hasQuestionnaire, setHasQuestionnaire] = useState<boolean | null>(
+		null,
+	);
 
 	useEffect(() => {
 		if (!session?.user?.id) {
-			setHasProfile(null);
+			setHasQuestionnaire(null);
 			return;
 		}
 
 		supabase
-			.from("profiles")
+			.from("questionnaires")
 			.select("id")
-			.eq("id", session.user.id)
+			.eq("user_id", session.user.id)
 			.maybeSingle()
 			.then(({ data }) => {
-				setHasProfile(!!data);
+				setHasQuestionnaire(!!data);
 			});
-	}, [session?.user?.id]);
+	}, [session?.user?.id, location.pathname]);
 
-	if (loading || hasProfile === null) {
+	if (loading || hasQuestionnaire === null) {
 		return (
 			<div className="flex min-h-screen items-center justify-center bg-background text-[color:var(--gold)] text-[0.6rem] tracking-[0.5em] uppercase">
 				…
@@ -42,8 +44,8 @@ function AuthGate() {
 	}
 	if (!session) return <Navigate to="/login" />;
 
-	// Se non ha profilo e non è già nel questionario, reindirizza
-	if (!hasProfile && !location.pathname.includes("questionnaire")) {
+	// Se non ha compilato il questionario e non è già nel questionario, reindirizza
+	if (!hasQuestionnaire && !location.pathname.includes("questionnaire")) {
 		return <Navigate to="/_authenticated/questionnaire" />;
 	}
 

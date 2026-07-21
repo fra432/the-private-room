@@ -6,12 +6,12 @@ import { BackArrow } from "@/components/back-arrow";
 import { BrandLogo } from "@/components/brand-logo";
 import { useAuth } from "@/hooks/use-auth";
 import { supabase } from "@/integrations/supabase/client";
+import { sendClientInvite } from "@/lib/auth.functions";
 import {
 	notifyAccessRequestDecision,
-	notifyBookingDecision,
 	notifyBookingChangeRequestDecision,
+	notifyBookingDecision,
 } from "@/lib/email.functions";
-import { sendClientInvite } from "@/lib/auth.functions";
 
 export const Route = createFileRoute("/_authenticated/admin")({
 	head: () => ({ meta: [{ title: "Admin — THE ROOM" }] }),
@@ -86,7 +86,9 @@ type ChangeReq = {
 };
 
 function ChangeRequestsSection() {
-	const [tab, setTab] = useState<"pending" | "approved" | "rejected">("pending");
+	const [tab, setTab] = useState<"pending" | "approved" | "rejected">(
+		"pending",
+	);
 	const [rows, setRows] = useState<ChangeReq[]>([]);
 	const [bookings, setBookings] = useState<Record<string, Booking>>({});
 	const [profiles, setProfiles] = useState<Record<string, Profile>>({});
@@ -133,17 +135,15 @@ function ChangeRequestsSection() {
 		void load();
 	}, [load]);
 
-	async function decide(
-		cr: ChangeReq,
-		status: "approved" | "rejected",
-	) {
+	async function decide(cr: ChangeReq, status: "approved" | "rejected") {
 		if (status === "approved") {
 			const patch: {
 				date?: string;
 				arrival_time?: string | null;
 			} = {};
 			if (cr.requested_date) patch.date = cr.requested_date;
-			if (cr.requested_arrival_time) patch.arrival_time = cr.requested_arrival_time;
+			if (cr.requested_arrival_time)
+				patch.arrival_time = cr.requested_arrival_time;
 			if (Object.keys(patch).length) {
 				const { error: bErr } = await supabase
 					.from("bookings")
@@ -266,6 +266,20 @@ function AdminPage() {
 		"requests" | "bookings" | "changes" | "availability" | "clients"
 	>("bookings");
 	const [selectedClient, setSelectedClient] = useState<string | null>(null);
+	const [pendingRequestsCount, setPendingRequestsCount] = useState(0);
+
+	useEffect(() => {
+		const fetchPendingCount = async () => {
+			const { data, error } = await supabase
+				.from("access_requests")
+				.select("id", { count: "exact" })
+				.eq("status", "pending");
+			if (!error) {
+				setPendingRequestsCount(data?.length ?? 0);
+			}
+		};
+		void fetchPendingCount();
+	}, []);
 
 	if (!authLoading && !isAdmin) return <Navigate to="/dashboard" />;
 
@@ -302,13 +316,18 @@ function AdminPage() {
 								setSection(key);
 								setSelectedClient(null);
 							}}
-							className={`text-lg tracking-[0.08em] uppercase font-medium transition-colors ${
+							className={`text-lg tracking-[0.08em] uppercase font-medium transition-colors flex items-center gap-2 ${
 								section === key
 									? "text-[color:var(--gold)]"
 									: "text-foreground/70 hover:text-foreground"
 							}`}
 						>
 							{label}
+							{key === "requests" && pendingRequestsCount > 0 && (
+								<span className="inline-flex items-center justify-center min-w-[24px] h-6 px-1.5 rounded-full bg-[color:var(--gold)] text-background text-[0.65rem] font-semibold">
+									{pendingRequestsCount}
+								</span>
+							)}
 						</button>
 					))}
 				</nav>
