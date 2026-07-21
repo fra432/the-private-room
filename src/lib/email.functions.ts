@@ -262,3 +262,105 @@ export const notifyBookingDecision = createServerFn({ method: "POST" })
 			),
 		});
 	});
+
+// 5. Nuova richiesta di modifica appuntamento → notifica proprietaria
+export const notifyBookingChangeRequestCreated = createServerFn({ method: "POST" })
+	.inputValidator((d) => z.object({ id: z.string().uuid() }).parse(d))
+	.handler(async ({ data }) => {
+		const { supabaseAdmin } = await import(
+			"@/integrations/supabase/client.server"
+		);
+		const { data: cr } = await supabaseAdmin
+			.from("booking_change_requests")
+			.select("id, booking_id, user_id, requested_date, requested_arrival_time, message")
+			.eq("id", data.id)
+			.maybeSingle();
+		if (!cr) return { ok: false };
+		const { data: b } = await supabaseAdmin
+			.from("bookings")
+			.select("date, arrival_time")
+			.eq("id", cr.booking_id)
+			.maybeSingle();
+		const { data: p } = await supabaseAdmin
+			.from("profiles")
+			.select("first_name, last_name, email, phone")
+			.eq("id", cr.user_id)
+			.maybeSingle();
+		const name = p ? `${p.first_name ?? ""} ${p.last_name ?? ""}`.trim() : "una cliente";
+		const body = `
+			<p><strong>Cliente:</strong> ${name || "—"}</p>
+			${p?.email ? `<p><strong>Email:</strong> ${p.email}</p>` : ""}
+			${p?.phone ? `<p><strong>Telefono:</strong> ${p.phone}</p>` : ""}
+			<p><strong>Appuntamento attuale:</strong> ${b ? fmtDate(b.date as any) : "—"}${b?.arrival_time ? ` alle ${String(b.arrival_time).slice(0,5)}` : ""}</p>
+			${cr.requested_date ? `<p><strong>Nuova data richiesta:</strong> ${fmtDate(cr.requested_date as any)}</p>` : ""}
+			${cr.requested_arrival_time ? `<p><strong>Nuovo orario richiesto:</strong> ${String(cr.requested_arrival_time).slice(0,5)}</p>` : ""}
+			${cr.message ? `<p><strong>Messaggio:</strong> ${cr.message}</p>` : ""}
+		`;
+		return sendMail({
+			to: OWNER_EMAIL,
+			subject: `Richiesta di modifica appuntamento — ${name}`,
+			html: shell(
+				"Richiesta di modifica appuntamento",
+				`${name || "Una cliente"} chiede di spostare un appuntamento.`,
+				body,
+				{ label: "Rivedi in Admin", url: "https://www.inside-theroom.it/admin" },
+			),
+			reply_to: p?.email ?? undefined,
+		});
+	});
+
+// 6. Decisione richiesta di modifica → notifica cliente
+export const notifyBookingChangeRequestDecision = createServerFn({ method: "POST" })
+	.inputValidator((d) =>
+		z
+			.object({
+				id: z.string().uuid(),
+				status: z.enum(["approved", "rejected"]),
+				admin_reply: z.string().optional(),
+			})
+			.parse(d),
+	)
+	.handler(async ({ data }) => {
+		const { supabaseAdmin } = await import(
+			"@/integrations/supabase/client.server"
+		);
+		const { data: cr } = await supabaseAdmin
+			.from("booking_change_requests")
+			.select("booking_id, user_id, requested_date, requested_arrival_time")
+			.eq("id", data.id)
+			.maybeSingle();
+		if (!cr) return { ok: false };
+		const { data: p } = await supabaseAdmin
+			.from("profiles")
+			.select("first_name, email")
+			.eq("id", cr.user_id)
+			.maybeSingle();
+		if (!p?.email) return { ok: false };
+		const first = p.first_name ?? "";
+		if (data.status === "approved") {
+			const { data: b } = await supabaseAdmin
+				.from("bookings")
+				.select("date, arrival_time")
+				.eq("id", cr.booking_id)
+				.maybeSingle();
+			return sendMail({
+				to: p.email,
+				subject: "Modifica appuntamento confermata — THE ROOM",
+				html: shell(
+					`Ciao ${first}`.trim(),
+					"La tua richiesta di modifica è stata accettata.",
+					`<p><strong>Nuova data:</strong> ${b ? fmtDate(b.date as any) : "—"}</p>${b?.arrival_time ? `<p><strong>Nuovo orario:</strong> ${String(b.arrival_time).slice(0,5)}</p>` : ""}${data.admin_reply ? `<p style="margin-top:12px">${data.admin_reply}</p>` : ""}`,
+				),
+			});
+		}
+		return sendMail({
+			to: p.email,
+			subject: "Richiesta di modifica — THE ROOM",
+			html: shell(
+				`Ciao ${first}`.trim(),
+				"Non è stato possibile accettare la tua richiesta di modifica.",
+				`<p>Puoi scrivere per proporre un'altra data o annullare l'appuntamento dalla tua area riservata.</p>${data.admin_reply ? `<p style="margin-top:12px">${data.admin_reply}</p>` : ""}`,
+				{ label: "Vai all'account", url: "https://www.inside-theroom.it/account" },
+			),
+		});
+	});
