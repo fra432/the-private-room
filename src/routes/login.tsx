@@ -85,17 +85,32 @@ function LoginPage() {
 				if (status === "none") navigate({ to: "/request-access" });
 				return;
 			}
-			const { error } = await supabase.auth.signUp({
-				email: parsed.data.email,
-				password: parsed.data.password,
-				options: { emailRedirectTo: `${window.location.origin}/dashboard` },
-			});
-			setLoading(false);
-			if (error) {
-				toast.error(error.message);
-				return;
-			}
-			toast.success("Account creato.");
+		
+		// Get access request data first
+		const { data: accessRequest } = await supabase
+			.from("access_requests")
+			.select("first_name,last_name,phone,instagram")
+			.eq("email", parsed.data.email)
+			.eq("status", "approved")
+			.maybeSingle();
+
+		const { error } = await supabase.auth.signUp({
+			email: parsed.data.email,
+			password: parsed.data.password,
+			options: {
+				emailRedirectTo: `${window.location.origin}/dashboard`,
+				data: {
+					first_name: accessRequest?.first_name || "",
+					last_name: accessRequest?.last_name || "",
+					phone: accessRequest?.phone || "",
+					instagram: accessRequest?.instagram || "",
+				},
+			},
+		});
+		setLoading(false);
+		if (error) {
+			toast.error(error.message);
+			return;
 			if (typeof window !== "undefined")
 				sessionStorage.removeItem("room:intro");
 			navigate({ to: "/dashboard" });
