@@ -9,7 +9,9 @@ import { supabase } from "@/integrations/supabase/client";
 import {
 	notifyAccessRequestDecision,
 	notifyBookingDecision,
+	notifyBookingChangeRequestDecision,
 } from "@/lib/email.functions";
+import { sendClientInvite } from "@/lib/auth.functions";
 
 export const Route = createFileRoute("/_authenticated/admin")({
 	head: () => ({ meta: [{ title: "Admin — THE ROOM" }] }),
@@ -84,7 +86,7 @@ const DAYS = [
 function AdminPage() {
 	const { isAdmin, loading: authLoading } = useAuth();
 	const [section, setSection] = useState<
-		"requests" | "bookings" | "availability" | "clients"
+		"requests" | "bookings" | "changes" | "availability" | "clients"
 	>("bookings");
 	const [selectedClient, setSelectedClient] = useState<string | null>(null);
 
@@ -111,6 +113,7 @@ function AdminPage() {
 					{(
 						[
 							["bookings", "Prenotazioni"],
+							["changes", "Cambi orario"],
 							["requests", "Richieste accesso"],
 							["availability", "Disponibilità"],
 							["clients", "Clienti"],
@@ -142,6 +145,7 @@ function AdminPage() {
 						}}
 					/>
 				)}
+				{section === "changes" && <ChangeRequestsSection />}
 				{section === "availability" && <AvailabilitySection />}
 				{section === "clients" &&
 					(selectedClient ? (
@@ -182,12 +186,19 @@ function RequestsSection() {
 	}, [load]);
 
 	async function review(id: string, status: "approved" | "rejected") {
+		const row = rows.find((r) => r.id === id);
 		const { error } = await supabase
 			.from("access_requests")
 			.update({ status, reviewed_at: new Date().toISOString() })
 			.eq("id", id);
 		if (error) return toast.error(error.message);
-		notifyAccessRequestDecision({ data: { id, status } }).catch(() => {});
+		if (status === "approved" && row) {
+			sendClientInvite({
+				data: { email: row.email, first_name: row.first_name },
+			}).catch((e) => console.error("[invite]", e));
+		} else {
+			notifyAccessRequestDecision({ data: { id, status } }).catch(() => {});
+		}
 		toast.success(status === "approved" ? "Approvata" : "Rifiutata");
 		void load();
 	}
