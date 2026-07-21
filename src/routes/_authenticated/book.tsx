@@ -58,6 +58,14 @@ function BookPage() {
 			.then(({ data }) => {
 				setHasQuestionnaire(!!data);
 				setQuestionnaireUpdatedAt(data?.updated_at ?? null);
+				// Auto-confirm if questionnaire updated today
+				if (data?.updated_at) {
+					const today = new Date().toISOString().split("T")[0];
+					const questionnaireDate = data.updated_at.split("T")[0];
+					if (today === questionnaireDate) {
+						setQuestionnaireConfirmed(true);
+					}
+				}
 			});
 	}, [user]);
 

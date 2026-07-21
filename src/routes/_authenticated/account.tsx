@@ -27,10 +27,27 @@ type Profile = {
 	email: string | null;
 };
 
+type Questionnaire = {
+	hair_type: string | null;
+	hair_length: string | null;
+	hair_color: string | null;
+	treatments: string | null;
+	allergies: string | null;
+	goals: string | null;
+	inspiration: string | null;
+	additional: string | null;
+	drink_preference: string | null;
+	music_taste: string | null;
+	updated_at: string | null;
+};
+
 function AccountPage() {
 	const { user } = useAuth();
 	const [profile, setProfile] = useState<Profile | null>(null);
 	const [profileSaving, setProfileSaving] = useState(false);
+	const [questionnaire, setQuestionnaire] = useState<Questionnaire | null>(
+		null,
+	);
 	const [upcoming, setUpcoming] = useState<Booking[]>([]);
 	const [past, setPast] = useState<Booking[]>([]);
 	const [changeFor, setChangeFor] = useState<Booking | null>(null);
@@ -39,27 +56,36 @@ function AccountPage() {
 	const load = useCallback(async () => {
 		if (!user) return;
 		const today = new Date().toISOString().slice(0, 10);
-		const [{ data: p }, { data: up }, { data: pa }] = await Promise.all([
-			supabase
-				.from("profiles")
-				.select("first_name,last_name,phone,instagram,email")
-				.eq("id", user.id)
-				.maybeSingle(),
-			supabase
-				.from("bookings")
-				.select("id,date,arrival_time,status,notes")
-				.eq("user_id", user.id)
-				.gte("date", today)
-				.order("date", { ascending: true }),
-			supabase
-				.from("bookings")
-				.select("id,date,arrival_time,status,notes")
-				.eq("user_id", user.id)
-				.lt("date", today)
-				.order("date", { ascending: false })
-				.limit(50),
-		]);
+		const [{ data: p }, { data: q }, { data: up }, { data: pa }] =
+			await Promise.all([
+				supabase
+					.from("profiles")
+					.select("first_name,last_name,phone,instagram,email")
+					.eq("id", user.id)
+					.maybeSingle(),
+				supabase
+					.from("questionnaires")
+					.select(
+						"hair_type,hair_length,hair_color,treatments,allergies,goals,inspiration,additional,drink_preference,music_taste,updated_at",
+					)
+					.eq("user_id", user.id)
+					.maybeSingle(),
+				supabase
+					.from("bookings")
+					.select("id,date,arrival_time,status,notes")
+					.eq("user_id", user.id)
+					.gte("date", today)
+					.order("date", { ascending: true }),
+				supabase
+					.from("bookings")
+					.select("id,date,arrival_time,status,notes")
+					.eq("user_id", user.id)
+					.lt("date", today)
+					.order("date", { ascending: false })
+					.limit(50),
+			]);
 		setProfile((p as Profile) ?? null);
+		setQuestionnaire((q as Questionnaire) ?? null);
 		setUpcoming((up ?? []) as Booking[]);
 		setPast((pa ?? []) as Booking[]);
 	}, [user]);
@@ -95,7 +121,8 @@ function AccountPage() {
 						Area personale
 					</p>
 					<h1 className="mt-4 font-serif text-5xl leading-tight text-foreground md:text-6xl">
-						Il tuo <span className="italic text-[color:var(--gold)]">account</span>
+						Il tuo{" "}
+						<span className="italic text-[color:var(--gold)]">account</span>
 					</h1>
 				</div>
 			</section>
@@ -110,14 +137,20 @@ function AccountPage() {
 						{upcoming.length === 0 && (
 							<li className="py-6 text-sm text-muted-foreground">
 								Nessun appuntamento in programma.{" "}
-								<Link to="/book" className="text-[color:var(--gold)] hover:underline">
+								<Link
+									to="/book"
+									className="text-[color:var(--gold)] hover:underline"
+								>
 									Prenota
 								</Link>
 								.
 							</li>
 						)}
 						{upcoming.map((b) => (
-							<li key={b.id} className="flex flex-wrap items-center justify-between gap-3 py-5">
+							<li
+								key={b.id}
+								className="flex flex-wrap items-center justify-between gap-3 py-5"
+							>
 								<div>
 									<div className="font-serif text-xl capitalize">
 										{new Date(b.date).toLocaleDateString("it-IT", {
@@ -190,7 +223,10 @@ function AccountPage() {
 				<div>
 					<h2 className="font-serif text-3xl text-foreground">I tuoi dati</h2>
 					{profile && (
-						<form onSubmit={saveProfile} className="mt-6 grid gap-6 sm:grid-cols-2">
+						<form
+							onSubmit={saveProfile}
+							className="mt-6 grid gap-6 sm:grid-cols-2"
+						>
 							<AField
 								label="Nome"
 								value={profile.first_name ?? ""}
@@ -224,6 +260,143 @@ function AccountPage() {
 								</button>
 							</div>
 						</form>
+					)}
+				</div>
+
+				{/* Questionario */}
+				<div>
+					<h2 className="font-serif text-3xl text-foreground">
+						Il tuo questionario
+					</h2>
+					{questionnaire ? (
+						<div className="mt-6 grid gap-6 sm:grid-cols-2">
+							{questionnaire.hair_type && (
+								<div>
+									<p className="text-xs tracking-[0.3em] uppercase text-muted-foreground">
+										Tipo capelli
+									</p>
+									<p className="mt-2 text-foreground">
+										{questionnaire.hair_type}
+									</p>
+								</div>
+							)}
+							{questionnaire.hair_length && (
+								<div>
+									<p className="text-xs tracking-[0.3em] uppercase text-muted-foreground">
+										Lunghezza
+									</p>
+									<p className="mt-2 text-foreground">
+										{questionnaire.hair_length}
+									</p>
+								</div>
+							)}
+							{questionnaire.hair_color && (
+								<div>
+									<p className="text-xs tracking-[0.3em] uppercase text-muted-foreground">
+										Colore
+									</p>
+									<p className="mt-2 text-foreground">
+										{questionnaire.hair_color}
+									</p>
+								</div>
+							)}
+							{questionnaire.treatments && (
+								<div>
+									<p className="text-xs tracking-[0.3em] uppercase text-muted-foreground">
+										Trattamenti
+									</p>
+									<p className="mt-2 text-foreground">
+										{questionnaire.treatments}
+									</p>
+								</div>
+							)}
+							{questionnaire.allergies && (
+								<div>
+									<p className="text-xs tracking-[0.3em] uppercase text-muted-foreground">
+										Allergie
+									</p>
+									<p className="mt-2 text-foreground">
+										{questionnaire.allergies}
+									</p>
+								</div>
+							)}
+							{questionnaire.goals && (
+								<div>
+									<p className="text-xs tracking-[0.3em] uppercase text-muted-foreground">
+										Obiettivi
+									</p>
+									<p className="mt-2 text-foreground">{questionnaire.goals}</p>
+								</div>
+							)}
+							{questionnaire.inspiration && (
+								<div className="sm:col-span-2">
+									<p className="text-xs tracking-[0.3em] uppercase text-muted-foreground">
+										Ispirazione
+									</p>
+									<p className="mt-2 text-foreground">
+										{questionnaire.inspiration}
+									</p>
+								</div>
+							)}
+							{questionnaire.additional && (
+								<div className="sm:col-span-2">
+									<p className="text-xs tracking-[0.3em] uppercase text-muted-foreground">
+										Altro
+									</p>
+									<p className="mt-2 text-foreground">
+										{questionnaire.additional}
+									</p>
+								</div>
+							)}
+							{questionnaire.drink_preference && (
+								<div>
+									<p className="text-xs tracking-[0.3em] uppercase text-muted-foreground">
+										Bevanda
+									</p>
+									<p className="mt-2 text-foreground">
+										{questionnaire.drink_preference}
+									</p>
+								</div>
+							)}
+							{questionnaire.music_taste && (
+								<div>
+									<p className="text-xs tracking-[0.3em] uppercase text-muted-foreground">
+										Musica
+									</p>
+									<p className="mt-2 text-foreground">
+										{questionnaire.music_taste}
+									</p>
+								</div>
+							)}
+							<div className="sm:col-span-2">
+								<p className="text-xs text-muted-foreground">
+									Compilato il{" "}
+									{questionnaire.updated_at
+										? new Date(questionnaire.updated_at).toLocaleDateString(
+												"it-IT",
+												{ day: "numeric", month: "long", year: "numeric" },
+											)
+										: ""}
+								</p>
+								<Link
+									to="/questionnaire"
+									className="mt-4 inline-flex text-sm tracking-[0.4em] uppercase text-[color:var(--gold)] hover:underline"
+								>
+									Modifica questionario
+								</Link>
+							</div>
+						</div>
+					) : (
+						<p className="mt-6 text-sm text-muted-foreground">
+							Non hai ancora compilato il questionario.{" "}
+							<Link
+								to="/questionnaire"
+								className="text-[color:var(--gold)] hover:underline"
+							>
+								Compilalo ora
+							</Link>
+							.
+						</p>
 					)}
 				</div>
 
@@ -324,14 +497,18 @@ function ChangeRequestModal({
 			<div className="w-full max-w-md border border-[color:var(--gold)]/40 bg-background p-8">
 				<div className="flex items-center justify-between">
 					<h3 className="font-italiana text-2xl">Richiedi cambio orario</h3>
-					<button onClick={onClose} className="text-foreground/60 hover:text-foreground">
+					<button
+						onClick={onClose}
+						className="text-foreground/60 hover:text-foreground"
+					>
 						✕
 					</button>
 				</div>
 				<p className="mt-2 text-sm text-foreground/70">
 					Appuntamento attuale:{" "}
 					{new Date(booking.date).toLocaleDateString("it-IT")}
-					{booking.arrival_time && ` · ${String(booking.arrival_time).slice(0, 5)}`}
+					{booking.arrival_time &&
+						` · ${String(booking.arrival_time).slice(0, 5)}`}
 				</p>
 				<form onSubmit={submit} className="mt-6 flex flex-col gap-5">
 					<label className="flex flex-col gap-2">
@@ -403,7 +580,10 @@ function PasswordModal({ onClose }: { onClose: () => void }) {
 			<div className="w-full max-w-md border border-[color:var(--gold)]/40 bg-background p-8">
 				<div className="flex items-center justify-between">
 					<h3 className="font-italiana text-2xl">Cambia password</h3>
-					<button onClick={onClose} className="text-foreground/60 hover:text-foreground">
+					<button
+						onClick={onClose}
+						className="text-foreground/60 hover:text-foreground"
+					>
 						✕
 					</button>
 				</div>

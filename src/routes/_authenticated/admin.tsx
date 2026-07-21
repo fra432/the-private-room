@@ -268,18 +268,19 @@ function AdminPage() {
 	const [selectedClient, setSelectedClient] = useState<string | null>(null);
 	const [pendingRequestsCount, setPendingRequestsCount] = useState(0);
 
-	useEffect(() => {
-		const fetchPendingCount = async () => {
-			const { data, error } = await supabase
-				.from("access_requests")
-				.select("id", { count: "exact" })
-				.eq("status", "pending");
-			if (!error) {
-				setPendingRequestsCount(data?.length ?? 0);
-			}
-		};
-		void fetchPendingCount();
+	const fetchPendingCount = useCallback(async () => {
+		const { data, error } = await supabase
+			.from("access_requests")
+			.select("id", { count: "exact" })
+			.eq("status", "pending");
+		if (!error) {
+			setPendingRequestsCount(data?.length ?? 0);
+		}
 	}, []);
+
+	useEffect(() => {
+		void fetchPendingCount();
+	}, [fetchPendingCount]);
 
 	if (!authLoading && !isAdmin) return <Navigate to="/dashboard" />;
 
@@ -332,7 +333,9 @@ function AdminPage() {
 					))}
 				</nav>
 
-				{section === "requests" && <RequestsSection />}
+				{section === "requests" && (
+					<RequestsSection onStatusChanged={fetchPendingCount} />
+				)}
 				{section === "bookings" && (
 					<BookingsSection
 						onOpenClient={(id) => {
@@ -358,7 +361,11 @@ function AdminPage() {
 	);
 }
 
-function RequestsSection() {
+function RequestsSection({
+	onStatusChanged,
+}: {
+	onStatusChanged?: () => void;
+}) {
 	const [tab, setTab] = useState<"pending" | "approved" | "rejected">(
 		"pending",
 	);
@@ -397,6 +404,7 @@ function RequestsSection() {
 		}
 		toast.success(status === "approved" ? "Approvata" : "Rifiutata");
 		void load();
+		onStatusChanged?.();
 	}
 
 	return (
