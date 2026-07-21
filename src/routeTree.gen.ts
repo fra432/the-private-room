@@ -10,6 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as WelcomeRouteImport } from './routes/welcome'
+import { Route as SetPasswordRouteImport } from './routes/set-password'
 import { Route as RequestReceivedRouteImport } from './routes/request-received'
 import { Route as RequestAccessRouteImport } from './routes/request-access'
 import { Route as LoginRouteImport } from './routes/login'
@@ -24,6 +25,11 @@ import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/
 const WelcomeRoute = WelcomeRouteImport.update({
   id: '/welcome',
   path: '/welcome',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SetPasswordRoute = SetPasswordRouteImport.update({
+  id: '/set-password',
+  path: '/set-password',
   getParentRoute: () => rootRouteImport,
 } as any)
 const RequestReceivedRoute = RequestReceivedRouteImport.update({
@@ -82,6 +88,7 @@ export interface FileRoutesByFullPath {
   '/login': typeof LoginRoute
   '/request-access': typeof RequestAccessRoute
   '/request-received': typeof RequestReceivedRoute
+  '/set-password': typeof SetPasswordRoute
   '/welcome': typeof WelcomeRoute
   '/admin': typeof AuthenticatedAdminRoute
   '/book': typeof AuthenticatedBookRoute
@@ -94,6 +101,7 @@ export interface FileRoutesByTo {
   '/login': typeof LoginRoute
   '/request-access': typeof RequestAccessRoute
   '/request-received': typeof RequestReceivedRoute
+  '/set-password': typeof SetPasswordRoute
   '/welcome': typeof WelcomeRoute
   '/admin': typeof AuthenticatedAdminRoute
   '/book': typeof AuthenticatedBookRoute
@@ -108,6 +116,7 @@ export interface FileRoutesById {
   '/login': typeof LoginRoute
   '/request-access': typeof RequestAccessRoute
   '/request-received': typeof RequestReceivedRoute
+  '/set-password': typeof SetPasswordRoute
   '/welcome': typeof WelcomeRoute
   '/_authenticated/admin': typeof AuthenticatedAdminRoute
   '/_authenticated/book': typeof AuthenticatedBookRoute
@@ -122,6 +131,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/request-access'
     | '/request-received'
+    | '/set-password'
     | '/welcome'
     | '/admin'
     | '/book'
@@ -134,6 +144,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/request-access'
     | '/request-received'
+    | '/set-password'
     | '/welcome'
     | '/admin'
     | '/book'
@@ -147,6 +158,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/request-access'
     | '/request-received'
+    | '/set-password'
     | '/welcome'
     | '/_authenticated/admin'
     | '/_authenticated/book'
@@ -161,6 +173,7 @@ export interface RootRouteChildren {
   LoginRoute: typeof LoginRoute
   RequestAccessRoute: typeof RequestAccessRoute
   RequestReceivedRoute: typeof RequestReceivedRoute
+  SetPasswordRoute: typeof SetPasswordRoute
   WelcomeRoute: typeof WelcomeRoute
 }
 
@@ -171,6 +184,13 @@ declare module '@tanstack/react-router' {
       path: '/welcome'
       fullPath: '/welcome'
       preLoaderRoute: typeof WelcomeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/set-password': {
+      id: '/set-password'
+      path: '/set-password'
+      fullPath: '/set-password'
+      preLoaderRoute: typeof SetPasswordRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/request-received': {
@@ -272,6 +292,7 @@ const rootRouteChildren: RootRouteChildren = {
   LoginRoute: LoginRoute,
   RequestAccessRoute: RequestAccessRoute,
   RequestReceivedRoute: RequestReceivedRoute,
+  SetPasswordRoute: SetPasswordRoute,
   WelcomeRoute: WelcomeRoute,
 }
 export const routeTree = rootRouteImport
