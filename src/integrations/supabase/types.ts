@@ -56,6 +56,53 @@ export type Database = {
         }
         Relationships: []
       }
+      booking_change_requests: {
+        Row: {
+          admin_reply: string | null
+          booking_id: string
+          created_at: string
+          id: string
+          message: string | null
+          requested_arrival_time: string | null
+          requested_date: string | null
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          admin_reply?: string | null
+          booking_id: string
+          created_at?: string
+          id?: string
+          message?: string | null
+          requested_arrival_time?: string | null
+          requested_date?: string | null
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          admin_reply?: string | null
+          booking_id?: string
+          created_at?: string
+          id?: string
+          message?: string | null
+          requested_arrival_time?: string | null
+          requested_date?: string | null
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "booking_change_requests_booking_id_fkey"
+            columns: ["booking_id"]
+            isOneToOne: false
+            referencedRelation: "bookings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       bookings: {
         Row: {
           arrival_time: string | null
