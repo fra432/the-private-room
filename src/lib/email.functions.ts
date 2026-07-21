@@ -156,16 +156,8 @@ export const notifyAccessRequestDecision = createServerFn({ method: "POST" })
 		const r = await loadAccessRequest(data.id);
 		if (!r) return { ok: false };
 		if (data.status === "approved") {
-			return sendMail({
-				to: r.email,
-				subject: "Il tuo accesso a THE ROOM è confermato",
-				html: shell(
-					`Benvenuta, ${r.first_name}`,
-					"La tua richiesta è stata approvata. Ora puoi accedere all'area riservata e prenotare il tuo appuntamento.",
-					"<p>Ti aspettiamo.</p>",
-					{ label: "Accedi", url: "https://www.inside-theroom.it/login" },
-				),
-			});
+			// Le approvazioni ora vengono inviate da sendClientInvite (link password).
+			return { ok: true };
 		}
 		return sendMail({
 			to: r.email,
