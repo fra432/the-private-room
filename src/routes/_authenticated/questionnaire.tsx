@@ -1,9 +1,9 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { ImagePlus, X } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
-import { X, ImagePlus } from "lucide-react";
-import { BrandLogo } from "@/components/brand-logo";
 import { BackArrow } from "@/components/back-arrow";
+import { BrandLogo } from "@/components/brand-logo";
 import { useAuth } from "@/hooks/use-auth";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -76,7 +76,8 @@ function QuestionnairePage() {
 						drink_preference: data.drink_preference ?? "",
 						music_taste: data.music_taste ?? "",
 					});
-					const paths: string[] = (data as { goal_images?: string[] }).goal_images ?? [];
+					const paths: string[] =
+						(data as { goal_images?: string[] }).goal_images ?? [];
 					if (paths.length) {
 						const signed = await Promise.all(
 							paths.map(async (p) => {
@@ -173,11 +174,32 @@ function QuestionnairePage() {
 					.update(payload)
 					.eq("id", existingId)
 			: await supabase.from("questionnaires").insert(payload);
-		setSaving(false);
+
 		if (error) {
+			setSaving(false);
 			toast.error("Impossibile salvare il questionario.");
 			return;
 		}
+
+		// Se è il primo completamento (non existingId), crea il profilo
+		if (!existingId) {
+			const profileData = {
+				id: user.id,
+				email: user.email || "",
+				first_name: "",
+				last_name: "",
+			};
+			const { error: profileError } = await supabase
+				.from("profiles")
+				.insert(profileData);
+
+			if (profileError) {
+				console.error("Errore creazione profilo:", profileError);
+				toast.error("Profilo creato parzialmente, aggiorna la pagina.");
+			}
+		}
+
+		setSaving(false);
 		toast.success(
 			existingId ? "Questionario aggiornato." : "Grazie, ora puoi prenotare.",
 		);
