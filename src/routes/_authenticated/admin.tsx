@@ -9,7 +9,9 @@ import { supabase } from "@/integrations/supabase/client";
 import {
 	notifyAccessRequestDecision,
 	notifyBookingDecision,
+	notifyBookingChangeRequestDecision,
 } from "@/lib/email.functions";
+import { sendClientInvite } from "@/lib/auth.functions";
 
 export const Route = createFileRoute("/_authenticated/admin")({
 	head: () => ({ meta: [{ title: "Admin — THE ROOM" }] }),
@@ -71,6 +73,183 @@ const STATUS_LABEL: Record<string, string> = {
 	cancelled: "Annullate",
 };
 
+type ChangeReq = {
+	id: string;
+	booking_id: string;
+	user_id: string;
+	requested_date: string | null;
+	requested_arrival_time: string | null;
+	message: string | null;
+	status: "pending" | "approved" | "rejected";
+	admin_reply: string | null;
+	created_at: string;
+};
+
+function ChangeRequestsSection() {
+	const [tab, setTab] = useState<"pending" | "approved" | "rejected">("pending");
+	const [rows, setRows] = useState<ChangeReq[]>([]);
+	const [bookings, setBookings] = useState<Record<string, Booking>>({});
+	const [profiles, setProfiles] = useState<Record<string, Profile>>({});
+	const [loading, setLoading] = useState(true);
+
+	const load = useCallback(async () => {
+		setLoading(true);
+		const { data, error } = await supabase
+			.from("booking_change_requests")
+			.select("*")
+			.eq("status", tab)
+			.order("created_at", { ascending: false });
+		if (error) {
+			setLoading(false);
+			return toast.error(error.message);
+		}
+		const list = (data ?? []) as ChangeReq[];
+		setRows(list);
+		if (list.length) {
+			const bookingIds = Array.from(new Set(list.map((r) => r.booking_id)));
+			const userIds = Array.from(new Set(list.map((r) => r.user_id)));
+			const [{ data: bs }, { data: ps }] = await Promise.all([
+				supabase.from("bookings").select("*").in("id", bookingIds),
+				supabase
+					.from("profiles")
+					.select("id,email,first_name,last_name,phone")
+					.in("id", userIds),
+			]);
+			const bm: Record<string, Booking> = {};
+			(bs ?? []).forEach((b: any) => {
+				bm[b.id] = b as Booking;
+			});
+			setBookings(bm);
+			const pm: Record<string, Profile> = {};
+			(ps ?? []).forEach((p: any) => {
+				pm[p.id] = p as Profile;
+			});
+			setProfiles(pm);
+		}
+		setLoading(false);
+	}, [tab]);
+
+	useEffect(() => {
+		void load();
+	}, [load]);
+
+	async function decide(
+		cr: ChangeReq,
+		status: "approved" | "rejected",
+	) {
+		if (status === "approved") {
+			const patch: {
+				date?: string;
+				arrival_time?: string | null;
+			} = {};
+			if (cr.requested_date) patch.date = cr.requested_date;
+			if (cr.requested_arrival_time) patch.arrival_time = cr.requested_arrival_time;
+			if (Object.keys(patch).length) {
+				const { error: bErr } = await supabase
+					.from("bookings")
+					.update(patch)
+					.eq("id", cr.booking_id);
+				if (bErr) return toast.error(bErr.message);
+			}
+		}
+		const { error } = await supabase
+			.from("booking_change_requests")
+			.update({ status })
+			.eq("id", cr.id);
+		if (error) return toast.error(error.message);
+		notifyBookingChangeRequestDecision({ data: { id: cr.id, status } }).catch(
+			() => {},
+		);
+		toast.success(status === "approved" ? "Modifica applicata" : "Rifiutata");
+		void load();
+	}
+
+	return (
+		<>
+			<div className="mt-6 flex gap-6">
+				{(["pending", "approved", "rejected"] as const).map((t) => (
+					<button
+						key={t}
+						onClick={() => setTab(t)}
+						className={`text-lg tracking-[0.08em] uppercase font-medium ${tab === t ? "text-foreground" : "text-foreground/70 hover:text-foreground"}`}
+					>
+						{STATUS_LABEL[t] ?? t}
+					</button>
+				))}
+			</div>
+			<section className="mt-6 flex flex-col divide-y divide-[color:var(--gold)]/15">
+				{loading && (
+					<p className="py-12 text-center text-lg text-foreground/70">
+						Caricamento…
+					</p>
+				)}
+				{!loading && rows.length === 0 && (
+					<p className="py-12 text-center text-lg text-foreground/70">
+						Nessuna richiesta di modifica.
+					</p>
+				)}
+				{!loading &&
+					rows.map((cr) => {
+						const b = bookings[cr.booking_id];
+						const p = profiles[cr.user_id];
+						const name = p
+							? `${p.first_name ?? ""} ${p.last_name ?? ""}`.trim() ||
+								p.email ||
+								"—"
+							: cr.user_id.slice(0, 8);
+						return (
+							<article key={cr.id} className="py-6">
+								<div className="flex flex-wrap items-baseline justify-between gap-2">
+									<h2 className="font-serif text-xl">{name}</h2>
+									<time className="text-lg tracking-[0.08em] uppercase text-foreground/70">
+										{new Date(cr.created_at).toLocaleDateString("it-IT")}
+									</time>
+								</div>
+								<dl className="mt-4 grid gap-2 text-lg text-foreground/70 sm:grid-cols-2">
+									<Info
+										label="Appuntamento attuale"
+										value={
+											b
+												? `${new Date(b.date).toLocaleDateString("it-IT")}${b.arrival_time ? " · " + String(b.arrival_time).slice(0, 5) : ""}`
+												: "—"
+										}
+									/>
+									<Info
+										label="Nuova richiesta"
+										value={`${cr.requested_date ? new Date(cr.requested_date).toLocaleDateString("it-IT") : b ? new Date(b.date).toLocaleDateString("it-IT") : "—"}${cr.requested_arrival_time ? " · " + String(cr.requested_arrival_time).slice(0, 5) : ""}`}
+									/>
+									{p?.email && <Info label="Email" value={p.email} />}
+									{p?.phone && <Info label="Telefono" value={p.phone} />}
+								</dl>
+								{cr.message && (
+									<p className="mt-3 text-lg italic text-foreground/70">
+										"{cr.message}"
+									</p>
+								)}
+								{tab === "pending" && (
+									<div className="mt-5 flex gap-3">
+										<button
+											onClick={() => decide(cr, "approved")}
+											className="inline-flex h-10 items-center justify-center bg-[color:var(--gold)] px-6 text-lg tracking-[0.08em] uppercase font-semibold text-background hover:opacity-90"
+										>
+											Approva e sposta
+										</button>
+										<button
+											onClick={() => decide(cr, "rejected")}
+											className="inline-flex h-10 items-center justify-center brand-frame px-6 text-lg tracking-[0.08em] uppercase font-semibold text-[color:var(--gold)] hover:bg-[color:var(--gold)]/10"
+										>
+											Rifiuta
+										</button>
+									</div>
+								)}
+							</article>
+						);
+					})}
+			</section>
+		</>
+	);
+}
+
 const DAYS = [
 	"Domenica",
 	"Lunedì",
@@ -84,7 +263,7 @@ const DAYS = [
 function AdminPage() {
 	const { isAdmin, loading: authLoading } = useAuth();
 	const [section, setSection] = useState<
-		"requests" | "bookings" | "availability" | "clients"
+		"requests" | "bookings" | "changes" | "availability" | "clients"
 	>("bookings");
 	const [selectedClient, setSelectedClient] = useState<string | null>(null);
 
@@ -111,6 +290,7 @@ function AdminPage() {
 					{(
 						[
 							["bookings", "Prenotazioni"],
+							["changes", "Cambi orario"],
 							["requests", "Richieste accesso"],
 							["availability", "Disponibilità"],
 							["clients", "Clienti"],
@@ -142,6 +322,7 @@ function AdminPage() {
 						}}
 					/>
 				)}
+				{section === "changes" && <ChangeRequestsSection />}
 				{section === "availability" && <AvailabilitySection />}
 				{section === "clients" &&
 					(selectedClient ? (
@@ -182,12 +363,19 @@ function RequestsSection() {
 	}, [load]);
 
 	async function review(id: string, status: "approved" | "rejected") {
+		const row = rows.find((r) => r.id === id);
 		const { error } = await supabase
 			.from("access_requests")
 			.update({ status, reviewed_at: new Date().toISOString() })
 			.eq("id", id);
 		if (error) return toast.error(error.message);
-		notifyAccessRequestDecision({ data: { id, status } }).catch(() => {});
+		if (status === "approved" && row) {
+			sendClientInvite({
+				data: { email: row.email, first_name: row.first_name },
+			}).catch((e) => console.error("[invite]", e));
+		} else {
+			notifyAccessRequestDecision({ data: { id, status } }).catch(() => {});
+		}
 		toast.success(status === "approved" ? "Approvata" : "Rifiutata");
 		void load();
 	}

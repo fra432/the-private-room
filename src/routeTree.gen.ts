@@ -10,6 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as WelcomeRouteImport } from './routes/welcome'
+import { Route as SetPasswordRouteImport } from './routes/set-password'
 import { Route as RequestReceivedRouteImport } from './routes/request-received'
 import { Route as RequestAccessRouteImport } from './routes/request-access'
 import { Route as LoginRouteImport } from './routes/login'
@@ -20,10 +21,16 @@ import { Route as AuthenticatedQuestionnaireRouteImport } from './routes/_authen
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
 import { Route as AuthenticatedBookRouteImport } from './routes/_authenticated/book'
 import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
+import { Route as AuthenticatedAccountRouteImport } from './routes/_authenticated/account'
 
 const WelcomeRoute = WelcomeRouteImport.update({
   id: '/welcome',
   path: '/welcome',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SetPasswordRoute = SetPasswordRouteImport.update({
+  id: '/set-password',
+  path: '/set-password',
   getParentRoute: () => rootRouteImport,
 } as any)
 const RequestReceivedRoute = RequestReceivedRouteImport.update({
@@ -76,13 +83,20 @@ const AuthenticatedAdminRoute = AuthenticatedAdminRouteImport.update({
   path: '/admin',
   getParentRoute: () => AuthenticatedRoute,
 } as any)
+const AuthenticatedAccountRoute = AuthenticatedAccountRouteImport.update({
+  id: '/account',
+  path: '/account',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
   '/request-access': typeof RequestAccessRoute
   '/request-received': typeof RequestReceivedRoute
+  '/set-password': typeof SetPasswordRoute
   '/welcome': typeof WelcomeRoute
+  '/account': typeof AuthenticatedAccountRoute
   '/admin': typeof AuthenticatedAdminRoute
   '/book': typeof AuthenticatedBookRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
@@ -94,7 +108,9 @@ export interface FileRoutesByTo {
   '/login': typeof LoginRoute
   '/request-access': typeof RequestAccessRoute
   '/request-received': typeof RequestReceivedRoute
+  '/set-password': typeof SetPasswordRoute
   '/welcome': typeof WelcomeRoute
+  '/account': typeof AuthenticatedAccountRoute
   '/admin': typeof AuthenticatedAdminRoute
   '/book': typeof AuthenticatedBookRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
@@ -108,7 +124,9 @@ export interface FileRoutesById {
   '/login': typeof LoginRoute
   '/request-access': typeof RequestAccessRoute
   '/request-received': typeof RequestReceivedRoute
+  '/set-password': typeof SetPasswordRoute
   '/welcome': typeof WelcomeRoute
+  '/_authenticated/account': typeof AuthenticatedAccountRoute
   '/_authenticated/admin': typeof AuthenticatedAdminRoute
   '/_authenticated/book': typeof AuthenticatedBookRoute
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
@@ -122,7 +140,9 @@ export interface FileRouteTypes {
     | '/login'
     | '/request-access'
     | '/request-received'
+    | '/set-password'
     | '/welcome'
+    | '/account'
     | '/admin'
     | '/book'
     | '/dashboard'
@@ -134,7 +154,9 @@ export interface FileRouteTypes {
     | '/login'
     | '/request-access'
     | '/request-received'
+    | '/set-password'
     | '/welcome'
+    | '/account'
     | '/admin'
     | '/book'
     | '/dashboard'
@@ -147,7 +169,9 @@ export interface FileRouteTypes {
     | '/login'
     | '/request-access'
     | '/request-received'
+    | '/set-password'
     | '/welcome'
+    | '/_authenticated/account'
     | '/_authenticated/admin'
     | '/_authenticated/book'
     | '/_authenticated/dashboard'
@@ -161,6 +185,7 @@ export interface RootRouteChildren {
   LoginRoute: typeof LoginRoute
   RequestAccessRoute: typeof RequestAccessRoute
   RequestReceivedRoute: typeof RequestReceivedRoute
+  SetPasswordRoute: typeof SetPasswordRoute
   WelcomeRoute: typeof WelcomeRoute
 }
 
@@ -171,6 +196,13 @@ declare module '@tanstack/react-router' {
       path: '/welcome'
       fullPath: '/welcome'
       preLoaderRoute: typeof WelcomeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/set-password': {
+      id: '/set-password'
+      path: '/set-password'
+      fullPath: '/set-password'
+      preLoaderRoute: typeof SetPasswordRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/request-received': {
@@ -243,10 +275,18 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
+    '/_authenticated/account': {
+      id: '/_authenticated/account'
+      path: '/account'
+      fullPath: '/account'
+      preLoaderRoute: typeof AuthenticatedAccountRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
   }
 }
 
 interface AuthenticatedRouteChildren {
+  AuthenticatedAccountRoute: typeof AuthenticatedAccountRoute
   AuthenticatedAdminRoute: typeof AuthenticatedAdminRoute
   AuthenticatedBookRoute: typeof AuthenticatedBookRoute
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
@@ -255,6 +295,7 @@ interface AuthenticatedRouteChildren {
 }
 
 const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
+  AuthenticatedAccountRoute: AuthenticatedAccountRoute,
   AuthenticatedAdminRoute: AuthenticatedAdminRoute,
   AuthenticatedBookRoute: AuthenticatedBookRoute,
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
@@ -272,18 +313,9 @@ const rootRouteChildren: RootRouteChildren = {
   LoginRoute: LoginRoute,
   RequestAccessRoute: RequestAccessRoute,
   RequestReceivedRoute: RequestReceivedRoute,
+  SetPasswordRoute: SetPasswordRoute,
   WelcomeRoute: WelcomeRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}

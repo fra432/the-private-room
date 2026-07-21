@@ -64,6 +64,12 @@ export function SiteNav({ tone = "dark", active }: Props) {
 							{it.label}
 						</Link>
 					))}
+					<Link
+						to="/account"
+						className={`${linkBase} ${linkIdle}`}
+					>
+						Account
+					</Link>
 					<button
 						onClick={() => supabase.auth.signOut()}
 						className={`${linkBase} ${linkIdle}`}
@@ -106,6 +112,13 @@ export function SiteNav({ tone = "dark", active }: Props) {
 									{it.label}
 								</Link>
 							))}
+							<Link
+								to="/account"
+								onClick={() => setOpen(false)}
+								className="text-[0.85rem] tracking-[0.35em] uppercase text-foreground/70 hover:text-foreground"
+							>
+								Account
+							</Link>
 							<div className="my-2 h-px bg-foreground/10" />
 							<button
 								onClick={() => {
