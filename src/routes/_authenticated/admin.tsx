@@ -739,6 +739,8 @@ function CalendarView({
 	rows,
 	loading,
 	nameOf,
+	avatarOf,
+	initialsOf,
 	onOpen,
 }: {
 	month: Date;
@@ -746,6 +748,8 @@ function CalendarView({
 	rows: Booking[];
 	loading: boolean;
 	nameOf: (b: Booking) => string;
+	avatarOf: (b: Booking) => string | null;
+	initialsOf: (b: Booking) => string;
 	onOpen: (id: string) => void;
 }) {
 	const byDate = new Map<string, Booking[]>();
@@ -827,19 +831,26 @@ function CalendarView({
 									<button
 										key={b.id}
 										onClick={() => onOpen(b.id)}
-										className={`truncate px-1.5 py-1 text-left text-[11px] leading-tight transition-colors ${
+										className={`flex items-center gap-1.5 truncate px-1.5 py-1 text-left text-[11px] leading-tight transition-colors ${
 											b.status === "confirmed"
 												? "bg-[color:var(--gold)] text-background hover:opacity-90"
 												: "border border-[color:var(--gold)]/50 text-[color:var(--gold)] hover:bg-[color:var(--gold)]/10"
 										}`}
 										title={`${b.arrival_time ? String(b.arrival_time).slice(0, 5) + " · " : ""}${nameOf(b)}`}
 									>
+										<span className="inline-flex h-4 w-4 shrink-0 items-center justify-center overflow-hidden rounded-full bg-black/20 text-[9px]">
+											{avatarOf(b) ? (
+												<img src={avatarOf(b) as string} alt="" className="h-full w-full object-cover" />
+											) : (
+												<span>{initialsOf(b)}</span>
+											)}
+										</span>
 										{b.arrival_time && (
 											<span className="font-medium">
-												{String(b.arrival_time).slice(0, 5)}{" "}
+												{String(b.arrival_time).slice(0, 5)}
 											</span>
 										)}
-										{nameOf(b)}
+										<span className="truncate">{nameOf(b)}</span>
 									</button>
 								))}
 							</div>
