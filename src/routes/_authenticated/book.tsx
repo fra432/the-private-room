@@ -47,6 +47,8 @@ function BookPage() {
 		}>
 	>([]);
 	const [arrivalTime, setArrivalTime] = useState<string | null>(null);
+	const [hoursLoaded, setHoursLoaded] = useState(false);
+	const [hoursError, setHoursError] = useState(false);
 
 	useEffect(() => {
 		if (!user) return;
@@ -95,7 +97,16 @@ function BookPage() {
 		supabase
 			.from("weekly_hours")
 			.select("day_of_week,is_closed,open_time,close_time")
-			.then(({ data }) => setWeeklyHours(data ?? []));
+			.then(({ data, error }) => {
+				if (error || !data || data.length === 0) {
+					setHoursError(true);
+					setHoursLoaded(true);
+					return;
+				}
+				setWeeklyHours(data);
+				setHoursError(false);
+				setHoursLoaded(true);
+			});
 	}, []);
 
 	const slots = useMemo(() => {
