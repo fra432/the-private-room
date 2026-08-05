@@ -422,34 +422,3 @@ function Area(props: {
 		</label>
 	);
 }
-
-function Select(props: {
-	label: string;
-	hint?: string;
-	value: string;
-	onChange: (v: string) => void;
-	options: Array<{ label: string; value: string }>;
-}) {
-	return (
-		<label className="flex flex-col gap-2">
-			<span className="text-sm font-medium tracking-[0.3em] uppercase text-foreground">
-				{props.label}
-			</span>
-			<select
-				value={props.value}
-				onChange={(e) => props.onChange(e.target.value)}
-				className="w-full bg-transparent border-b border-foreground/30 pb-2 pt-1 text-base text-foreground focus:border-[color:var(--gold)] focus:outline-none transition-colors"
-			>
-				<option value="">Scegli un'opzione</option>
-				{props.options.map((opt) => (
-					<option key={opt.value} value={opt.value}>
-						{opt.label}
-					</option>
-				))}
-			</select>
-			{props.hint && (
-				<span className="text-sm text-foreground/55">{props.hint}</span>
-			)}
-		</label>
-	);
-}
