@@ -331,15 +331,12 @@ function QuestionnairePage() {
 							value={form.additional}
 							onChange={(v) => set("additional", v)}
 						/>
-						<Select
+						<Field
 							label="Preferenza bevanda"
-							hint="Cosa preferisci bere durante l'appuntamento?"
+							hint="Cosa preferisci bere durante l'appuntamento? Es. caffè, tè, acqua frizzante, tisana…"
 							value={form.drink_preference}
 							onChange={(v) => set("drink_preference", v)}
-							options={[
-								{ label: "Caffè", value: "caffè" },
-								{ label: "Tè", value: "tè" },
-							]}
+							maxLength={120}
 						/>
 						<Area
 							label="Gusti musicali"
