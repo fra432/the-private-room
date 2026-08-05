@@ -1,6 +1,11 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
+import {
+	PASSWORD_HINT,
+	PasswordField,
+	passwordErrorMessage,
+} from "@/components/password-field";
 import { SiteNav } from "@/components/site-nav";
 import { useAuth } from "@/hooks/use-auth";
 import { supabase } from "@/integrations/supabase/client";
@@ -667,7 +672,7 @@ function PasswordModal({ onClose }: { onClose: () => void }) {
 		setSaving(true);
 		const { error } = await supabase.auth.updateUser({ password: pwd });
 		setSaving(false);
-		if (error) return toast.error(error.message);
+		if (error) return toast.error(passwordErrorMessage(error.message));
 		toast.success("Password aggiornata");
 		onClose();
 	}
@@ -685,30 +690,21 @@ function PasswordModal({ onClose }: { onClose: () => void }) {
 					</button>
 				</div>
 				<form onSubmit={submit} className="mt-6 flex flex-col gap-5">
-					<label className="flex flex-col gap-2">
-						<span className="text-[0.7rem] tracking-[0.5em] uppercase text-foreground/60">
-							Nuova password
-						</span>
-						<input
-							type="password"
-							value={pwd}
-							onChange={(e) => setPwd(e.target.value)}
-							required
-							className="w-full !bg-transparent border-b border-[color:var(--gold)]/50 pb-2 pt-2 font-serif text-lg focus:border-[color:var(--gold)] focus:outline-none"
-						/>
-					</label>
-					<label className="flex flex-col gap-2">
-						<span className="text-[0.7rem] tracking-[0.5em] uppercase text-foreground/60">
-							Conferma
-						</span>
-						<input
-							type="password"
-							value={confirm}
-							onChange={(e) => setConfirm(e.target.value)}
-							required
-							className="w-full !bg-transparent border-b border-[color:var(--gold)]/50 pb-2 pt-2 font-serif text-lg focus:border-[color:var(--gold)] focus:outline-none"
-						/>
-					</label>
+					<PasswordField
+						label="Nuova password"
+						value={pwd}
+						onChange={setPwd}
+						required
+						hint={PASSWORD_HINT}
+						className="w-full !bg-transparent border-b border-[color:var(--gold)]/50 pb-2 pr-11 pt-2 font-serif text-lg focus:border-[color:var(--gold)] focus:outline-none"
+					/>
+					<PasswordField
+						label="Conferma"
+						value={confirm}
+						onChange={setConfirm}
+						required
+						className="w-full !bg-transparent border-b border-[color:var(--gold)]/50 pb-2 pr-11 pt-2 font-serif text-lg focus:border-[color:var(--gold)] focus:outline-none"
+					/>
 					<button
 						type="submit"
 						disabled={saving}

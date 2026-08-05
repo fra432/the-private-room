@@ -10,6 +10,11 @@ import { z } from "zod";
 import { BackArrow } from "@/components/back-arrow";
 import { BrandLogo } from "@/components/brand-logo";
 import { useAuth } from "@/hooks/use-auth";
+import {
+	PASSWORD_HINT,
+	PasswordField,
+	passwordErrorMessage,
+} from "@/components/password-field";
 import { supabase } from "@/integrations/supabase/client";
 import { sendPasswordReset } from "@/lib/auth.functions";
 
@@ -20,7 +25,7 @@ export const Route = createFileRoute("/login")({
 
 const LoginSchema = z.object({
 	email: z.string().email().max(255),
-	password: z.string().min(6).max(100),
+	password: z.string().min(8).max(100),
 });
 
 function LoginPage() {
@@ -39,7 +44,7 @@ function LoginPage() {
 		const fd = new FormData(e.currentTarget);
 		const parsed = LoginSchema.safeParse(Object.fromEntries(fd.entries()));
 		if (!parsed.success) {
-			toast.error("Please enter a valid email and password (min 6 chars).");
+			toast.error("Inserisci un'email valida e una password di almeno 8 caratteri.");
 			return;
 		}
 		setLoading(true);
@@ -109,7 +114,7 @@ function LoginPage() {
 			});
 			setLoading(false);
 			if (error) {
-				toast.error(error.message);
+				toast.error(passwordErrorMessage(error.message));
 				return;
 			}
 			if (typeof window !== "undefined")
@@ -174,14 +179,14 @@ function LoginPage() {
 								required
 								autoComplete="email"
 							/>
-							<Field
+							<PasswordField
 								name="password"
 								label="Password"
-								type="password"
 								required
 								autoComplete={
 									mode === "login" ? "current-password" : "new-password"
 								}
+								hint={mode === "signup" ? PASSWORD_HINT : undefined}
 							/>
 
 							<button
