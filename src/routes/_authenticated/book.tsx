@@ -255,6 +255,17 @@ function BookPage() {
 							<h1 className="font-serif text-3xl text-[color:var(--gold)]">
 								Scegli un giorno
 							</h1>
+							{!hoursLoaded && (
+								<p className="mt-3 text-[0.6rem] tracking-[0.4em] uppercase text-muted-foreground">
+									Caricamento disponibilità…
+								</p>
+							)}
+							{hoursLoaded && hoursError && (
+								<p className="mt-3 text-sm text-[color:var(--gold)]">
+									Non riusciamo a caricare gli orari dello studio. Ricarica la
+									pagina o scrivici per prenotare.
+								</p>
+							)}
 							<p className="mt-2 text-sm text-muted-foreground">
 								Uno slot disponibile per giorno. La richiesta sarà confermata
 								personalmente.
@@ -312,9 +323,19 @@ function BookPage() {
 										const hourRow = weeklyHours.find(
 											(r) => r.day_of_week === dow,
 										);
-										const isWeeklyClosed = !hourRow || hourRow.is_closed;
+										// Finché gli orari non sono caricati non blocchiamo il giorno,
+										// altrimenti sembra tutto non disponibile.
+										const isWeeklyClosed = hoursLoaded
+											? hourRow
+												? hourRow.is_closed
+												: false
+											: false;
 										const disabled =
-											isPast || isTaken || isClosed || isWeeklyClosed;
+											!hoursLoaded ||
+											isPast ||
+											isTaken ||
+											isClosed ||
+											isWeeklyClosed;
 										const isSel = selected === iso;
 										const isToday = iso === today;
 										return (
