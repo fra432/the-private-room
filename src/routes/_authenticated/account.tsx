@@ -1,6 +1,11 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
+import {
+	PASSWORD_HINT,
+	PasswordField,
+	passwordErrorMessage,
+} from "@/components/password-field";
 import { SiteNav } from "@/components/site-nav";
 import { useAuth } from "@/hooks/use-auth";
 import { supabase } from "@/integrations/supabase/client";
