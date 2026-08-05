@@ -193,8 +193,14 @@ function BookPage() {
 				</div>
 			</header>
 
+			{hasQuestionnaire === null && (
+				<div className="mx-auto max-w-2xl px-6 py-24 text-center text-[0.6rem] tracking-[0.5em] uppercase text-muted-foreground">
+					Caricamento…
+				</div>
+			)}
+
 			{hasQuestionnaire === false && (
-				<div className="mx-auto max-w-2xl px-6 pt-12">
+				<div className="mx-auto max-w-2xl px-6 py-20 md:py-28">
 					<p className="text-[0.55rem] tracking-[0.6em] uppercase text-[color:var(--gold)]">
 						Un passaggio prima
 					</p>
@@ -206,16 +212,27 @@ function BookPage() {
 						di compilare un breve questionario di presentazione prima del primo
 						appuntamento.
 					</p>
+					<p className="mt-3 text-sm leading-relaxed text-muted-foreground">
+						Il calendario si sbloccherà subito dopo l'invio del questionario.
+					</p>
 					<Link
 						to="/questionnaire"
 						className="mt-8 inline-flex h-12 items-center justify-center bg-[color:var(--gold)] px-10 text-[0.6rem] tracking-[0.5em] uppercase text-background hover:opacity-90"
 					>
 						Compila il questionario
 					</Link>
+					<div className="mt-6">
+						<Link
+							to="/dashboard"
+							className="text-[0.6rem] tracking-[0.4em] uppercase text-muted-foreground hover:text-foreground"
+						>
+							Torna al dashboard
+						</Link>
+					</div>
 				</div>
 			)}
 
-			{hasQuestionnaire !== false && (
+			{hasQuestionnaire === true && (
 				<div className="mx-auto max-w-2xl px-6 py-12">
 					{hasQuestionnaire === true && !questionnaireConfirmed && (
 						<div className="mb-12 border border-[color:var(--gold)]/40 bg-[color:var(--gold)]/5 p-6 md:p-8">
