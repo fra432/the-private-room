@@ -36,6 +36,14 @@ function DashboardPage() {
 		setIntroDone(true);
 	}
 
+	// Safety net: se il video non parte (autoplay bloccato, rete lenta, iOS in
+	// risparmio energetico) non lasciare la schermata nera bloccata.
+	useEffect(() => {
+		if (introDone) return;
+		const t = setTimeout(() => markIntroDone(), 5000);
+		return () => clearTimeout(t);
+	}, [introDone]);
+
 	useEffect(() => {
 		if (!user) return;
 		supabase
@@ -70,11 +78,13 @@ function DashboardPage() {
 						muted
 						playsInline
 						onEnded={markIntroDone}
+						onError={markIntroDone}
+						onStalled={markIntroDone}
 						className="h-full w-full object-contain opacity-90"
 					/>
 					<button
 						onClick={markIntroDone}
-						className="absolute bottom-8 right-8 text-sm tracking-[0.5em] uppercase text-white/60 hover:text-white"
+						className="absolute bottom-10 left-1/2 -translate-x-1/2 border border-white/40 px-8 py-3 text-[0.65rem] tracking-[0.5em] uppercase text-white/80 hover:text-white md:bottom-8 md:left-auto md:right-8 md:translate-x-0"
 					>
 						Salta
 					</button>
