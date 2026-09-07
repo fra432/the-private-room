@@ -533,10 +533,24 @@ function BookingsSection({
 				})),
 			);
 			setAvatarUrls(urls);
+			const { data: ns } = await supabase
+				.from("booking_notes")
+				.select("booking_id")
+				.in(
+					"booking_id",
+					list.map((b) => b.id),
+				);
+			const counts: Record<string, number> = {};
+			(ns ?? []).forEach((n: { booking_id: string }) => {
+				counts[n.booking_id] = (counts[n.booking_id] ?? 0) + 1;
+			});
+			setNoteCounts(counts);
 		} else {
 			setProfiles({});
 			setAvatarUrls({});
+			setNoteCounts({});
 		}
+
 		setLoading(false);
 	}, [tab, view, month]);
 
