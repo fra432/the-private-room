@@ -1871,3 +1871,167 @@ function Info({ label, value }: { label: string; value: string }) {
 		</div>
 	);
 }
+
+type BookingNote = {
+	id: string;
+	content: string;
+	created_at: string;
+	updated_at: string;
+};
+
+function BookingNotes({ bookingId }: { bookingId: string }) {
+	const { user } = useAuth();
+	const [notes, setNotes] = useState<BookingNote[]>([]);
+	const [loading, setLoading] = useState(true);
+	const [draft, setDraft] = useState("");
+	const [saving, setSaving] = useState(false);
+	const [editingId, setEditingId] = useState<string | null>(null);
+	const [editDraft, setEditDraft] = useState("");
+
+	const load = useCallback(async () => {
+		setLoading(true);
+		const { data, error } = await supabase
+			.from("booking_notes")
+			.select("id,content,created_at,updated_at")
+			.eq("booking_id", bookingId)
+			.order("created_at", { ascending: false });
+		setLoading(false);
+		if (error) return toast.error(error.message);
+		setNotes((data ?? []) as BookingNote[]);
+	}, [bookingId]);
+
+	useEffect(() => {
+		void load();
+	}, [load]);
+
+	async function add() {
+		const content = draft.trim();
+		if (!content || !user) return;
+		setSaving(true);
+		const { error } = await supabase
+			.from("booking_notes")
+			.insert({ booking_id: bookingId, author_id: user.id, content });
+		setSaving(false);
+		if (error) return toast.error(error.message);
+		setDraft("");
+		toast.success("Nota salvata");
+		void load();
+	}
+
+	async function saveEdit(id: string) {
+		const content = editDraft.trim();
+		if (!content) return;
+		const { error } = await supabase
+			.from("booking_notes")
+			.update({ content })
+			.eq("id", id);
+		if (error) return toast.error(error.message);
+		setEditingId(null);
+		void load();
+	}
+
+	async function remove(id: string) {
+		const { error } = await supabase
+			.from("booking_notes")
+			.delete()
+			.eq("id", id);
+		if (error) return toast.error(error.message);
+		void load();
+	}
+
+	return (
+		<div className="mt-6 border-t border-[color:var(--gold)]/20 pt-5">
+			<h3 className="font-serif text-xl text-[color:var(--gold)]">
+				Note interne
+			</h3>
+			<p className="mt-1 text-sm text-foreground/60">
+				Visibili solo a te. La cliente non le vede.
+			</p>
+
+			<div className="mt-4 flex flex-col gap-3">
+				<textarea
+					value={draft}
+					onChange={(e) => setDraft(e.currentTarget.value)}
+					rows={3}
+					placeholder="Es. formula colore, tempi, preferenze…"
+					className="w-full resize-none border border-[color:var(--gold)]/40 bg-transparent p-3 font-serif text-base text-foreground transition-colors placeholder:text-foreground/40 focus:border-[color:var(--gold)] focus:outline-none"
+				/>
+				<button
+					onClick={add}
+					disabled={saving || !draft.trim()}
+					className="inline-flex h-10 w-fit items-center justify-center bg-[color:var(--gold)] px-6 text-sm tracking-[0.15em] uppercase text-background hover:opacity-90 disabled:opacity-40"
+				>
+					Aggiungi nota
+				</button>
+			</div>
+
+			<div className="mt-5 flex flex-col divide-y divide-[color:var(--gold)]/15">
+				{loading && <p className="py-4 text-foreground/60">Caricamento…</p>}
+				{!loading && notes.length === 0 && (
+					<p className="py-4 italic text-foreground/60">Nessuna nota.</p>
+				)}
+				{!loading &&
+					notes.map((n) => (
+						<div key={n.id} className="py-4">
+							<p className="text-[0.6rem] tracking-[0.4em] uppercase text-foreground/50">
+								{new Date(n.created_at).toLocaleString("it-IT", {
+									day: "numeric",
+									month: "long",
+									year: "numeric",
+									hour: "2-digit",
+									minute: "2-digit",
+								})}
+							</p>
+							{editingId === n.id ? (
+								<div className="mt-2 flex flex-col gap-2">
+									<textarea
+										value={editDraft}
+										onChange={(e) => setEditDraft(e.currentTarget.value)}
+										rows={3}
+										className="w-full resize-none border border-[color:var(--gold)]/40 bg-transparent p-3 font-serif text-base text-foreground focus:border-[color:var(--gold)] focus:outline-none"
+									/>
+									<div className="flex gap-4">
+										<button
+											onClick={() => saveEdit(n.id)}
+											className="text-sm tracking-[0.08em] uppercase text-[color:var(--gold)] hover:underline"
+										>
+											Salva
+										</button>
+										<button
+											onClick={() => setEditingId(null)}
+											className="text-sm tracking-[0.08em] uppercase text-foreground/60 hover:text-foreground"
+										>
+											Annulla
+										</button>
+									</div>
+								</div>
+							) : (
+								<>
+									<p className="mt-2 whitespace-pre-wrap font-serif text-base text-foreground/90">
+										{n.content}
+									</p>
+									<div className="mt-2 flex gap-4">
+										<button
+											onClick={() => {
+												setEditingId(n.id);
+												setEditDraft(n.content);
+											}}
+											className="text-sm tracking-[0.08em] uppercase text-foreground/60 hover:text-[color:var(--gold)]"
+										>
+											Modifica
+										</button>
+										<button
+											onClick={() => remove(n.id)}
+											className="text-sm tracking-[0.08em] uppercase text-foreground/60 hover:text-[color:var(--gold)]"
+										>
+											Elimina
+										</button>
+									</div>
+								</>
+							)}
+						</div>
+					))}
+			</div>
+		</div>
+	);
+}
