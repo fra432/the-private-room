@@ -1574,6 +1574,8 @@ function ClientDetail({
 	const [newNote, setNewNote] = useState("");
 	const [editingId, setEditingId] = useState<string | null>(null);
 	const [editingContent, setEditingContent] = useState("");
+	const [openBookingId, setOpenBookingId] = useState<string | null>(null);
+
 
 	const loadData = useCallback(async () => {
 		setLoading(true);
@@ -1857,29 +1859,52 @@ function ClientDetail({
 				) : (
 					<ul className="mt-4 divide-y divide-[color:var(--gold)]/15">
 						{bookings.map((b) => (
-							<li
-								key={b.id}
-								className="flex items-center justify-between py-3 text-lg"
-							>
-								<span className="font-serif">
-									{new Date(b.date).toLocaleDateString("it-IT", {
-										weekday: "long",
-										day: "numeric",
-										month: "long",
-										year: "numeric",
-									})}
-								</span>
-								<span className="text-lg tracking-[0.08em] uppercase text-foreground/70">
-									{STATUS_LABEL[b.status] ?? b.status}
-								</span>
+							<li key={b.id}>
+								<button
+									type="button"
+									onClick={() => setOpenBookingId(b.id)}
+									className="flex w-full items-center justify-between gap-4 py-3 text-left text-lg transition-colors hover:text-[color:var(--gold)]"
+								>
+									<span className="font-serif">
+										{new Date(b.date).toLocaleDateString("it-IT", {
+											weekday: "long",
+											day: "numeric",
+											month: "long",
+											year: "numeric",
+										})}
+										{b.arrival_time && (
+											<span className="ml-3 text-foreground/70">
+												{b.arrival_time.slice(0, 5)}
+											</span>
+										)}
+									</span>
+									<span className="flex items-center gap-4">
+										<span className="text-lg tracking-[0.08em] uppercase text-foreground/70">
+											{STATUS_LABEL[b.status] ?? b.status}
+										</span>
+										<span className="text-lg tracking-[0.08em] uppercase text-[color:var(--gold)]/80">
+											Dettagli
+										</span>
+									</span>
+								</button>
 							</li>
 						))}
 					</ul>
 				)}
 			</div>
+
+			{openBookingId && (
+				<BookingDetailModal
+					bookingId={openBookingId}
+					onClose={() => setOpenBookingId(null)}
+					onOpenClient={() => setOpenBookingId(null)}
+					onChanged={() => void loadData()}
+				/>
+			)}
 		</section>
 	);
 }
+
 
 function Info({ label, value }: { label: string; value: string }) {
 	return (
