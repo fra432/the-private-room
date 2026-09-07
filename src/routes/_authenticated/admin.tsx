@@ -1079,6 +1079,9 @@ function BookingDetailModal({
 							)}
 						</div>
 
+						<BookingNotes bookingId={booking.id} />
+
+
 						<div className="mt-8 flex flex-wrap gap-3 border-t border-[color:var(--gold)]/20 pt-5">
 							{booking.status === "pending" && (
 								<>
