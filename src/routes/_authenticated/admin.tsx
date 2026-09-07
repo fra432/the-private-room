@@ -688,13 +688,19 @@ function BookingsSection({
 												)}
 											</h2>
 										</div>
-										<div className="flex gap-4">
+										<div className="flex items-center gap-4">
+											{(noteCounts[b.id] ?? 0) > 0 && (
+												<span className="border border-[color:var(--gold)]/40 px-2 py-0.5 text-[0.65rem] tracking-[0.25em] uppercase text-[color:var(--gold)]">
+													{noteCounts[b.id]} note
+												</span>
+											)}
 											<button
 												onClick={() => setOpenBookingId(b.id)}
 												className="text-lg tracking-[0.08em] uppercase text-[color:var(--gold)] hover:underline underline-offset-4"
 											>
 												Dettagli
 											</button>
+
 											<button
 												onClick={() => onOpenClient(b.user_id)}
 												className="text-lg tracking-[0.08em] uppercase text-foreground/70 hover:text-[color:var(--gold)]"
