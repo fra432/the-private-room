@@ -493,6 +493,8 @@ function BookingsSection({
 		return new Date(d.getFullYear(), d.getMonth(), 1);
 	});
 	const [openBookingId, setOpenBookingId] = useState<string | null>(null);
+	const [noteCounts, setNoteCounts] = useState<Record<string, number>>({});
+
 
 	const load = useCallback(async () => {
 		setLoading(true);
