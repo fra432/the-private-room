@@ -1,6 +1,5 @@
 import { createFileRoute, Link, Navigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { BrandLogo } from "@/components/brand-logo";
 import { useAuth } from "@/hooks/use-auth";
 
 export const Route = createFileRoute("/welcome")({
@@ -39,7 +38,11 @@ function WelcomePage() {
 						show ? "opacity-100 translate-y-0" : "opacity-0 translate-y-3"
 					}`}
 				>
-					<BrandLogo className="w-[min(440px,82vw)] text-[color:var(--gold)]" />
+					<img
+						src="/logo-welcome.png"
+						alt="THE ROOM — Private Hair Studio"
+						className="w-[min(440px,82vw)] h-auto"
+					/>
 
 					<div className="mt-12 flex flex-col items-center gap-4 sm:flex-row sm:gap-6">
 						<Link

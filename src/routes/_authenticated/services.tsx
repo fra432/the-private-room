@@ -251,18 +251,6 @@ function ServicesPage() {
 					</Link>
 				</div>
 			</section>
-
-			<footer className="border-t border-[color:var(--border)]">
-				<div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-10 md:px-10">
-					<BrandLogo
-						variant="horizontal"
-						className="h-8 w-auto text-foreground/60"
-					/>
-					<p className="text-[0.5rem] tracking-[0.5em] uppercase text-muted-foreground">
-						Access by appointment only
-					</p>
-				</div>
-			</footer>
 		</main>
 	);
 }
