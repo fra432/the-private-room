@@ -47,6 +47,8 @@ function BookPage() {
 		}>
 	>([]);
 	const [arrivalTime, setArrivalTime] = useState<string | null>(null);
+	const [hoursLoaded, setHoursLoaded] = useState(false);
+	const [hoursError, setHoursError] = useState(false);
 
 	useEffect(() => {
 		if (!user) return;
@@ -95,7 +97,16 @@ function BookPage() {
 		supabase
 			.from("weekly_hours")
 			.select("day_of_week,is_closed,open_time,close_time")
-			.then(({ data }) => setWeeklyHours(data ?? []));
+			.then(({ data, error }) => {
+				if (error || !data || data.length === 0) {
+					setHoursError(true);
+					setHoursLoaded(true);
+					return;
+				}
+				setWeeklyHours(data);
+				setHoursError(false);
+				setHoursLoaded(true);
+			});
 	}, []);
 
 	const slots = useMemo(() => {
@@ -182,8 +193,14 @@ function BookPage() {
 				</div>
 			</header>
 
+			{hasQuestionnaire === null && (
+				<div className="mx-auto max-w-2xl px-6 py-24 text-center text-[0.6rem] tracking-[0.5em] uppercase text-muted-foreground">
+					Caricamento…
+				</div>
+			)}
+
 			{hasQuestionnaire === false && (
-				<div className="mx-auto max-w-2xl px-6 pt-12">
+				<div className="mx-auto max-w-2xl px-6 py-20 md:py-28">
 					<p className="text-[0.55rem] tracking-[0.6em] uppercase text-[color:var(--gold)]">
 						Un passaggio prima
 					</p>
@@ -195,16 +212,27 @@ function BookPage() {
 						di compilare un breve questionario di presentazione prima del primo
 						appuntamento.
 					</p>
+					<p className="mt-3 text-sm leading-relaxed text-muted-foreground">
+						Il calendario si sbloccherà subito dopo l'invio del questionario.
+					</p>
 					<Link
 						to="/questionnaire"
 						className="mt-8 inline-flex h-12 items-center justify-center bg-[color:var(--gold)] px-10 text-[0.6rem] tracking-[0.5em] uppercase text-background hover:opacity-90"
 					>
 						Compila il questionario
 					</Link>
+					<div className="mt-6">
+						<Link
+							to="/dashboard"
+							className="text-[0.6rem] tracking-[0.4em] uppercase text-muted-foreground hover:text-foreground"
+						>
+							Torna al dashboard
+						</Link>
+					</div>
 				</div>
 			)}
 
-			{hasQuestionnaire !== false && (
+			{hasQuestionnaire === true && (
 				<div className="mx-auto max-w-2xl px-6 py-12">
 					{hasQuestionnaire === true && !questionnaireConfirmed && (
 						<div className="mb-12 border border-[color:var(--gold)]/40 bg-[color:var(--gold)]/5 p-6 md:p-8">
@@ -244,6 +272,17 @@ function BookPage() {
 							<h1 className="font-serif text-3xl text-[color:var(--gold)]">
 								Scegli un giorno
 							</h1>
+							{!hoursLoaded && (
+								<p className="mt-3 text-[0.6rem] tracking-[0.4em] uppercase text-muted-foreground">
+									Caricamento disponibilità…
+								</p>
+							)}
+							{hoursLoaded && hoursError && (
+								<p className="mt-3 text-sm text-[color:var(--gold)]">
+									Non riusciamo a caricare gli orari dello studio. Ricarica la
+									pagina o scrivici per prenotare.
+								</p>
+							)}
 							<p className="mt-2 text-sm text-muted-foreground">
 								Uno slot disponibile per giorno. La richiesta sarà confermata
 								personalmente.
@@ -301,9 +340,19 @@ function BookPage() {
 										const hourRow = weeklyHours.find(
 											(r) => r.day_of_week === dow,
 										);
-										const isWeeklyClosed = !hourRow || hourRow.is_closed;
+										// Finché gli orari non sono caricati non blocchiamo il giorno,
+										// altrimenti sembra tutto non disponibile.
+										const isWeeklyClosed = hoursLoaded
+											? hourRow
+												? hourRow.is_closed
+												: false
+											: false;
 										const disabled =
-											isPast || isTaken || isClosed || isWeeklyClosed;
+											!hoursLoaded ||
+											isPast ||
+											isTaken ||
+											isClosed ||
+											isWeeklyClosed;
 										const isSel = selected === iso;
 										const isToday = iso === today;
 										return (

@@ -1,9 +1,15 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
+import {
+	PASSWORD_HINT,
+	PasswordField,
+	passwordErrorMessage,
+} from "@/components/password-field";
 import { SiteNav } from "@/components/site-nav";
 import { useAuth } from "@/hooks/use-auth";
 import { supabase } from "@/integrations/supabase/client";
+import { deleteAvatar, getAvatarUrl, uploadAvatar } from "@/lib/avatar";
 import { notifyBookingChangeRequestCreated } from "@/lib/email.functions";
 
 export const Route = createFileRoute("/_authenticated/account")({
@@ -25,6 +31,7 @@ type Profile = {
 	phone: string | null;
 	instagram: string | null;
 	email: string | null;
+	avatar_url: string | null;
 };
 
 type Questionnaire = {
@@ -45,6 +52,9 @@ function AccountPage() {
 	const { user } = useAuth();
 	const [profile, setProfile] = useState<Profile | null>(null);
 	const [profileSaving, setProfileSaving] = useState(false);
+	const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
+	const [avatarBusy, setAvatarBusy] = useState(false);
+	const fileInputRef = useRef<HTMLInputElement>(null);
 	const [questionnaire, setQuestionnaire] = useState<Questionnaire | null>(
 		null,
 	);
@@ -60,7 +70,7 @@ function AccountPage() {
 			await Promise.all([
 				supabase
 					.from("profiles")
-					.select("first_name,last_name,phone,instagram,email")
+					.select("first_name,last_name,phone,instagram,email,avatar_url")
 					.eq("id", user.id)
 					.maybeSingle(),
 				supabase
@@ -85,6 +95,7 @@ function AccountPage() {
 					.limit(50),
 			]);
 		setProfile((p as Profile) ?? null);
+		setAvatarPreview(await getAvatarUrl((p as Profile | null)?.avatar_url));
 		setQuestionnaire((q as Questionnaire) ?? null);
 		setUpcoming((up ?? []) as Booking[]);
 		setPast((pa ?? []) as Booking[]);
@@ -110,6 +121,49 @@ function AccountPage() {
 		setProfileSaving(false);
 		if (error) return toast.error(error.message);
 		toast.success("Profilo aggiornato");
+	}
+
+	async function onPickAvatar(e: React.ChangeEvent<HTMLInputElement>) {
+		const file = e.target.files?.[0];
+		e.target.value = "";
+		if (!file || !user) return;
+		if (file.size > 8 * 1024 * 1024) {
+			toast.error("File troppo grande (max 8MB).");
+			return;
+		}
+		setAvatarBusy(true);
+		try {
+			const path = await uploadAvatar(user.id, file);
+			const { error } = await supabase
+				.from("profiles")
+				.update({ avatar_url: path })
+				.eq("id", user.id);
+			if (error) throw error;
+			setProfile((prev) => (prev ? { ...prev, avatar_url: path } : prev));
+			setAvatarPreview(await getAvatarUrl(path));
+			toast.success("Foto profilo aggiornata");
+		} catch (err) {
+			toast.error(err instanceof Error ? err.message : "Errore upload");
+		} finally {
+			setAvatarBusy(false);
+		}
+	}
+
+	async function onRemoveAvatar() {
+		if (!user) return;
+		setAvatarBusy(true);
+		try {
+			await deleteAvatar(user.id);
+			await supabase
+				.from("profiles")
+				.update({ avatar_url: null })
+				.eq("id", user.id);
+			setProfile((prev) => (prev ? { ...prev, avatar_url: null } : prev));
+			setAvatarPreview(null);
+			toast.success("Foto rimossa");
+		} finally {
+			setAvatarBusy(false);
+		}
 	}
 
 	return (
@@ -223,9 +277,57 @@ function AccountPage() {
 				<div>
 					<h2 className="font-serif text-3xl text-foreground">I tuoi dati</h2>
 					{profile && (
+						<div className="mt-6 flex items-center gap-6">
+							<div className="relative h-24 w-24 overflow-hidden rounded-full border border-[color:var(--gold)]/40 bg-black/20">
+								{avatarPreview ? (
+									// eslint-disable-next-line @next/next/no-img-element
+									<img
+										src={avatarPreview}
+										alt="Foto profilo"
+										className="h-full w-full object-cover"
+									/>
+								) : (
+									<div className="flex h-full w-full items-center justify-center font-serif text-2xl text-[color:var(--gold)]/70">
+										{(profile.first_name?.[0] ?? profile.email?.[0] ?? "•").toUpperCase()}
+									</div>
+								)}
+							</div>
+							<div className="flex flex-col gap-2">
+								<input
+									ref={fileInputRef}
+									type="file"
+									accept="image/jpeg,image/png,image/webp"
+									className="hidden"
+									onChange={onPickAvatar}
+								/>
+								<button
+									type="button"
+									onClick={() => fileInputRef.current?.click()}
+									disabled={avatarBusy}
+									className="text-xs tracking-[0.4em] uppercase text-[color:var(--gold)] hover:underline disabled:opacity-50"
+								>
+									{avatarBusy ? "…" : avatarPreview ? "Cambia foto" : "Carica foto"}
+								</button>
+								{avatarPreview && (
+									<button
+										type="button"
+										onClick={onRemoveAvatar}
+										disabled={avatarBusy}
+										className="text-xs tracking-[0.4em] uppercase text-foreground/60 hover:text-foreground disabled:opacity-50"
+									>
+										Rimuovi
+									</button>
+								)}
+								<p className="text-[11px] text-muted-foreground">
+									JPG/PNG/WEBP · ridimensionata a 512px, max ~500KB.
+								</p>
+							</div>
+						</div>
+					)}
+					{profile && (
 						<form
 							onSubmit={saveProfile}
-							className="mt-6 grid gap-6 sm:grid-cols-2"
+							className="mt-8 grid gap-6 sm:grid-cols-2"
 						>
 							<AField
 								label="Nome"
@@ -570,7 +672,7 @@ function PasswordModal({ onClose }: { onClose: () => void }) {
 		setSaving(true);
 		const { error } = await supabase.auth.updateUser({ password: pwd });
 		setSaving(false);
-		if (error) return toast.error(error.message);
+		if (error) return toast.error(passwordErrorMessage(error.message));
 		toast.success("Password aggiornata");
 		onClose();
 	}
@@ -588,30 +690,21 @@ function PasswordModal({ onClose }: { onClose: () => void }) {
 					</button>
 				</div>
 				<form onSubmit={submit} className="mt-6 flex flex-col gap-5">
-					<label className="flex flex-col gap-2">
-						<span className="text-[0.7rem] tracking-[0.5em] uppercase text-foreground/60">
-							Nuova password
-						</span>
-						<input
-							type="password"
-							value={pwd}
-							onChange={(e) => setPwd(e.target.value)}
-							required
-							className="w-full !bg-transparent border-b border-[color:var(--gold)]/50 pb-2 pt-2 font-serif text-lg focus:border-[color:var(--gold)] focus:outline-none"
-						/>
-					</label>
-					<label className="flex flex-col gap-2">
-						<span className="text-[0.7rem] tracking-[0.5em] uppercase text-foreground/60">
-							Conferma
-						</span>
-						<input
-							type="password"
-							value={confirm}
-							onChange={(e) => setConfirm(e.target.value)}
-							required
-							className="w-full !bg-transparent border-b border-[color:var(--gold)]/50 pb-2 pt-2 font-serif text-lg focus:border-[color:var(--gold)] focus:outline-none"
-						/>
-					</label>
+					<PasswordField
+						label="Nuova password"
+						value={pwd}
+						onChange={setPwd}
+						required
+						hint={PASSWORD_HINT}
+						className="w-full !bg-transparent border-b border-[color:var(--gold)]/50 pb-2 pr-11 pt-2 font-serif text-lg focus:border-[color:var(--gold)] focus:outline-none"
+					/>
+					<PasswordField
+						label="Conferma"
+						value={confirm}
+						onChange={setConfirm}
+						required
+						className="w-full !bg-transparent border-b border-[color:var(--gold)]/50 pb-2 pr-11 pt-2 font-serif text-lg focus:border-[color:var(--gold)] focus:outline-none"
+					/>
 					<button
 						type="submit"
 						disabled={saving}

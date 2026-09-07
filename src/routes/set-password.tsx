@@ -2,6 +2,11 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { BrandLogo } from "@/components/brand-logo";
+import {
+	PASSWORD_HINT,
+	PasswordField,
+	passwordErrorMessage,
+} from "@/components/password-field";
 import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/set-password")({
@@ -52,7 +57,7 @@ function SetPasswordPage() {
 		const { error } = await supabase.auth.updateUser({ password });
 		setLoading(false);
 		if (error) {
-			toast.error(error.message);
+			toast.error(passwordErrorMessage(error.message));
 			return;
 		}
 		toast.success("Password impostata. Benvenuta.");
@@ -97,19 +102,20 @@ function SetPasswordPage() {
 
 				{ready && hasSession && (
 					<form onSubmit={onSubmit} className="mt-10 flex flex-col gap-7">
-						<Field
+						<PasswordField
 							label="Nuova password"
-							type="password"
 							autoComplete="new-password"
 							value={password}
 							onChange={setPassword}
+							required
+							hint={PASSWORD_HINT}
 						/>
-						<Field
+						<PasswordField
 							label="Conferma password"
-							type="password"
 							autoComplete="new-password"
 							value={confirm}
 							onChange={setConfirm}
+							required
 						/>
 						<button
 							type="submit"

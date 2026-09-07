@@ -7,6 +7,7 @@ import { BrandLogo } from "@/components/brand-logo";
 import { useAuth } from "@/hooks/use-auth";
 import { supabase } from "@/integrations/supabase/client";
 import { sendClientInvite } from "@/lib/auth.functions";
+import { resolveAvatarUrls } from "@/lib/avatar";
 import {
 	notifyAccessRequestDecision,
 	notifyBookingChangeRequestDecision,
@@ -47,6 +48,7 @@ type Profile = {
 	last_name: string | null;
 	phone?: string | null;
 	instagram?: string | null;
+	avatar_url?: string | null;
 	created_at?: string;
 };
 
@@ -484,6 +486,7 @@ function BookingsSection({
 	>("pending");
 	const [rows, setRows] = useState<Booking[]>([]);
 	const [profiles, setProfiles] = useState<Record<string, Profile>>({});
+	const [avatarUrls, setAvatarUrls] = useState<Record<string, string>>({});
 	const [loading, setLoading] = useState(true);
 	const [month, setMonth] = useState(() => {
 		const d = new Date();
@@ -516,15 +519,20 @@ function BookingsSection({
 			const ids = Array.from(new Set(list.map((b) => b.user_id)));
 			const { data: ps } = await supabase
 				.from("profiles")
-				.select("id,email,first_name,last_name,phone,instagram")
+				.select("id,email,first_name,last_name,phone,instagram,avatar_url")
 				.in("id", ids);
 			const map: Record<string, Profile> = {};
 			(ps ?? []).forEach((p) => {
 				map[p.id] = p as Profile;
 			});
 			setProfiles(map);
+			const urls = await resolveAvatarUrls(
+				(ps ?? []).map((p: any) => ({ id: p.id, avatar_url: p.avatar_url ?? null })),
+			);
+			setAvatarUrls(urls);
 		} else {
 			setProfiles({});
+			setAvatarUrls({});
 		}
 		setLoading(false);
 	}, [tab, view, month]);
@@ -558,6 +566,12 @@ function BookingsSection({
 		return p
 			? `${p.first_name ?? ""} ${p.last_name ?? ""}`.trim() || p.email || "—"
 			: b.user_id.slice(0, 8);
+	}
+
+	function initialsOf(b: Booking) {
+		const p = profiles[b.user_id];
+		const s = p?.first_name || p?.email || "•";
+		return s.charAt(0).toUpperCase();
 	}
 
 	return (
@@ -603,6 +617,8 @@ function BookingsSection({
 					rows={rows}
 					loading={loading}
 					nameOf={nameOf}
+					avatarOf={(b) => avatarUrls[b.user_id] ?? null}
+					initialsOf={initialsOf}
 					onOpen={setOpenBookingId}
 				/>
 			) : (
@@ -621,10 +637,21 @@ function BookingsSection({
 						rows.map((b) => {
 							const p = profiles[b.user_id];
 							const name = nameOf(b);
+							const avatar = avatarUrls[b.user_id];
 							return (
 								<article key={b.id} className="py-6">
-									<div className="flex flex-wrap items-baseline justify-between gap-2">
-										<h2 className="font-serif text-xl">
+									<div className="flex flex-wrap items-center justify-between gap-2">
+										<div className="flex items-center gap-3">
+											<div className="h-10 w-10 shrink-0 overflow-hidden rounded-full border border-[color:var(--gold)]/40 bg-black/20">
+												{avatar ? (
+													<img src={avatar} alt="" className="h-full w-full object-cover" />
+												) : (
+													<div className="flex h-full w-full items-center justify-center text-sm text-[color:var(--gold)]/70">
+														{initialsOf(b)}
+													</div>
+												)}
+											</div>
+											<h2 className="font-serif text-xl">
 											{new Date(b.date).toLocaleDateString("it-IT", {
 												weekday: "long",
 												day: "numeric",
@@ -637,6 +664,7 @@ function BookingsSection({
 												</span>
 											)}
 										</h2>
+										</div>
 										<div className="flex gap-4">
 											<button
 												onClick={() => setOpenBookingId(b.id)}
@@ -711,6 +739,8 @@ function CalendarView({
 	rows,
 	loading,
 	nameOf,
+	avatarOf,
+	initialsOf,
 	onOpen,
 }: {
 	month: Date;
@@ -718,6 +748,8 @@ function CalendarView({
 	rows: Booking[];
 	loading: boolean;
 	nameOf: (b: Booking) => string;
+	avatarOf: (b: Booking) => string | null;
+	initialsOf: (b: Booking) => string;
 	onOpen: (id: string) => void;
 }) {
 	const byDate = new Map<string, Booking[]>();
@@ -799,19 +831,26 @@ function CalendarView({
 									<button
 										key={b.id}
 										onClick={() => onOpen(b.id)}
-										className={`truncate px-1.5 py-1 text-left text-[11px] leading-tight transition-colors ${
+										className={`flex items-center gap-1.5 truncate px-1.5 py-1 text-left text-[11px] leading-tight transition-colors ${
 											b.status === "confirmed"
 												? "bg-[color:var(--gold)] text-background hover:opacity-90"
 												: "border border-[color:var(--gold)]/50 text-[color:var(--gold)] hover:bg-[color:var(--gold)]/10"
 										}`}
 										title={`${b.arrival_time ? String(b.arrival_time).slice(0, 5) + " · " : ""}${nameOf(b)}`}
 									>
+										<span className="inline-flex h-4 w-4 shrink-0 items-center justify-center overflow-hidden rounded-full bg-black/20 text-[9px]">
+											{avatarOf(b) ? (
+												<img src={avatarOf(b) as string} alt="" className="h-full w-full object-cover" />
+											) : (
+												<span>{initialsOf(b)}</span>
+											)}
+										</span>
 										{b.arrival_time && (
 											<span className="font-medium">
-												{String(b.arrival_time).slice(0, 5)}{" "}
+												{String(b.arrival_time).slice(0, 5)}
 											</span>
 										)}
-										{nameOf(b)}
+										<span className="truncate">{nameOf(b)}</span>
 									</button>
 								))}
 							</div>
