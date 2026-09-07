@@ -1574,6 +1574,8 @@ function ClientDetail({
 	const [newNote, setNewNote] = useState("");
 	const [editingId, setEditingId] = useState<string | null>(null);
 	const [editingContent, setEditingContent] = useState("");
+	const [openBookingId, setOpenBookingId] = useState<string | null>(null);
+
 
 	const loadData = useCallback(async () => {
 		setLoading(true);
