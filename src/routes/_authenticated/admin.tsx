@@ -527,7 +527,10 @@ function BookingsSection({
 			});
 			setProfiles(map);
 			const urls = await resolveAvatarUrls(
-				(ps ?? []).map((p: any) => ({ id: p.id, avatar_url: p.avatar_url ?? null })),
+				(ps ?? []).map((p: any) => ({
+					id: p.id,
+					avatar_url: p.avatar_url ?? null,
+				})),
 			);
 			setAvatarUrls(urls);
 		} else {
@@ -644,7 +647,11 @@ function BookingsSection({
 										<div className="flex items-center gap-3">
 											<div className="h-10 w-10 shrink-0 overflow-hidden rounded-full border border-[color:var(--gold)]/40 bg-black/20">
 												{avatar ? (
-													<img src={avatar} alt="" className="h-full w-full object-cover" />
+													<img
+														src={avatar}
+														alt=""
+														className="h-full w-full object-cover"
+													/>
 												) : (
 													<div className="flex h-full w-full items-center justify-center text-sm text-[color:var(--gold)]/70">
 														{initialsOf(b)}
@@ -652,18 +659,18 @@ function BookingsSection({
 												)}
 											</div>
 											<h2 className="font-serif text-xl">
-											{new Date(b.date).toLocaleDateString("it-IT", {
-												weekday: "long",
-												day: "numeric",
-												month: "long",
-												year: "numeric",
-											})}
-											{b.arrival_time && (
-												<span className="ml-3 text-lg text-[color:var(--gold)]">
-													{String(b.arrival_time).slice(0, 5)}
-												</span>
-											)}
-										</h2>
+												{new Date(b.date).toLocaleDateString("it-IT", {
+													weekday: "long",
+													day: "numeric",
+													month: "long",
+													year: "numeric",
+												})}
+												{b.arrival_time && (
+													<span className="ml-3 text-lg text-[color:var(--gold)]">
+														{String(b.arrival_time).slice(0, 5)}
+													</span>
+												)}
+											</h2>
 										</div>
 										<div className="flex gap-4">
 											<button
@@ -831,26 +838,32 @@ function CalendarView({
 									<button
 										key={b.id}
 										onClick={() => onOpen(b.id)}
-										className={`flex items-center gap-1.5 truncate px-1.5 py-1 text-left text-[11px] leading-tight transition-colors ${
+										className={`flex flex-col items-center gap-1 truncate px-1.5 py-2 text-center text-[10px] leading-tight transition-colors ${
 											b.status === "confirmed"
 												? "bg-[color:var(--gold)] text-background hover:opacity-90"
 												: "border border-[color:var(--gold)]/50 text-[color:var(--gold)] hover:bg-[color:var(--gold)]/10"
 										}`}
 										title={`${b.arrival_time ? String(b.arrival_time).slice(0, 5) + " · " : ""}${nameOf(b)}`}
 									>
-										<span className="inline-flex h-4 w-4 shrink-0 items-center justify-center overflow-hidden rounded-full bg-black/20 text-[9px]">
+										<span className="inline-flex h-8 w-8 shrink-0 items-center justify-center overflow-hidden rounded-full bg-black/20 text-[11px] font-semibold">
 											{avatarOf(b) ? (
-												<img src={avatarOf(b) as string} alt="" className="h-full w-full object-cover" />
+												<img
+													src={avatarOf(b) as string}
+													alt=""
+													className="h-full w-full object-cover"
+												/>
 											) : (
 												<span>{initialsOf(b)}</span>
 											)}
 										</span>
-										{b.arrival_time && (
-											<span className="font-medium">
-												{String(b.arrival_time).slice(0, 5)}
-											</span>
-										)}
-										<span className="truncate">{nameOf(b)}</span>
+										<div className="w-full truncate">
+											{b.arrival_time && (
+												<div className="font-medium">
+													{String(b.arrival_time).slice(0, 5)}
+												</div>
+											)}
+											<div className="truncate text-[9px]">{nameOf(b)}</div>
+										</div>
 									</button>
 								))}
 							</div>
@@ -1415,6 +1428,7 @@ function ClosedDaysEditor() {
 
 function ClientsList({ onOpen }: { onOpen: (userId: string) => void }) {
 	const [rows, setRows] = useState<Profile[]>([]);
+	const [avatarUrls, setAvatarUrls] = useState<Record<string, string>>({});
 	const [loading, setLoading] = useState(true);
 	const [q, setQ] = useState("");
 
@@ -1422,11 +1436,20 @@ function ClientsList({ onOpen }: { onOpen: (userId: string) => void }) {
 		(async () => {
 			const { data, error } = await supabase
 				.from("profiles")
-				.select("id,email,first_name,last_name,phone,instagram,created_at")
+				.select(
+					"id,email,first_name,last_name,phone,instagram,created_at,avatar_url",
+				)
 				.order("created_at", { ascending: false });
 			setLoading(false);
 			if (error) return toast.error(error.message);
-			setRows((data ?? []) as Profile[]);
+			const profiles = (data ?? []) as Profile[];
+			setRows(profiles);
+			if (profiles.length) {
+				const urls = await resolveAvatarUrls(
+					profiles.map((p) => ({ id: p.id, avatar_url: p.avatar_url ?? null })),
+				);
+				setAvatarUrls(urls);
+			}
 		})();
 	}, []);
 
@@ -1461,15 +1484,35 @@ function ClientsList({ onOpen }: { onOpen: (userId: string) => void }) {
 						`${p.first_name ?? ""} ${p.last_name ?? ""}`.trim() ||
 						p.email ||
 						"—";
+					const avatar = avatarUrls[p.id];
 					return (
 						<li key={p.id}>
 							<button
 								onClick={() => onOpen(p.id)}
-								className="flex w-full items-center justify-between py-5 text-left hover:text-[color:var(--gold)] transition-colors"
+								className="flex w-full items-center gap-4 justify-between py-5 text-left hover:text-[color:var(--gold)] transition-colors"
 							>
-								<div>
-									<p className="font-serif text-xl">{name}</p>
-									<p className="text-lg text-foreground/70">{p.email}</p>
+								<div className="flex items-center gap-4 flex-1">
+									<div className="h-12 w-12 shrink-0 overflow-hidden rounded-full border border-[color:var(--gold)]/40 bg-black/20">
+										{avatar ? (
+											<img
+												src={avatar}
+												alt=""
+												className="h-full w-full object-cover"
+											/>
+										) : (
+											<div className="flex h-full w-full items-center justify-center text-sm font-semibold text-[color:var(--gold)]/70">
+												{(
+													p.first_name?.[0] ??
+													p.email?.[0] ??
+													"•"
+												).toUpperCase()}
+											</div>
+										)}
+									</div>
+									<div>
+										<p className="font-serif text-xl">{name}</p>
+										<p className="text-lg text-foreground/70">{p.email}</p>
+									</div>
 								</div>
 								<span className="inline-flex items-center gap-2 text-lg tracking-[0.08em] uppercase text-foreground/70">
 									Apri <ArrowRight className="h-3 w-3" strokeWidth={1.25} />
@@ -1491,6 +1534,7 @@ function ClientDetail({
 	onBack: () => void;
 }) {
 	const [profile, setProfile] = useState<Profile | null>(null);
+	const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
 	const [quest, setQuest] = useState<Questionnaire | null>(null);
 	const [bookings, setBookings] = useState<Booking[]>([]);
 	const [notes, setNotes] = useState<
@@ -1512,7 +1556,9 @@ function ClientDetail({
 			await Promise.all([
 				supabase
 					.from("profiles")
-					.select("id,email,first_name,last_name,phone,instagram,created_at")
+					.select(
+						"id,email,first_name,last_name,phone,instagram,created_at,avatar_url",
+					)
 					.eq("id", userId)
 					.maybeSingle(),
 				supabase
@@ -1532,6 +1578,12 @@ function ClientDetail({
 					.order("created_at", { ascending: false }),
 			]);
 		setProfile((p ?? null) as Profile | null);
+		if (p?.avatar_url) {
+			const urls = await resolveAvatarUrls([
+				{ id: p.id, avatar_url: p.avatar_url },
+			]);
+			setAvatarUrl(urls[p.id] ?? null);
+		}
 		setQuest((q ?? null) as Questionnaire | null);
 		setBookings((b ?? []) as Booking[]);
 		setNotes((n ?? []) as any[]);
@@ -1602,20 +1654,45 @@ function ClientDetail({
 			</button>
 
 			<header className="mt-6">
-				<h2 className="font-serif text-3xl text-[color:var(--gold)]">{name}</h2>
-				<dl className="mt-4 grid gap-3 text-lg sm:grid-cols-2">
-					<Info label="Email" value={profile.email ?? "—"} />
-					{profile.phone && <Info label="Telefono" value={profile.phone} />}
-					{profile.instagram && (
-						<Info label="Instagram" value={profile.instagram} />
-					)}
-					{profile.created_at && (
-						<Info
-							label="Cliente dal"
-							value={new Date(profile.created_at).toLocaleDateString("it-IT")}
-						/>
-					)}
-				</dl>
+				<div className="flex items-start gap-6">
+					<div className="h-24 w-24 shrink-0 overflow-hidden rounded-full border border-[color:var(--gold)]/40 bg-black/20">
+						{avatarUrl ? (
+							<img
+								src={avatarUrl}
+								alt=""
+								className="h-full w-full object-cover"
+							/>
+						) : (
+							<div className="flex h-full w-full items-center justify-center text-3xl font-semibold text-[color:var(--gold)]/70">
+								{(
+									profile.first_name?.[0] ??
+									profile.email?.[0] ??
+									"•"
+								).toUpperCase()}
+							</div>
+						)}
+					</div>
+					<div className="flex-1">
+						<h2 className="font-serif text-3xl text-[color:var(--gold)]">
+							{name}
+						</h2>
+						<dl className="mt-4 grid gap-3 text-lg sm:grid-cols-2">
+							<Info label="Email" value={profile.email ?? "—"} />
+							{profile.phone && <Info label="Telefono" value={profile.phone} />}
+							{profile.instagram && (
+								<Info label="Instagram" value={profile.instagram} />
+							)}
+							{profile.created_at && (
+								<Info
+									label="Cliente dal"
+									value={new Date(profile.created_at).toLocaleDateString(
+										"it-IT",
+									)}
+								/>
+							)}
+						</dl>
+					</div>
+				</div>
 			</header>
 
 			<div className="mt-10">
