@@ -33,13 +33,18 @@ type Req = {
 
 type Booking = {
 	id: string;
-	user_id: string;
+	user_id: string | null;
 	date: string;
 	arrival_time: string | null;
 	status: "pending" | "confirmed" | "cancelled" | "rejected";
 	notes: string | null;
 	created_at: string;
+	guest_name?: string | null;
+	guest_phone?: string | null;
+	guest_email?: string | null;
+	created_by_admin?: boolean;
 };
+
 
 type Profile = {
 	id: string;
@@ -494,6 +499,8 @@ function BookingsSection({
 	});
 	const [openBookingId, setOpenBookingId] = useState<string | null>(null);
 	const [noteCounts, setNoteCounts] = useState<Record<string, number>>({});
+	const [showNew, setShowNew] = useState(false);
+
 
 
 	const load = useCallback(async () => {
@@ -518,7 +525,10 @@ function BookingsSection({
 		const list = (data ?? []) as Booking[];
 		setRows(list);
 		if (list.length) {
-			const ids = Array.from(new Set(list.map((b) => b.user_id)));
+			const ids = Array.from(
+				new Set(list.map((b) => b.user_id).filter(Boolean) as string[]),
+			);
+
 			const { data: ps } = await supabase
 				.from("profiles")
 				.select("id,email,first_name,last_name,phone,instagram,avatar_url")
@@ -581,6 +591,7 @@ function BookingsSection({
 	}
 
 	function nameOf(b: Booking) {
+		if (!b.user_id) return b.guest_name || "Ospite";
 		const p = profiles[b.user_id];
 		return p
 			? `${p.first_name ?? ""} ${p.last_name ?? ""}`.trim() || p.email || "—"
@@ -588,10 +599,12 @@ function BookingsSection({
 	}
 
 	function initialsOf(b: Booking) {
+		if (!b.user_id) return (b.guest_name || "•").charAt(0).toUpperCase();
 		const p = profiles[b.user_id];
 		const s = p?.first_name || p?.email || "•";
 		return s.charAt(0).toUpperCase();
 	}
+
 
 	return (
 		<>
@@ -611,7 +624,14 @@ function BookingsSection({
 						</button>
 					))}
 				</div>
+				<button
+					onClick={() => setShowNew(true)}
+					className="inline-flex h-10 items-center justify-center bg-[color:var(--gold)] px-5 text-sm tracking-[0.15em] uppercase font-semibold text-background hover:opacity-90"
+				>
+					+ Nuova prenotazione
+				</button>
 			</div>
+
 
 			{view === "list" && (
 				<div className="mt-6 flex flex-wrap gap-6">
