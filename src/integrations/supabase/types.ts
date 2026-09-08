@@ -150,6 +150,7 @@ export type Database = {
           guest_phone: string | null
           id: string
           notes: string | null
+          questionnaire_snapshot: Json | null
           status: Database["public"]["Enums"]["booking_status"]
           updated_at: string
           user_id: string | null
@@ -165,6 +166,7 @@ export type Database = {
           guest_phone?: string | null
           id?: string
           notes?: string | null
+          questionnaire_snapshot?: Json | null
           status?: Database["public"]["Enums"]["booking_status"]
           updated_at?: string
           user_id?: string | null
@@ -180,6 +182,7 @@ export type Database = {
           guest_phone?: string | null
           id?: string
           notes?: string | null
+          questionnaire_snapshot?: Json | null
           status?: Database["public"]["Enums"]["booking_status"]
           updated_at?: string
           user_id?: string | null
