@@ -8,13 +8,12 @@ import { useState } from "react";
 import { toast } from "sonner";
 import { z } from "zod";
 import { BackArrow } from "@/components/back-arrow";
-import { BrandLogo } from "@/components/brand-logo";
-import { useAuth } from "@/hooks/use-auth";
 import {
 	PASSWORD_HINT,
 	PasswordField,
 	passwordErrorMessage,
 } from "@/components/password-field";
+import { useAuth } from "@/hooks/use-auth";
 import { supabase } from "@/integrations/supabase/client";
 import { sendPasswordReset } from "@/lib/auth.functions";
 
@@ -44,7 +43,9 @@ function LoginPage() {
 		const fd = new FormData(e.currentTarget);
 		const parsed = LoginSchema.safeParse(Object.fromEntries(fd.entries()));
 		if (!parsed.success) {
-			toast.error("Inserisci un'email valida e una password di almeno 8 caratteri.");
+			toast.error(
+				"Inserisci un'email valida e una password di almeno 8 caratteri.",
+			);
 			return;
 		}
 		setLoading(true);
@@ -133,7 +134,7 @@ function LoginPage() {
 
 			<div className="relative mx-auto grid min-h-screen w-full max-w-6xl grid-cols-1 lg:grid-cols-2">
 				{/* LEFT — brand panel */}
-				<aside className="relative flex flex-col justify-between px-8 py-10 lg:border-r lg:border-[color:var(--gold)]/15 lg:px-14 lg:py-16">
+				<aside className="relative flex flex-col justify-between px-8 py-10 lg:justify-start lg:border-r lg:border-[color:var(--gold)]/15 lg:px-14 lg:py-16">
 					<Link
 						to="/welcome"
 						className="group inline-flex items-center gap-3 self-start text-[0.6rem] tracking-[0.5em] uppercase text-muted-foreground transition-colors hover:text-[color:var(--gold)]"
@@ -142,8 +143,12 @@ function LoginPage() {
 						<span className="hidden md:inline">Indietro</span>
 					</Link>
 
-					<div className="flex flex-col items-center text-center lg:items-start lg:text-left">
-						<BrandLogo className="w-[200px] text-[color:var(--gold)] lg:w-[280px]" />
+					<div className="flex flex-col items-center text-center lg:mt-16 lg:items-start lg:text-left">
+						<img
+							src="/logo-welcome.png"
+							alt="THE ROOM — Private Hair Studio"
+							className="w-[200px] h-auto lg:w-[340px]"
+						/>
 						<p className="font-serif italic mt-8 max-w-xs text-lg text-foreground/70 lg:text-xl">
 							Uno studio privato. Un'ospite alla volta. Lo spazio ti aspetta.
 						</p>
