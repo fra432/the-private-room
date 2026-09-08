@@ -33,13 +33,18 @@ type Req = {
 
 type Booking = {
 	id: string;
-	user_id: string;
+	user_id: string | null;
 	date: string;
 	arrival_time: string | null;
 	status: "pending" | "confirmed" | "cancelled" | "rejected";
 	notes: string | null;
 	created_at: string;
+	guest_name?: string | null;
+	guest_phone?: string | null;
+	guest_email?: string | null;
+	created_by_admin?: boolean;
 };
+
 
 type Profile = {
 	id: string;
@@ -494,6 +499,8 @@ function BookingsSection({
 	});
 	const [openBookingId, setOpenBookingId] = useState<string | null>(null);
 	const [noteCounts, setNoteCounts] = useState<Record<string, number>>({});
+	const [showNew, setShowNew] = useState(false);
+
 
 
 	const load = useCallback(async () => {
@@ -518,7 +525,10 @@ function BookingsSection({
 		const list = (data ?? []) as Booking[];
 		setRows(list);
 		if (list.length) {
-			const ids = Array.from(new Set(list.map((b) => b.user_id)));
+			const ids = Array.from(
+				new Set(list.map((b) => b.user_id).filter(Boolean) as string[]),
+			);
+
 			const { data: ps } = await supabase
 				.from("profiles")
 				.select("id,email,first_name,last_name,phone,instagram,avatar_url")
@@ -581,6 +591,7 @@ function BookingsSection({
 	}
 
 	function nameOf(b: Booking) {
+		if (!b.user_id) return b.guest_name || "Ospite";
 		const p = profiles[b.user_id];
 		return p
 			? `${p.first_name ?? ""} ${p.last_name ?? ""}`.trim() || p.email || "—"
@@ -588,10 +599,12 @@ function BookingsSection({
 	}
 
 	function initialsOf(b: Booking) {
+		if (!b.user_id) return (b.guest_name || "•").charAt(0).toUpperCase();
 		const p = profiles[b.user_id];
 		const s = p?.first_name || p?.email || "•";
 		return s.charAt(0).toUpperCase();
 	}
+
 
 	return (
 		<>
@@ -611,7 +624,14 @@ function BookingsSection({
 						</button>
 					))}
 				</div>
+				<button
+					onClick={() => setShowNew(true)}
+					className="inline-flex h-10 items-center justify-center bg-[color:var(--gold)] px-5 text-sm tracking-[0.15em] uppercase font-semibold text-background hover:opacity-90"
+				>
+					+ Nuova prenotazione
+				</button>
 			</div>
+
 
 			{view === "list" && (
 				<div className="mt-6 flex flex-wrap gap-6">
@@ -636,7 +656,7 @@ function BookingsSection({
 					rows={rows}
 					loading={loading}
 					nameOf={nameOf}
-					avatarOf={(b) => avatarUrls[b.user_id] ?? null}
+					avatarOf={(b) => (b.user_id ? avatarUrls[b.user_id] ?? null : null)}
 					initialsOf={initialsOf}
 					onOpen={setOpenBookingId}
 				/>
@@ -654,9 +674,10 @@ function BookingsSection({
 					)}
 					{!loading &&
 						rows.map((b) => {
-							const p = profiles[b.user_id];
+							const p = b.user_id ? profiles[b.user_id] : undefined;
 							const name = nameOf(b);
-							const avatar = avatarUrls[b.user_id];
+							const avatar = b.user_id ? avatarUrls[b.user_id] : undefined;
+
 							return (
 								<article key={b.id} className="py-6">
 									<div className="flex flex-wrap items-center justify-between gap-2">
@@ -701,12 +722,19 @@ function BookingsSection({
 												Dettagli
 											</button>
 
-											<button
-												onClick={() => onOpenClient(b.user_id)}
-												className="text-lg tracking-[0.08em] uppercase text-foreground/70 hover:text-[color:var(--gold)]"
-											>
-												{name} ↗
-											</button>
+											{b.user_id ? (
+												<button
+													onClick={() => onOpenClient(b.user_id as string)}
+													className="text-lg tracking-[0.08em] uppercase text-foreground/70 hover:text-[color:var(--gold)]"
+												>
+													{name} ↗
+												</button>
+											) : (
+												<span className="text-lg tracking-[0.08em] uppercase text-foreground/70">
+													{name} · ospite
+												</span>
+											)}
+
 										</div>
 									</div>
 									{p?.email && (
@@ -758,9 +786,253 @@ function BookingsSection({
 					onChanged={() => void load()}
 				/>
 			)}
+
+			{showNew && (
+				<NewBookingModal
+					onClose={() => setShowNew(false)}
+					onCreated={() => {
+						setShowNew(false);
+						void load();
+					}}
+				/>
+			)}
 		</>
 	);
 }
+
+function NewBookingModal({
+	onClose,
+	onCreated,
+}: {
+	onClose: () => void;
+	onCreated: () => void;
+}) {
+	const [mode, setMode] = useState<"client" | "guest">("client");
+	const [clients, setClients] = useState<Profile[]>([]);
+	const [clientId, setClientId] = useState("");
+	const [guestName, setGuestName] = useState("");
+	const [guestPhone, setGuestPhone] = useState("");
+	const [guestEmail, setGuestEmail] = useState("");
+	const [date, setDate] = useState("");
+	const [arrival, setArrival] = useState("");
+	const [notes, setNotes] = useState("");
+	const [saving, setSaving] = useState(false);
+	const [existing, setExisting] = useState<string | null>(null);
+
+	useEffect(() => {
+		(async () => {
+			const { data } = await supabase
+				.from("profiles")
+				.select("id,email,first_name,last_name,phone")
+				.order("first_name", { ascending: true });
+			setClients((data ?? []) as Profile[]);
+		})();
+	}, []);
+
+	useEffect(() => {
+		if (!date) return setExisting(null);
+		(async () => {
+			const { data } = await supabase
+				.from("bookings")
+				.select("id")
+				.eq("date", date)
+				.in("status", ["pending", "confirmed"]);
+			setExisting((data ?? []).length > 0 ? date : null);
+		})();
+	}, [date]);
+
+	async function save() {
+		if (!date) return toast.error("Scegli una data");
+		if (mode === "client" && !clientId) return toast.error("Scegli una cliente");
+		if (mode === "guest" && !guestName.trim())
+			return toast.error("Inserisci il nome");
+		setSaving(true);
+		const { error } = await supabase.from("bookings").insert({
+			user_id: mode === "client" ? clientId : null,
+			guest_name: mode === "guest" ? guestName.trim() : null,
+			guest_phone: mode === "guest" ? guestPhone.trim() || null : null,
+			guest_email: mode === "guest" ? guestEmail.trim() || null : null,
+			date,
+			arrival_time: arrival || null,
+			notes: notes.trim() || null,
+			status: "confirmed",
+			created_by_admin: true,
+		});
+		setSaving(false);
+		if (error) return toast.error(error.message);
+		toast.success("Prenotazione creata");
+		onCreated();
+	}
+
+	const inputClass =
+		"h-11 w-full border border-[color:var(--gold)]/30 bg-background px-3 text-base text-foreground focus:outline-none focus:ring-1 focus:ring-[color:var(--gold)]";
+
+	return (
+		<div
+			className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-black/70 p-4 md:p-8"
+			onClick={onClose}
+		>
+			<div
+				className="relative w-full max-w-xl bg-background text-foreground shadow-2xl"
+				onClick={(e) => e.stopPropagation()}
+			>
+				<button
+					onClick={onClose}
+					aria-label="Chiudi"
+					className="absolute right-3 top-3 inline-flex h-9 w-9 items-center justify-center text-foreground/60 hover:text-[color:var(--gold)]"
+				>
+					<X className="h-5 w-5" />
+				</button>
+				<div className="p-6 md:p-8">
+					<p className="text-[0.6rem] tracking-[0.5em] uppercase text-[color:var(--gold)]">
+						Nuova prenotazione
+					</p>
+					<h2 className="mt-2 font-serif text-2xl">Aggiungi appuntamento</h2>
+
+					<div className="mt-6 inline-flex border border-[color:var(--gold)]/40">
+						{(
+							[
+								["client", "Cliente registrata"],
+								["guest", "Senza account"],
+							] as const
+						).map(([m, label]) => (
+							<button
+								key={m}
+								onClick={() => setMode(m)}
+								className={`px-4 py-2 text-sm tracking-[0.08em] uppercase ${
+									mode === m
+										? "bg-[color:var(--gold)] text-background"
+										: "text-foreground/70 hover:text-foreground"
+								}`}
+							>
+								{label}
+							</button>
+						))}
+					</div>
+
+					<div className="mt-6 flex flex-col gap-4">
+						{mode === "client" ? (
+							<label className="flex flex-col gap-2">
+								<span className="text-[0.65rem] tracking-[0.3em] uppercase text-foreground/60">
+									Cliente
+								</span>
+								<select
+									value={clientId}
+									onChange={(e) => setClientId(e.target.value)}
+									className={inputClass}
+								>
+									<option value="">Seleziona…</option>
+									{clients.map((c) => (
+										<option key={c.id} value={c.id}>
+											{`${c.first_name ?? ""} ${c.last_name ?? ""}`.trim() ||
+												c.email ||
+												c.id}
+										</option>
+									))}
+								</select>
+							</label>
+						) : (
+							<>
+								<label className="flex flex-col gap-2">
+									<span className="text-[0.65rem] tracking-[0.3em] uppercase text-foreground/60">
+										Nome e cognome
+									</span>
+									<input
+										value={guestName}
+										onChange={(e) => setGuestName(e.target.value)}
+										className={inputClass}
+									/>
+								</label>
+								<div className="grid gap-4 sm:grid-cols-2">
+									<label className="flex flex-col gap-2">
+										<span className="text-[0.65rem] tracking-[0.3em] uppercase text-foreground/60">
+											Telefono
+										</span>
+										<input
+											value={guestPhone}
+											onChange={(e) => setGuestPhone(e.target.value)}
+											className={inputClass}
+										/>
+									</label>
+									<label className="flex flex-col gap-2">
+										<span className="text-[0.65rem] tracking-[0.3em] uppercase text-foreground/60">
+											Email (facoltativa)
+										</span>
+										<input
+											type="email"
+											value={guestEmail}
+											onChange={(e) => setGuestEmail(e.target.value)}
+											className={inputClass}
+										/>
+									</label>
+								</div>
+							</>
+						)}
+
+						<div className="grid gap-4 sm:grid-cols-2">
+							<label className="flex flex-col gap-2">
+								<span className="text-[0.65rem] tracking-[0.3em] uppercase text-foreground/60">
+									Data
+								</span>
+								<input
+									type="date"
+									value={date}
+									onChange={(e) => setDate(e.target.value)}
+									className={inputClass}
+								/>
+							</label>
+							<label className="flex flex-col gap-2">
+								<span className="text-[0.65rem] tracking-[0.3em] uppercase text-foreground/60">
+									Orario di arrivo
+								</span>
+								<input
+									type="time"
+									value={arrival}
+									onChange={(e) => setArrival(e.target.value)}
+									className={inputClass}
+								/>
+							</label>
+						</div>
+
+						{existing && (
+							<p className="text-sm text-[color:var(--gold)]">
+								Attenzione: in questa data c'è già un appuntamento.
+							</p>
+						)}
+
+						<label className="flex flex-col gap-2">
+							<span className="text-[0.65rem] tracking-[0.3em] uppercase text-foreground/60">
+								Note (servizio, dettagli…)
+							</span>
+							<textarea
+								value={notes}
+								onChange={(e) => setNotes(e.target.value)}
+								className="min-h-20 border border-[color:var(--gold)]/30 bg-background px-3 py-2 text-base text-foreground focus:outline-none focus:ring-1 focus:ring-[color:var(--gold)]"
+							/>
+						</label>
+
+						<div className="mt-2 flex flex-wrap gap-3">
+							<button
+								onClick={() => void save()}
+								disabled={saving}
+								className="inline-flex h-11 items-center justify-center bg-[color:var(--gold)] px-6 text-sm tracking-[0.15em] uppercase font-semibold text-background hover:opacity-90 disabled:opacity-50"
+							>
+								{saving ? "Salvataggio…" : "Crea e conferma"}
+							</button>
+							<button
+								onClick={onClose}
+								className="inline-flex h-11 items-center justify-center brand-frame px-6 text-sm tracking-[0.15em] uppercase text-[color:var(--gold)] hover:bg-[color:var(--gold)]/10"
+							>
+								Annulla
+							</button>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	);
+}
+
 
 function CalendarView({
 	month,
@@ -939,7 +1211,7 @@ function BookingDetailModal({
 				.eq("id", bookingId)
 				.maybeSingle();
 			setBooking((b ?? null) as Booking | null);
-			if (b) {
+			if (b?.user_id) {
 				const [{ data: p }, { data: q }] = await Promise.all([
 					supabase
 						.from("profiles")
@@ -954,7 +1226,11 @@ function BookingDetailModal({
 				]);
 				setProfile((p ?? null) as Profile | null);
 				setQuest((q ?? null) as Questionnaire | null);
+			} else {
+				setProfile(null);
+				setQuest(null);
 			}
+
 			setLoading(false);
 		})();
 	}, [bookingId]);
@@ -989,7 +1265,8 @@ function BookingDetailModal({
 		? `${profile.first_name ?? ""} ${profile.last_name ?? ""}`.trim() ||
 			profile.email ||
 			"—"
-		: "—";
+		: booking?.guest_name || "—";
+
 
 	return (
 		<div
@@ -1036,12 +1313,18 @@ function BookingDetailModal({
 						<div className="mt-6 border-t border-[color:var(--gold)]/20 pt-5">
 							<div className="flex flex-wrap items-baseline justify-between gap-2">
 								<h3 className="font-serif text-xl">{name}</h3>
-								<button
-									onClick={() => onOpenClient(booking.user_id)}
-									className="text-sm tracking-[0.08em] uppercase text-[color:var(--gold)] hover:underline"
-								>
-									Scheda cliente ↗
-								</button>
+								{booking.user_id ? (
+									<button
+										onClick={() => onOpenClient(booking.user_id as string)}
+										className="text-sm tracking-[0.08em] uppercase text-[color:var(--gold)] hover:underline"
+									>
+										Scheda cliente ↗
+									</button>
+								) : (
+									<span className="text-sm tracking-[0.25em] uppercase text-foreground/60">
+										Ospite · senza account
+									</span>
+								)}
 							</div>
 							<dl className="mt-3 grid gap-2 text-base sm:grid-cols-2">
 								{profile?.email && <Info label="Email" value={profile.email} />}
@@ -1051,7 +1334,14 @@ function BookingDetailModal({
 								{profile?.instagram && (
 									<Info label="Instagram" value={profile.instagram} />
 								)}
+								{!booking.user_id && booking.guest_phone && (
+									<Info label="Telefono" value={booking.guest_phone} />
+								)}
+								{!booking.user_id && booking.guest_email && (
+									<Info label="Email" value={booking.guest_email} />
+								)}
 							</dl>
+
 						</div>
 
 						<div className="mt-6 border-t border-[color:var(--gold)]/20 pt-5">
