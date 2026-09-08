@@ -92,12 +92,14 @@ async function loadBooking(id: string) {
 		.eq("id", id)
 		.maybeSingle();
 	if (!data) return null;
+	if (!data.user_id) return { booking: data, profile: null };
 	const { data: profile } = await supabaseAdmin
 		.from("profiles")
 		.select("first_name, last_name, email, phone")
 		.eq("id", data.user_id)
 		.maybeSingle();
 	return { booking: data, profile };
+
 }
 
 function fmtDate(iso: string) {
