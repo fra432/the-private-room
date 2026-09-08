@@ -1021,7 +1021,8 @@ function BookingDetailModal({
 		? `${profile.first_name ?? ""} ${profile.last_name ?? ""}`.trim() ||
 			profile.email ||
 			"—"
-		: "—";
+		: booking?.guest_name || "—";
+
 
 	return (
 		<div
@@ -1068,12 +1069,18 @@ function BookingDetailModal({
 						<div className="mt-6 border-t border-[color:var(--gold)]/20 pt-5">
 							<div className="flex flex-wrap items-baseline justify-between gap-2">
 								<h3 className="font-serif text-xl">{name}</h3>
-								<button
-									onClick={() => onOpenClient(booking.user_id)}
-									className="text-sm tracking-[0.08em] uppercase text-[color:var(--gold)] hover:underline"
-								>
-									Scheda cliente ↗
-								</button>
+								{booking.user_id ? (
+									<button
+										onClick={() => onOpenClient(booking.user_id as string)}
+										className="text-sm tracking-[0.08em] uppercase text-[color:var(--gold)] hover:underline"
+									>
+										Scheda cliente ↗
+									</button>
+								) : (
+									<span className="text-sm tracking-[0.25em] uppercase text-foreground/60">
+										Ospite · senza account
+									</span>
+								)}
 							</div>
 							<dl className="mt-3 grid gap-2 text-base sm:grid-cols-2">
 								{profile?.email && <Info label="Email" value={profile.email} />}
@@ -1083,7 +1090,14 @@ function BookingDetailModal({
 								{profile?.instagram && (
 									<Info label="Instagram" value={profile.instagram} />
 								)}
+								{!booking.user_id && booking.guest_phone && (
+									<Info label="Telefono" value={booking.guest_phone} />
+								)}
+								{!booking.user_id && booking.guest_email && (
+									<Info label="Email" value={booking.guest_email} />
+								)}
 							</dl>
+
 						</div>
 
 						<div className="mt-6 border-t border-[color:var(--gold)]/20 pt-5">
