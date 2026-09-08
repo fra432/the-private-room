@@ -248,11 +248,11 @@ function DashboardPage() {
 								Un cliente al giorno
 							</h3>
 							<p className="mt-4 text-base leading-relaxed text-muted-foreground">
-								Fino a febbraio è disponibile un solo appuntamento al giorno,
-								dalle 9:00 alle 12:30. Da marzo la disponibilità si estende fino
-								alle 15:00, mantenendo la stessa qualità del servizio. Ogni
-								appuntamento include un'analisi dettagliata della cute e dei
-								capelli, e una consulenza personalizzata su taglio e colore.
+								Un solo cliente al giorno, dalle 9:00 alle 12:30. Da novembre
+								l'orario si estende fino alle 15:00, mantenendo la stessa
+								qualità del servizio. Ogni appuntamento include un'analisi
+								dettagliata della cute e dei capelli, e una consulenza
+								personalizzata su taglio e colore.
 							</p>
 						</article>
 
