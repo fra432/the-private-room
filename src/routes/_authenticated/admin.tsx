@@ -656,7 +656,7 @@ function BookingsSection({
 					rows={rows}
 					loading={loading}
 					nameOf={nameOf}
-					avatarOf={(b) => avatarUrls[b.user_id] ?? null}
+					avatarOf={(b) => (b.user_id ? avatarUrls[b.user_id] ?? null : null)}
 					initialsOf={initialsOf}
 					onOpen={setOpenBookingId}
 				/>
@@ -674,9 +674,10 @@ function BookingsSection({
 					)}
 					{!loading &&
 						rows.map((b) => {
-							const p = profiles[b.user_id];
+							const p = b.user_id ? profiles[b.user_id] : undefined;
 							const name = nameOf(b);
-							const avatar = avatarUrls[b.user_id];
+							const avatar = b.user_id ? avatarUrls[b.user_id] : undefined;
+
 							return (
 								<article key={b.id} className="py-6">
 									<div className="flex flex-wrap items-center justify-between gap-2">
@@ -721,12 +722,19 @@ function BookingsSection({
 												Dettagli
 											</button>
 
-											<button
-												onClick={() => onOpenClient(b.user_id)}
-												className="text-lg tracking-[0.08em] uppercase text-foreground/70 hover:text-[color:var(--gold)]"
-											>
-												{name} ↗
-											</button>
+											{b.user_id ? (
+												<button
+													onClick={() => onOpenClient(b.user_id as string)}
+													className="text-lg tracking-[0.08em] uppercase text-foreground/70 hover:text-[color:var(--gold)]"
+												>
+													{name} ↗
+												</button>
+											) : (
+												<span className="text-lg tracking-[0.08em] uppercase text-foreground/70">
+													{name} · ospite
+												</span>
+											)}
+
 										</div>
 									</div>
 									{p?.email && (
@@ -959,7 +967,7 @@ function BookingDetailModal({
 				.eq("id", bookingId)
 				.maybeSingle();
 			setBooking((b ?? null) as Booking | null);
-			if (b) {
+			if (b?.user_id) {
 				const [{ data: p }, { data: q }] = await Promise.all([
 					supabase
 						.from("profiles")
@@ -974,7 +982,11 @@ function BookingDetailModal({
 				]);
 				setProfile((p ?? null) as Profile | null);
 				setQuest((q ?? null) as Questionnaire | null);
+			} else {
+				setProfile(null);
+				setQuest(null);
 			}
+
 			setLoading(false);
 		})();
 	}, [bookingId]);
