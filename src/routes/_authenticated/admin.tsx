@@ -43,6 +43,7 @@ type Booking = {
 	guest_phone?: string | null;
 	guest_email?: string | null;
 	created_by_admin?: boolean;
+	questionnaire_snapshot?: (Questionnaire & { snapshot_at?: string }) | null;
 };
 
 
