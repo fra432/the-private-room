@@ -1355,46 +1355,67 @@ function BookingDetailModal({
 							<h3 className="font-serif text-xl text-[color:var(--gold)]">
 								Questionario
 							</h3>
-							{!quest ? (
+							<p className="mt-1 text-xs tracking-[0.15em] uppercase text-foreground/50">
+								{snap
+									? `Risposte al momento della prenotazione${
+											snapDate
+												? ` · ${new Date(snapDate).toLocaleDateString("it-IT", { day: "numeric", month: "long", year: "numeric" })}`
+												: ""
+										}`
+									: "Risposte attuali della cliente (nessuna copia salvata per questa prenotazione)"}
+							</p>
+							{!shownQuest ? (
 								<p className="mt-2 italic text-foreground/70">
 									Non ancora compilato.
 								</p>
 							) : (
 								<dl className="mt-3 grid gap-2 text-base sm:grid-cols-2">
-									<Info label="Tipo di capello" value={quest.hair_type} />
-									<Info label="Lunghezza" value={quest.hair_length} />
-									<Info label="Colore" value={quest.hair_color} />
-									{quest.treatments && (
-										<Info label="Trattamenti" value={quest.treatments} />
+									<Info label="Tipo di capello" value={shownQuest.hair_type} />
+									<Info label="Lunghezza" value={shownQuest.hair_length} />
+									<Info label="Colore" value={shownQuest.hair_color} />
+									{shownQuest.treatments && (
+										<Info label="Trattamenti" value={shownQuest.treatments} />
 									)}
-									{quest.allergies && (
-										<Info label="Allergie" value={quest.allergies} />
+									{shownQuest.allergies && (
+										<Info label="Allergie" value={shownQuest.allergies} />
 									)}
 									<div className="sm:col-span-2">
-										<Info label="Obiettivi" value={quest.goals} />
+										<Info label="Obiettivi" value={shownQuest.goals} />
 									</div>
-									{quest.inspiration && (
+									{shownQuest.inspiration && (
 										<div className="sm:col-span-2">
-											<Info label="Ispirazione" value={quest.inspiration} />
+											<Info
+												label="Ispirazione"
+												value={shownQuest.inspiration}
+											/>
 										</div>
 									)}
-									{quest.additional && (
+									{shownQuest.additional && (
 										<div className="sm:col-span-2">
-											<Info label="Note aggiuntive" value={quest.additional} />
+											<Info
+												label="Note aggiuntive"
+												value={shownQuest.additional}
+											/>
 										</div>
 									)}
-									{quest.drink_preference && (
+									{shownQuest.drink_preference && (
 										<Info
 											label="Bevanda preferita"
-											value={quest.drink_preference}
+											value={shownQuest.drink_preference}
 										/>
 									)}
-									{quest.music_taste && (
+									{shownQuest.music_taste && (
 										<div className="sm:col-span-2">
-											<Info label="Musica" value={quest.music_taste} />
+											<Info label="Musica" value={shownQuest.music_taste} />
 										</div>
 									)}
 								</dl>
+							)}
+							{snap && quest && (
+								<p className="mt-3 text-sm italic text-foreground/60">
+									Il questionario attuale della cliente è visibile nella scheda
+									cliente.
+								</p>
 							)}
 						</div>
 
