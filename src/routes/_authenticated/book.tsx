@@ -47,6 +47,10 @@ function BookPage() {
 		}>
 	>([]);
 	const [arrivalTime, setArrivalTime] = useState<string | null>(null);
+	const [questSnapshot, setQuestSnapshot] = useState<Record<
+		string,
+		unknown
+	> | null>(null);
 	const [hoursLoaded, setHoursLoaded] = useState(false);
 	const [hoursError, setHoursError] = useState(false);
 
@@ -54,11 +58,12 @@ function BookPage() {
 		if (!user) return;
 		supabase
 			.from("questionnaires")
-			.select("id,updated_at")
+			.select("*")
 			.eq("user_id", user.id)
 			.maybeSingle()
 			.then(({ data }) => {
 				setHasQuestionnaire(!!data);
+				setQuestSnapshot((data ?? null) as Record<string, unknown> | null);
 				setQuestionnaireUpdatedAt(data?.updated_at ?? null);
 				// Auto-confirm if questionnaire updated today
 				if (data?.updated_at) {
@@ -161,6 +166,9 @@ function BookPage() {
 				date: selected,
 				arrival_time: arrivalTime,
 				notes: notes.trim() || null,
+				questionnaire_snapshot: questSnapshot
+					? { ...questSnapshot, snapshot_at: new Date().toISOString() }
+					: null,
 			})
 			.select("id")
 			.maybeSingle();
