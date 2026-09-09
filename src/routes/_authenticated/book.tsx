@@ -166,6 +166,9 @@ function BookPage() {
 				date: selected,
 				arrival_time: arrivalTime,
 				notes: notes.trim() || null,
+				questionnaire_snapshot: questSnapshot
+					? { ...questSnapshot, snapshot_at: new Date().toISOString() }
+					: null,
 			})
 			.select("id")
 			.maybeSingle();
