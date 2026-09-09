@@ -1268,6 +1268,12 @@ function BookingDetailModal({
 			"—"
 		: booking?.guest_name || "—";
 
+	const snap = (booking?.questionnaire_snapshot ?? null) as
+		| (Questionnaire & { snapshot_at?: string; updated_at?: string })
+		| null;
+	const shownQuest = snap ?? quest;
+	const snapDate = snap?.snapshot_at ?? snap?.updated_at ?? null;
+
 
 	return (
 		<div
