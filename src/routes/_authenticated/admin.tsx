@@ -1202,6 +1202,9 @@ function BookingDetailModal({
 	const [acting, setActing] = useState(false);
 	const [cancellationReason, setCancellationReason] = useState("");
 	const [showCancelConfirm, setShowCancelConfirm] = useState(false);
+	const [editDate, setEditDate] = useState("");
+	const [editTime, setEditTime] = useState("");
+	const [savingEdit, setSavingEdit] = useState(false);
 
 	useEffect(() => {
 		(async () => {
@@ -1212,6 +1215,10 @@ function BookingDetailModal({
 				.eq("id", bookingId)
 				.maybeSingle();
 			setBooking((b ?? null) as Booking | null);
+			if (b) {
+				setEditDate(b.date);
+				setEditTime(b.arrival_time ? String(b.arrival_time).slice(0, 5) : "");
+			}
 			if (b?.user_id) {
 				const [{ data: p }, { data: q }] = await Promise.all([
 					supabase
