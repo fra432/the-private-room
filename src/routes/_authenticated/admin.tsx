@@ -1269,6 +1269,28 @@ function BookingDetailModal({
 		onClose();
 	}
 
+	async function saveEdit() {
+		if (!booking || !editDate) return;
+		setSavingEdit(true);
+		const { error } = await supabase
+			.from("bookings")
+			.update({
+				date: editDate,
+				arrival_time: editTime || null,
+				updated_at: new Date().toISOString(),
+			})
+			.eq("id", booking.id);
+		setSavingEdit(false);
+		if (error) return toast.error(error.message);
+		setBooking({
+			...booking,
+			date: editDate,
+			arrival_time: editTime || null,
+		});
+		toast.success("Data e orario aggiornati");
+		onChanged();
+	}
+
 	const name = profile
 		? `${profile.first_name ?? ""} ${profile.last_name ?? ""}`.trim() ||
 			profile.email ||
