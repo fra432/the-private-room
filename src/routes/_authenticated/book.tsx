@@ -86,7 +86,7 @@ function BookPage() {
 					.select("date,status")
 					.gte("date", start)
 					.lte("date", end)
-					.in("status", ["pending", "confirmed"]),
+					.eq("status", "confirmed"),
 				supabase
 					.from("closed_days")
 					.select("date")

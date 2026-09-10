@@ -499,6 +499,7 @@ function BookingsSection({
 		return new Date(d.getFullYear(), d.getMonth(), 1);
 	});
 	const [openBookingId, setOpenBookingId] = useState<string | null>(null);
+	const [selectedDay, setSelectedDay] = useState<string | null>(null);
 	const [noteCounts, setNoteCounts] = useState<Record<string, number>>({});
 	const [showNew, setShowNew] = useState(false);
 
@@ -518,7 +519,7 @@ function BookingsSection({
 				.lte("date", end)
 				.in("status", ["pending", "confirmed"]);
 		}
-		const { data, error } = await q.order("date", { ascending: true });
+		const { data, error } = await q.order("date", { ascending: false });
 		if (error) {
 			setLoading(false);
 			return toast.error(error.message);
@@ -660,6 +661,7 @@ function BookingsSection({
 					avatarOf={(b) => (b.user_id ? avatarUrls[b.user_id] ?? null : null)}
 					initialsOf={initialsOf}
 					onOpen={setOpenBookingId}
+					onOpenDay={setSelectedDay}
 				/>
 			) : (
 				<section className="mt-6 flex flex-col divide-y divide-[color:var(--gold)]/15">
@@ -670,19 +672,19 @@ function BookingsSection({
 					)}
 					{!loading && rows.length === 0 && (
 						<p className="py-12 text-center text-lg text-foreground/70">
-							Nessuna prenotazione {STATUS_LABEL[tab].toLowerCase()}.
+							Nessuna prenotazione {tab === "all" ? "." : `${STATUS_LABEL[tab]?.toLowerCase()}.`}
 						</p>
 					)}
 					{!loading &&
 						rows.map((b) => {
-							const p = b.user_id ? profiles[b.user_id] : undefined;
-							const name = nameOf(b);
-							const avatar = b.user_id ? avatarUrls[b.user_id] : undefined;
+									const p = b.user_id ? profiles[b.user_id] : undefined;
+									const name = nameOf(b);
+									const avatar = b.user_id ? avatarUrls[b.user_id] : undefined;
 
-							return (
-								<article key={b.id} className="py-6">
-									<div className="flex flex-wrap items-center justify-between gap-2">
-										<div className="flex items-center gap-3">
+									return (
+										<article key={b.id} className="py-6">
+											<div className="flex flex-wrap items-center justify-between gap-2">
+												<div className="flex items-center gap-3">
 											<div className="h-10 w-10 shrink-0 overflow-hidden rounded-full border border-[color:var(--gold)]/40 bg-black/20">
 												{avatar ? (
 													<img
@@ -746,7 +748,7 @@ function BookingsSection({
 											"{b.notes}"
 										</p>
 									)}
-									{tab === "pending" && (
+									{b.status === "pending" && (
 										<div className="mt-5 flex gap-3">
 											<button
 												onClick={() => setStatus(b.id, "confirmed")}
@@ -762,7 +764,7 @@ function BookingsSection({
 											</button>
 										</div>
 									)}
-									{tab === "confirmed" && (
+									{b.status === "confirmed" && new Date(b.date) > new Date() && (
 										<button
 											onClick={() => setStatus(b.id, "cancelled")}
 											className="mt-5 text-lg tracking-[0.08em] uppercase text-foreground/70 hover:text-[color:var(--gold)]"
@@ -772,9 +774,9 @@ function BookingsSection({
 									)}
 								</article>
 							);
-						})}
-				</section>
-			)}
+					})}
+			</section>
+		)}
 
 			{openBookingId && (
 				<BookingDetailModal
@@ -795,6 +797,18 @@ function BookingsSection({
 						setShowNew(false);
 						void load();
 					}}
+				/>
+			)}
+
+			{selectedDay && (
+				<DayBookingsModal
+					day={selectedDay}
+					bookings={rows.filter((b) => b.date === selectedDay)}
+					nameOf={nameOf}
+					avatarOf={(b) => (b.user_id ? avatarUrls[b.user_id] ?? null : null)}
+					initialsOf={initialsOf}
+					onClose={() => setSelectedDay(null)}
+					onOpenBooking={setOpenBookingId}
 				/>
 			)}
 		</>
@@ -818,7 +832,6 @@ function NewBookingModal({
 	const [arrival, setArrival] = useState("");
 	const [notes, setNotes] = useState("");
 	const [saving, setSaving] = useState(false);
-	const [existing, setExisting] = useState<string | null>(null);
 
 	useEffect(() => {
 		(async () => {
@@ -829,18 +842,6 @@ function NewBookingModal({
 			setClients((data ?? []) as Profile[]);
 		})();
 	}, []);
-
-	useEffect(() => {
-		if (!date) return setExisting(null);
-		(async () => {
-			const { data } = await supabase
-				.from("bookings")
-				.select("id")
-				.eq("date", date)
-				.in("status", ["pending", "confirmed"]);
-			setExisting((data ?? []).length > 0 ? date : null);
-		})();
-	}, [date]);
 
 	async function save() {
 		if (!date) return toast.error("Scegli una data");
@@ -995,12 +996,6 @@ function NewBookingModal({
 							</label>
 						</div>
 
-						{existing && (
-							<p className="text-sm text-[color:var(--gold)]">
-								Attenzione: in questa data c'è già un appuntamento.
-							</p>
-						)}
-
 						<label className="flex flex-col gap-2">
 							<span className="text-[0.65rem] tracking-[0.3em] uppercase text-foreground/60">
 								Note (servizio, dettagli…)
@@ -1044,6 +1039,7 @@ function CalendarView({
 	avatarOf,
 	initialsOf,
 	onOpen,
+	onOpenDay,
 }: {
 	month: Date;
 	setMonth: (d: Date) => void;
@@ -1053,6 +1049,7 @@ function CalendarView({
 	avatarOf: (b: Booking) => string | null;
 	initialsOf: (b: Booking) => string;
 	onOpen: (id: string) => void;
+	onOpenDay: (date: string) => void;
 }) {
 	const byDate = new Map<string, Booking[]>();
 	for (const b of rows) {
@@ -1129,7 +1126,7 @@ function CalendarView({
 								{d.getDate()}
 							</div>
 							<div className="flex flex-col gap-1">
-								{list.map((b) => (
+								{list.slice(0, 1).map((b) => (
 									<button
 										key={b.id}
 										onClick={() => onOpen(b.id)}
@@ -1161,6 +1158,14 @@ function CalendarView({
 										</div>
 									</button>
 								))}
+							{list.length > 1 && (
+								<button
+									onClick={() => onOpenDay(day)}
+									className="w-full flex items-center justify-center px-1.5 py-2 text-center text-[10px] font-medium text-[color:var(--gold)] hover:bg-[color:var(--gold)]/10 transition-colors"
+								>
+									+{list.length - 1}
+								</button>
+							)}
 							</div>
 						</div>
 					);
@@ -1181,6 +1186,101 @@ function CalendarView({
 				</span>
 			</div>
 		</section>
+	);
+}
+
+function DayBookingsModal({
+	day,
+	bookings,
+	nameOf,
+	avatarOf,
+	initialsOf,
+	onClose,
+	onOpenBooking,
+}: {
+	day: string;
+	bookings: Booking[];
+	nameOf: (b: Booking) => string;
+	avatarOf: (b: Booking) => string | null;
+	initialsOf: (b: Booking) => string;
+	onClose: () => void;
+	onOpenBooking: (id: string) => void;
+}) {
+	const d = new Date(day + "T00:00:00");
+	const dateStr = d.toLocaleDateString("it-IT", {
+		weekday: "long",
+		day: "numeric",
+		month: "long",
+		year: "numeric",
+	});
+
+	return (
+		<div
+			className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-black/70 p-4 md:p-8"
+			onClick={onClose}
+		>
+			<div
+				className="relative w-full max-w-2xl bg-background text-foreground shadow-2xl"
+				onClick={(e) => e.stopPropagation()}
+			>
+				<button
+					onClick={onClose}
+					aria-label="Chiudi"
+					className="absolute right-3 top-3 inline-flex h-9 w-9 items-center justify-center text-foreground/60 hover:text-[color:var(--gold)]"
+				>
+					<X className="h-5 w-5" />
+				</button>
+				<div className="p-6 md:p-8">
+					<p className="text-[0.6rem] tracking-[0.5em] uppercase text-[color:var(--gold)]">
+						{dateStr}
+					</p>
+					<h2 className="mt-2 font-serif text-2xl">
+						{bookings.length} appuntament{bookings.length === 1 ? "o" : "i"}
+					</h2>
+
+					<div className="mt-6 max-h-[60vh] overflow-y-auto hide-scrollbar flex flex-col gap-2">
+						{bookings.map((b) => (
+							<button
+								key={b.id}
+								onClick={() => {
+									onOpenBooking(b.id);
+									onClose();
+								}}
+								className={`flex items-center gap-3 rounded border p-4 transition-colors ${
+									b.status === "confirmed"
+										? "border-[color:var(--gold)] bg-[color:var(--gold)]/10 hover:bg-[color:var(--gold)]/20"
+										: "border-[color:var(--gold)]/50 hover:border-[color:var(--gold)] hover:bg-[color:var(--gold)]/5"
+								}`}
+								title={nameOf(b)}
+							>
+								<span className="inline-flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-full bg-black/20 text-sm font-semibold">
+									{avatarOf(b) ? (
+										<img
+											src={avatarOf(b) as string}
+											alt=""
+											className="h-full w-full object-cover"
+										/>
+									) : (
+										<span>{initialsOf(b)}</span>
+									)}
+								</span>
+								<div className="flex-1 text-left">
+									<div className="font-medium">{nameOf(b)}</div>
+									<div className="text-sm text-foreground/70">
+										{b.arrival_time && (
+											<span>{String(b.arrival_time).slice(0, 5)}</span>
+										)}
+										<span className="ml-2 text-[0.75rem]">
+											{b.status === "confirmed" ? "✓ Confermato" : "• In attesa"}
+										</span>
+									</div>
+								</div>
+							</button>
+						))}
+					</div>
+				</div>
+			</div>
+		</div>
 	);
 }
 
