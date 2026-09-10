@@ -1202,6 +1202,9 @@ function BookingDetailModal({
 	const [acting, setActing] = useState(false);
 	const [cancellationReason, setCancellationReason] = useState("");
 	const [showCancelConfirm, setShowCancelConfirm] = useState(false);
+	const [editDate, setEditDate] = useState("");
+	const [editTime, setEditTime] = useState("");
+	const [savingEdit, setSavingEdit] = useState(false);
 
 	useEffect(() => {
 		(async () => {
@@ -1212,6 +1215,10 @@ function BookingDetailModal({
 				.eq("id", bookingId)
 				.maybeSingle();
 			setBooking((b ?? null) as Booking | null);
+			if (b) {
+				setEditDate(b.date);
+				setEditTime(b.arrival_time ? String(b.arrival_time).slice(0, 5) : "");
+			}
 			if (b?.user_id) {
 				const [{ data: p }, { data: q }] = await Promise.all([
 					supabase
@@ -1260,6 +1267,28 @@ function BookingDetailModal({
 		toast.success("Aggiornato");
 		onChanged();
 		onClose();
+	}
+
+	async function saveEdit() {
+		if (!booking || !editDate) return;
+		setSavingEdit(true);
+		const { error } = await supabase
+			.from("bookings")
+			.update({
+				date: editDate,
+				arrival_time: editTime || null,
+				updated_at: new Date().toISOString(),
+			})
+			.eq("id", booking.id);
+		setSavingEdit(false);
+		if (error) return toast.error(error.message);
+		setBooking({
+			...booking,
+			date: editDate,
+			arrival_time: editTime || null,
+		});
+		toast.success("Data e orario aggiornati");
+		onChanged();
 	}
 
 	const name = profile
@@ -1316,6 +1345,47 @@ function BookingDetailModal({
 								"{booking.notes}"
 							</p>
 						)}
+
+						<div className="mt-5 border border-[color:var(--gold)]/25 p-4">
+							<p className="text-[0.6rem] tracking-[0.4em] uppercase text-[color:var(--gold)]">
+								Sposta appuntamento
+							</p>
+							<div className="mt-3 flex flex-wrap items-end gap-3">
+								<label className="flex flex-col gap-1 text-xs tracking-[0.1em] uppercase text-foreground/60">
+									Data
+									<input
+										type="date"
+										value={editDate}
+										onChange={(e) => setEditDate(e.target.value)}
+										className="border border-foreground/20 bg-transparent px-3 py-2 text-sm normal-case tracking-normal text-foreground focus:border-[color:var(--gold)] focus:outline-none"
+									/>
+								</label>
+								<label className="flex flex-col gap-1 text-xs tracking-[0.1em] uppercase text-foreground/60">
+									Orario di arrivo
+									<input
+										type="time"
+										value={editTime}
+										onChange={(e) => setEditTime(e.target.value)}
+										className="border border-foreground/20 bg-transparent px-3 py-2 text-sm normal-case tracking-normal text-foreground focus:border-[color:var(--gold)] focus:outline-none"
+									/>
+								</label>
+								<button
+									onClick={() => void saveEdit()}
+									disabled={
+										savingEdit ||
+										!editDate ||
+										(editDate === booking.date &&
+											(editTime || "") ===
+												(booking.arrival_time
+													? String(booking.arrival_time).slice(0, 5)
+													: ""))
+									}
+									className="border border-[color:var(--gold)] px-5 py-2 text-xs tracking-[0.2em] uppercase text-[color:var(--gold)] transition-colors hover:bg-[color:var(--gold)] hover:text-black disabled:opacity-40"
+								>
+									{savingEdit ? "Salvataggio…" : "Salva"}
+								</button>
+							</div>
+						</div>
 
 						<div className="mt-6 border-t border-[color:var(--gold)]/20 pt-5">
 							<div className="flex flex-wrap items-baseline justify-between gap-2">
