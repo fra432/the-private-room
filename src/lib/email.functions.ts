@@ -311,6 +311,41 @@ export const notifyBookingChangeRequestCreated = createServerFn({ method: "POST"
 		});
 	});
 
+// 5b. Annullamento da parte della cliente → notifica proprietaria
+export const notifyBookingCancelledByClient = createServerFn({ method: "POST" })
+	.inputValidator((d) =>
+		z
+			.object({ id: z.string().uuid(), reason: z.string().min(1).max(1000) })
+			.parse(d),
+	)
+	.handler(async ({ data }) => {
+		const res = await loadBooking(data.id);
+		if (!res) return { ok: false };
+		const { booking, profile } = res;
+		const name = profile
+			? `${profile.first_name ?? ""} ${profile.last_name ?? ""}`.trim()
+			: "una cliente";
+		const body = `
+			<p><strong>Cliente:</strong> ${name || "—"}</p>
+			${profile?.email ? `<p><strong>Email:</strong> ${profile.email}</p>` : ""}
+			${profile?.phone ? `<p><strong>Telefono:</strong> ${profile.phone}</p>` : ""}
+			<p><strong>Data annullata:</strong> ${fmtDate(booking.date)}</p>
+			${(booking as any).arrival_time ? `<p><strong>Orario:</strong> ${String((booking as any).arrival_time).slice(0, 5)}</p>` : ""}
+			<p><strong>Motivo:</strong> ${data.reason}</p>
+		`;
+		return sendMail({
+			to: OWNER_EMAIL,
+			subject: `Appuntamento annullato — ${fmtDate(booking.date)}`,
+			html: shell(
+				"Appuntamento annullato dalla cliente",
+				`${name || "Una cliente"} ha annullato il suo appuntamento. La data è di nuovo libera.`,
+				body,
+				{ label: "Apri Admin", url: "https://www.inside-theroom.it/admin" },
+			),
+			reply_to: profile?.email ?? undefined,
+		});
+	});
+
 // 6. Decisione richiesta di modifica → notifica cliente
 export const notifyBookingChangeRequestDecision = createServerFn({ method: "POST" })
 	.inputValidator((d) =>
