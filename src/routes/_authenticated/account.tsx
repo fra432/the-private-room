@@ -10,7 +10,10 @@ import { SiteNav } from "@/components/site-nav";
 import { useAuth } from "@/hooks/use-auth";
 import { supabase } from "@/integrations/supabase/client";
 import { deleteAvatar, getAvatarUrl, uploadAvatar } from "@/lib/avatar";
-import { notifyBookingChangeRequestCreated } from "@/lib/email.functions";
+import {
+	notifyBookingCancelledByClient,
+	notifyBookingChangeRequestCreated,
+} from "@/lib/email.functions";
 
 export const Route = createFileRoute("/_authenticated/account")({
 	head: () => ({ meta: [{ title: "Il mio account — THE ROOM" }] }),
@@ -61,6 +64,7 @@ function AccountPage() {
 	const [upcoming, setUpcoming] = useState<Booking[]>([]);
 	const [past, setPast] = useState<Booking[]>([]);
 	const [changeFor, setChangeFor] = useState<Booking | null>(null);
+	const [cancelFor, setCancelFor] = useState<Booking | null>(null);
 	const [pwdOpen, setPwdOpen] = useState(false);
 
 	const load = useCallback(async () => {
@@ -229,13 +233,21 @@ function AccountPage() {
 													: "Rifiutato"}
 									</div>
 								</div>
-								{(b.status === "pending" || b.status === "confirmed") && (
-									<button
-										onClick={() => setChangeFor(b)}
-										className="text-xs tracking-[0.4em] uppercase text-[color:var(--gold)] hover:underline"
-									>
-										Richiedi cambio orario
-									</button>
+							{(b.status === "pending" || b.status === "confirmed") && (
+									<div className="flex flex-wrap items-center gap-5">
+										<button
+											onClick={() => setChangeFor(b)}
+											className="text-xs tracking-[0.4em] uppercase text-[color:var(--gold)] hover:underline"
+										>
+											Richiedi cambio orario
+										</button>
+										<button
+											onClick={() => setCancelFor(b)}
+											className="text-xs tracking-[0.4em] uppercase text-foreground/60 hover:text-foreground"
+										>
+											Annulla
+										</button>
+									</div>
 								)}
 							</li>
 						))}
@@ -525,6 +537,17 @@ function AccountPage() {
 					}}
 				/>
 			)}
+			{cancelFor && (
+				<CancelBookingModal
+					booking={cancelFor}
+					onClose={() => setCancelFor(null)}
+					onDone={() => {
+						setCancelFor(null);
+						toast.success("Appuntamento annullato");
+						void load();
+					}}
+				/>
+			)}
 			{pwdOpen && <PasswordModal onClose={() => setPwdOpen(false)} />}
 		</main>
 	);
@@ -711,6 +734,83 @@ function PasswordModal({ onClose }: { onClose: () => void }) {
 						className="inline-flex h-12 items-center justify-center border border-[color:var(--gold)] bg-[color:var(--gold)] px-8 text-[0.65rem] tracking-[0.55em] uppercase text-background hover:bg-transparent hover:text-[color:var(--gold)] disabled:opacity-50"
 					>
 						{saving ? "…" : "Aggiorna"}
+					</button>
+				</form>
+			</div>
+		</div>
+	);
+}
+
+function CancelBookingModal({
+	booking,
+	onClose,
+	onDone,
+}: {
+	booking: Booking;
+	onClose: () => void;
+	onDone: () => void;
+}) {
+	const [reason, setReason] = useState("");
+	const [saving, setSaving] = useState(false);
+
+	async function submit(e: React.FormEvent<HTMLFormElement>) {
+		e.preventDefault();
+		const r = reason.trim();
+		if (r.length < 3) return toast.error("Scrivi il motivo dell'annullamento.");
+		setSaving(true);
+		const { error } = await supabase
+			.from("bookings")
+			.update({ status: "cancelled", cancellation_reason: r })
+			.eq("id", booking.id);
+		setSaving(false);
+		if (error) return toast.error(error.message);
+		notifyBookingCancelledByClient({
+			data: { id: booking.id, reason: r },
+		}).catch(() => {});
+		onDone();
+	}
+
+	return (
+		<div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 px-4">
+			<div className="w-full max-w-md border border-[color:var(--gold)]/40 bg-background p-8">
+				<div className="flex items-center justify-between">
+					<h3 className="font-italiana text-2xl">Annulla appuntamento</h3>
+					<button
+						onClick={onClose}
+						className="text-foreground/60 hover:text-foreground"
+					>
+						✕
+					</button>
+				</div>
+				<p className="mt-2 text-sm text-foreground/70">
+					{new Date(booking.date).toLocaleDateString("it-IT", {
+						weekday: "long",
+						day: "numeric",
+						month: "long",
+					})}
+					{booking.arrival_time &&
+						` · ${String(booking.arrival_time).slice(0, 5)}`}
+				</p>
+				<form onSubmit={submit} className="mt-6 flex flex-col gap-5">
+					<label className="flex flex-col gap-2">
+						<span className="text-[0.7rem] tracking-[0.5em] uppercase text-foreground/60">
+							Motivo dell'annullamento
+						</span>
+						<textarea
+							value={reason}
+							onChange={(e) => setReason(e.target.value)}
+							rows={3}
+							required
+							maxLength={1000}
+							className="w-full !bg-transparent border border-[color:var(--gold)]/30 p-3 font-serif text-base focus:border-[color:var(--gold)] focus:outline-none"
+						/>
+					</label>
+					<button
+						type="submit"
+						disabled={saving}
+						className="inline-flex h-12 items-center justify-center border border-[color:var(--gold)] bg-[color:var(--gold)] px-8 text-[0.65rem] tracking-[0.55em] uppercase text-background hover:bg-transparent hover:text-[color:var(--gold)] disabled:opacity-50"
+					>
+						{saving ? "…" : "Conferma annullamento"}
 					</button>
 				</form>
 			</div>
