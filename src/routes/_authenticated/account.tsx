@@ -229,13 +229,21 @@ function AccountPage() {
 													: "Rifiutato"}
 									</div>
 								</div>
-								{(b.status === "pending" || b.status === "confirmed") && (
-									<button
-										onClick={() => setChangeFor(b)}
-										className="text-xs tracking-[0.4em] uppercase text-[color:var(--gold)] hover:underline"
-									>
-										Richiedi cambio orario
-									</button>
+							{(b.status === "pending" || b.status === "confirmed") && (
+									<div className="flex flex-wrap items-center gap-5">
+										<button
+											onClick={() => setChangeFor(b)}
+											className="text-xs tracking-[0.4em] uppercase text-[color:var(--gold)] hover:underline"
+										>
+											Richiedi cambio orario
+										</button>
+										<button
+											onClick={() => setCancelFor(b)}
+											className="text-xs tracking-[0.4em] uppercase text-foreground/60 hover:text-foreground"
+										>
+											Annulla
+										</button>
+									</div>
 								)}
 							</li>
 						))}
