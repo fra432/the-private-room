@@ -10,7 +10,10 @@ import { SiteNav } from "@/components/site-nav";
 import { useAuth } from "@/hooks/use-auth";
 import { supabase } from "@/integrations/supabase/client";
 import { deleteAvatar, getAvatarUrl, uploadAvatar } from "@/lib/avatar";
-import { notifyBookingChangeRequestCreated } from "@/lib/email.functions";
+import {
+	notifyBookingCancelledByClient,
+	notifyBookingChangeRequestCreated,
+} from "@/lib/email.functions";
 
 export const Route = createFileRoute("/_authenticated/account")({
 	head: () => ({ meta: [{ title: "Il mio account — THE ROOM" }] }),
@@ -61,6 +64,7 @@ function AccountPage() {
 	const [upcoming, setUpcoming] = useState<Booking[]>([]);
 	const [past, setPast] = useState<Booking[]>([]);
 	const [changeFor, setChangeFor] = useState<Booking | null>(null);
+	const [cancelFor, setCancelFor] = useState<Booking | null>(null);
 	const [pwdOpen, setPwdOpen] = useState(false);
 
 	const load = useCallback(async () => {
