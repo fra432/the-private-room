@@ -537,6 +537,17 @@ function AccountPage() {
 					}}
 				/>
 			)}
+			{cancelFor && (
+				<CancelBookingModal
+					booking={cancelFor}
+					onClose={() => setCancelFor(null)}
+					onDone={() => {
+						setCancelFor(null);
+						toast.success("Appuntamento annullato");
+						void load();
+					}}
+				/>
+			)}
 			{pwdOpen && <PasswordModal onClose={() => setPwdOpen(false)} />}
 		</main>
 	);
