@@ -672,7 +672,7 @@ function BookingsSection({
 					)}
 					{!loading && rows.length === 0 && (
 						<p className="py-12 text-center text-lg text-foreground/70">
-							Nessuna prenotazione {tab === "all" ? "." : `${STATUS_LABEL[tab]?.toLowerCase()}.`}
+							Nessuna prenotazione {STATUS_LABEL[tab]?.toLowerCase()}.
 						</p>
 					)}
 					{!loading &&
