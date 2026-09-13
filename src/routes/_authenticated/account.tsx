@@ -279,7 +279,13 @@ function AccountPage() {
 									)}
 								</span>
 								<span className="text-xs tracking-[0.4em] uppercase text-muted-foreground">
-									{b.status === "confirmed" ? "Completato" : b.status}
+{b.status === "confirmed"
+									? "Completato"
+									: b.status === "cancelled"
+										? "Annullato"
+										: b.status === "rejected"
+											? "Rifiutato"
+											: "In attesa"}
 								</span>
 							</li>
 						))}
