@@ -89,12 +89,13 @@ function AccountPage() {
 					.select("id,date,arrival_time,status,notes")
 					.eq("user_id", user.id)
 					.gte("date", today)
+					.in("status", ["pending", "confirmed"])
 					.order("date", { ascending: true }),
 				supabase
 					.from("bookings")
 					.select("id,date,arrival_time,status,notes")
 					.eq("user_id", user.id)
-					.lt("date", today)
+					.or(`date.lt.${today},status.in.(cancelled,rejected)`)
 					.order("date", { ascending: false })
 					.limit(50),
 			]);
