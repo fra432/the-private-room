@@ -390,6 +390,7 @@ export type Database = {
         }
         Returns: boolean
       }
+      is_booking_date_available: { Args: { _date: string }; Returns: boolean }
     }
     Enums: {
       app_role: "admin" | "user"
