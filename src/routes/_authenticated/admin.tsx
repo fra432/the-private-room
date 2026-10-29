@@ -46,7 +46,6 @@ type Booking = {
 	questionnaire_snapshot?: (Questionnaire & { snapshot_at?: string }) | null;
 };
 
-
 type Profile = {
 	id: string;
 	email: string | null;
@@ -503,8 +502,6 @@ function BookingsSection({
 	const [noteCounts, setNoteCounts] = useState<Record<string, number>>({});
 	const [showNew, setShowNew] = useState(false);
 
-
-
 	const load = useCallback(async () => {
 		setLoading(true);
 		let q = supabase.from("bookings").select("*");
@@ -607,7 +604,6 @@ function BookingsSection({
 		return s.charAt(0).toUpperCase();
 	}
 
-
 	return (
 		<>
 			<div className="mt-6 flex flex-wrap items-center gap-3">
@@ -634,7 +630,6 @@ function BookingsSection({
 				</button>
 			</div>
 
-
 			{view === "list" && (
 				<div className="mt-6 flex flex-wrap gap-6">
 					{(["pending", "confirmed", "cancelled", "rejected"] as const).map(
@@ -658,7 +653,7 @@ function BookingsSection({
 					rows={rows}
 					loading={loading}
 					nameOf={nameOf}
-					avatarOf={(b) => (b.user_id ? avatarUrls[b.user_id] ?? null : null)}
+					avatarOf={(b) => (b.user_id ? (avatarUrls[b.user_id] ?? null) : null)}
 					initialsOf={initialsOf}
 					onOpen={setOpenBookingId}
 					onOpenDay={setSelectedDay}
@@ -677,14 +672,14 @@ function BookingsSection({
 					)}
 					{!loading &&
 						rows.map((b) => {
-									const p = b.user_id ? profiles[b.user_id] : undefined;
-									const name = nameOf(b);
-									const avatar = b.user_id ? avatarUrls[b.user_id] : undefined;
+							const p = b.user_id ? profiles[b.user_id] : undefined;
+							const name = nameOf(b);
+							const avatar = b.user_id ? avatarUrls[b.user_id] : undefined;
 
-									return (
-										<article key={b.id} className="py-6">
-											<div className="flex flex-wrap items-center justify-between gap-2">
-												<div className="flex items-center gap-3">
+							return (
+								<article key={b.id} className="py-6">
+									<div className="flex flex-wrap items-center justify-between gap-2">
+										<div className="flex items-center gap-3">
 											<div className="h-10 w-10 shrink-0 overflow-hidden rounded-full border border-[color:var(--gold)]/40 bg-black/20">
 												{avatar ? (
 													<img
@@ -737,7 +732,6 @@ function BookingsSection({
 													{name} · ospite
 												</span>
 											)}
-
 										</div>
 									</div>
 									{p?.email && (
@@ -764,19 +758,20 @@ function BookingsSection({
 											</button>
 										</div>
 									)}
-									{b.status === "confirmed" && new Date(b.date) > new Date() && (
-										<button
-											onClick={() => setStatus(b.id, "cancelled")}
-											className="mt-5 text-lg tracking-[0.08em] uppercase text-foreground/70 hover:text-[color:var(--gold)]"
-										>
-											Annulla
-										</button>
-									)}
+									{b.status === "confirmed" &&
+										new Date(b.date) > new Date() && (
+											<button
+												onClick={() => setStatus(b.id, "cancelled")}
+												className="mt-5 text-lg tracking-[0.08em] uppercase text-foreground/70 hover:text-[color:var(--gold)]"
+											>
+												Annulla
+											</button>
+										)}
 								</article>
 							);
-					})}
-			</section>
-		)}
+						})}
+				</section>
+			)}
 
 			{openBookingId && (
 				<BookingDetailModal
@@ -805,7 +800,7 @@ function BookingsSection({
 					day={selectedDay}
 					bookings={rows.filter((b) => b.date === selectedDay)}
 					nameOf={nameOf}
-					avatarOf={(b) => (b.user_id ? avatarUrls[b.user_id] ?? null : null)}
+					avatarOf={(b) => (b.user_id ? (avatarUrls[b.user_id] ?? null) : null)}
 					initialsOf={initialsOf}
 					onClose={() => setSelectedDay(null)}
 					onOpenBooking={setOpenBookingId}
@@ -845,7 +840,8 @@ function NewBookingModal({
 
 	async function save() {
 		if (!date) return toast.error("Scegli una data");
-		if (mode === "client" && !clientId) return toast.error("Scegli una cliente");
+		if (mode === "client" && !clientId)
+			return toast.error("Scegli una cliente");
 		if (mode === "guest" && !guestName.trim())
 			return toast.error("Inserisci il nome");
 		setSaving(true);
@@ -1038,7 +1034,6 @@ function NewBookingModal({
 	);
 }
 
-
 function CalendarView({
 	month,
 	setMonth,
@@ -1167,14 +1162,14 @@ function CalendarView({
 										</div>
 									</button>
 								))}
-							{list.length > 1 && (
-								<button
-									onClick={() => onOpenDay(day)}
-									className="w-full flex items-center justify-center px-1.5 py-2 text-center text-[10px] font-medium text-[color:var(--gold)] hover:bg-[color:var(--gold)]/10 transition-colors"
-								>
-									+{list.length - 1}
-								</button>
-							)}
+								{list.length > 1 && (
+									<button
+										onClick={() => onOpenDay(day)}
+										className="w-full flex items-center justify-center px-1.5 py-2 text-center text-[10px] font-medium text-[color:var(--gold)] hover:bg-[color:var(--gold)]/10 transition-colors"
+									>
+										+{list.length - 1}
+									</button>
+								)}
 							</div>
 						</div>
 					);
@@ -1280,7 +1275,9 @@ function DayBookingsModal({
 											<span>{String(b.arrival_time).slice(0, 5)}</span>
 										)}
 										<span className="ml-2 text-[0.75rem]">
-											{b.status === "confirmed" ? "✓ Confermato" : "• In attesa"}
+											{b.status === "confirmed"
+												? "✓ Confermato"
+												: "• In attesa"}
 										</span>
 									</div>
 								</div>
@@ -1412,7 +1409,6 @@ function BookingDetailModal({
 	const shownQuest = snap ?? quest;
 	const snapDate = snap?.snapshot_at ?? snap?.updated_at ?? null;
 
-
 	return (
 		<div
 			className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-black/70 p-4 md:p-8"
@@ -1527,7 +1523,6 @@ function BookingDetailModal({
 									<Info label="Email" value={booking.guest_email} />
 								)}
 							</dl>
-
 						</div>
 
 						<div className="mt-6 border-t border-[color:var(--gold)]/20 pt-5">
@@ -1599,7 +1594,6 @@ function BookingDetailModal({
 						</div>
 
 						<BookingNotes bookingId={booking.id} />
-
 
 						<div className="mt-8 flex flex-wrap gap-3 border-t border-[color:var(--gold)]/20 pt-5">
 							{booking.status === "pending" && (
@@ -2073,7 +2067,6 @@ function ClientDetail({
 	const [editingContent, setEditingContent] = useState("");
 	const [openBookingId, setOpenBookingId] = useState<string | null>(null);
 
-
 	const loadData = useCallback(async () => {
 		setLoading(true);
 		const [{ data: p }, { data: q }, { data: b }, { data: n }] =
@@ -2401,7 +2394,6 @@ function ClientDetail({
 		</section>
 	);
 }
-
 
 function Info({ label, value }: { label: string; value: string }) {
 	return (
