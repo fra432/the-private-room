@@ -1,5 +1,5 @@
 import { createFileRoute, Link, Navigate } from "@tanstack/react-router";
-import { ArrowRight, ChevronLeft, ChevronRight, X } from "lucide-react";
+import { ArrowRight, ChevronLeft, ChevronRight, Plus, X } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import { toast } from "sonner";
 import { BackArrow } from "@/components/back-arrow";
@@ -498,6 +498,7 @@ function BookingsSection({
 		return new Date(d.getFullYear(), d.getMonth(), 1);
 	});
 	const [openBookingId, setOpenBookingId] = useState<string | null>(null);
+	const [newBookingDate, setNewBookingDate] = useState<string | null>(null);
 	const [selectedDay, setSelectedDay] = useState<string | null>(null);
 	const [noteCounts, setNoteCounts] = useState<Record<string, number>>({});
 	const [showNew, setShowNew] = useState(false);
@@ -623,7 +624,10 @@ function BookingsSection({
 					))}
 				</div>
 				<button
-					onClick={() => setShowNew(true)}
+					onClick={() => {
+						setNewBookingDate(null);
+						setShowNew(true);
+					}}
 					className="inline-flex h-10 items-center justify-center bg-[color:var(--gold)] px-5 text-sm tracking-[0.15em] uppercase font-semibold text-background hover:opacity-90"
 				>
 					+ Nuova prenotazione
@@ -656,6 +660,10 @@ function BookingsSection({
 					avatarOf={(b) => (b.user_id ? (avatarUrls[b.user_id] ?? null) : null)}
 					initialsOf={initialsOf}
 					onOpen={setOpenBookingId}
+					onAdd={(date) => {
+						setNewBookingDate(date);
+						setShowNew(true);
+					}}
 					onOpenDay={setSelectedDay}
 				/>
 			) : (
@@ -787,7 +795,11 @@ function BookingsSection({
 
 			{showNew && (
 				<NewBookingModal
-					onClose={() => setShowNew(false)}
+					initialDate={newBookingDate}
+					onClose={() => {
+						setShowNew(false);
+						setNewBookingDate(null);
+					}}
 					onCreated={() => {
 						setShowNew(false);
 						void load();
@@ -811,9 +823,11 @@ function BookingsSection({
 }
 
 function NewBookingModal({
+	initialDate,
 	onClose,
 	onCreated,
 }: {
+	initialDate: string | null;
 	onClose: () => void;
 	onCreated: () => void;
 }) {
@@ -823,7 +837,7 @@ function NewBookingModal({
 	const [guestName, setGuestName] = useState("");
 	const [guestPhone, setGuestPhone] = useState("");
 	const [guestEmail, setGuestEmail] = useState("");
-	const [date, setDate] = useState("");
+	const [date, setDate] = useState(initialDate ?? "");
 	const [arrival, setArrival] = useState("");
 	const [notes, setNotes] = useState("");
 	const [saving, setSaving] = useState(false);
@@ -840,6 +854,9 @@ function NewBookingModal({
 
 	async function save() {
 		if (!date) return toast.error("Scegli una data");
+		if (date < new Date().toISOString().slice(0, 10)) {
+			return toast.error("Non puoi creare appuntamenti nelle date passate");
+		}
 		if (mode === "client" && !clientId)
 			return toast.error("Scegli una cliente");
 		if (mode === "guest" && !guestName.trim())
@@ -862,12 +879,24 @@ function NewBookingModal({
 			.maybeSingle();
 		setSaving(false);
 		if (error) return toast.error(error.message);
+		let confirmationSent = true;
 		if (inserted?.id) {
-			notifyBookingDecision({
-				data: { id: inserted.id, status: "confirmed" },
-			}).catch(() => {});
+			try {
+				const result = await notifyBookingDecision({
+					data: { id: inserted.id, status: "confirmed" },
+				});
+				confirmationSent = result.ok;
+			} catch {
+				confirmationSent = false;
+			}
 		}
-		toast.success("Prenotazione creata");
+		if (confirmationSent) {
+			toast.success("Prenotazione creata e confermata");
+		} else {
+			toast.error(
+				"Prenotazione creata, ma la mail di conferma non è stata inviata",
+			);
+		}
 		onCreated();
 	}
 
@@ -984,6 +1013,7 @@ function NewBookingModal({
 								<input
 									type="date"
 									value={date}
+									min={new Date().toISOString().slice(0, 10)}
 									onChange={(e) => setDate(e.target.value)}
 									className={inputClass}
 								/>
@@ -1044,6 +1074,7 @@ function CalendarView({
 	initialsOf,
 	onOpen,
 	onOpenDay,
+	onAdd,
 }: {
 	month: Date;
 	setMonth: (d: Date) => void;
@@ -1054,6 +1085,7 @@ function CalendarView({
 	initialsOf: (b: Booking) => string;
 	onOpen: (id: string) => void;
 	onOpenDay: (date: string) => void;
+	onAdd: (date: string) => void;
 }) {
 	const byDate = new Map<string, Booking[]>();
 	for (const b of rows) {
@@ -1117,17 +1149,28 @@ function CalendarView({
 					const day = iso(d);
 					const list = byDate.get(day) ?? [];
 					const isToday = day === today;
+					const isPast = day < today;
 					return (
 						<div
 							key={i}
-							className={`min-h-24 border p-1.5 text-left ${
+							className={`group relative min-h-24 border p-1.5 text-left ${
 								isToday
 									? "border-[color:var(--gold)] bg-[color:var(--gold)]/5"
 									: "border-[color:var(--gold)]/15"
 							}`}
 						>
-							<div className="mb-1 font-serif text-sm text-foreground/80">
+							<div className="mb-1 flex items-center justify-between font-serif text-sm text-foreground/80">
 								{d.getDate()}
+								{!isPast && (
+									<button
+										onClick={() => onAdd(day)}
+										aria-label={`Aggiungi appuntamento il ${d.toLocaleDateString("it-IT")}`}
+										title="Aggiungi appuntamento"
+										className="inline-flex h-6 w-6 items-center justify-center border border-[color:var(--gold)]/50 text-[color:var(--gold)] opacity-0 transition-opacity hover:bg-[color:var(--gold)] hover:text-background focus:opacity-100 group-hover:opacity-100"
+									>
+										<Plus className="h-3.5 w-3.5" strokeWidth={1.5} />
+									</button>
+								)}
 							</div>
 							<div className="flex flex-col gap-1">
 								{list.slice(0, 1).map((b) => (
