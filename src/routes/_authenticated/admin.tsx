@@ -294,19 +294,19 @@ function AdminPage() {
 	return (
 		<main className="theme-interior min-h-screen bg-background font-display text-[16px] text-foreground antialiased md:text-[17px]">
 			<div className="mx-auto flex min-h-screen max-w-5xl flex-col px-6 py-10 md:px-8">
-				<header className="flex items-center justify-end">
+				<header className="mt-2 flex items-center gap-3">
+					<h1 className="font-serif text-4xl text-[color:var(--gold)]">
+						Area Admin
+					</h1>
 					<Link
 						to="/dashboard"
-						className="inline-flex items-center gap-2.5 text-lg font-medium tracking-[0.08em] uppercase text-foreground/70 transition-colors hover:text-[color:var(--gold)]"
+						aria-label="Torna al dashboard"
+						title="Torna al dashboard"
+						className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-foreground/15 text-foreground/50 transition-colors hover:border-[color:var(--gold)]/50 hover:text-[color:var(--gold)]"
 					>
 						<BackArrow />
-						Dashboard
 					</Link>
 				</header>
-
-				<h1 className="mt-12 font-serif text-4xl text-[color:var(--gold)]">
-					Area Admin
-				</h1>
 
 				<nav className="mt-8 flex flex-wrap gap-x-6 gap-y-3 border-b border-[color:var(--gold)]/20 pb-4">
 					{(
