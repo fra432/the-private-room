@@ -88,7 +88,9 @@ async function loadBooking(id: string) {
 	);
 	const { data } = await supabaseAdmin
 		.from("bookings")
-		.select("id, user_id, date, arrival_time, status, notes")
+		.select(
+			"id, user_id, guest_name, guest_email, date, arrival_time, status, notes",
+		)
 		.eq("id", id)
 		.maybeSingle();
 	if (!data) return null;
@@ -219,9 +221,11 @@ export const notifyBookingDecision = createServerFn({ method: "POST" })
 	)
 	.handler(async ({ data }) => {
 		const res = await loadBooking(data.id);
-		if (!res || !res.profile?.email) return { ok: false };
+		if (!res) return { ok: false };
 		const { booking, profile } = res;
-		const first = profile.first_name ?? "";
+		const recipient = profile?.email ?? booking.guest_email;
+		if (!recipient) return { ok: false };
+		const first = profile?.first_name ?? booking.guest_name?.split(" ")[0] ?? "";
 		const dateStr = fmtDate(booking.date);
 		console.log("[email] notifyBookingDecision:", {
 			status: data.status,
@@ -229,7 +233,7 @@ export const notifyBookingDecision = createServerFn({ method: "POST" })
 		});
 		if (data.status === "confirmed") {
 			return sendMail({
-				to: profile.email!,
+				to: recipient,
 				subject: `Appuntamento confermato — ${dateStr}`,
 				html: shell(
 					`Ci vediamo ${first ? first + "," : ""} ${dateStr}`.trim(),
@@ -240,7 +244,7 @@ export const notifyBookingDecision = createServerFn({ method: "POST" })
 		}
 		if (data.status === "rejected") {
 			return sendMail({
-				to: profile.email!,
+				to: recipient,
 				subject: "Appuntamento non disponibile — THE ROOM",
 				html: shell(
 					`Ciao ${first}`.trim(),
@@ -254,7 +258,7 @@ export const notifyBookingDecision = createServerFn({ method: "POST" })
 			});
 		}
 		return sendMail({
-			to: profile.email!,
+			to: recipient,
 			subject: "Appuntamento annullato — THE ROOM",
 			html: shell(
 				`Ciao ${first}`.trim(),

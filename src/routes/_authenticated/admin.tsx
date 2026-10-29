@@ -849,19 +849,28 @@ function NewBookingModal({
 		if (mode === "guest" && !guestName.trim())
 			return toast.error("Inserisci il nome");
 		setSaving(true);
-		const { error } = await supabase.from("bookings").insert({
-			user_id: mode === "client" ? clientId : null,
-			guest_name: mode === "guest" ? guestName.trim() : null,
-			guest_phone: mode === "guest" ? guestPhone.trim() || null : null,
-			guest_email: mode === "guest" ? guestEmail.trim() || null : null,
-			date,
-			arrival_time: arrival || null,
-			notes: notes.trim() || null,
-			status: "confirmed",
-			created_by_admin: true,
-		});
+		const { data: inserted, error } = await supabase
+			.from("bookings")
+			.insert({
+				user_id: mode === "client" ? clientId : null,
+				guest_name: mode === "guest" ? guestName.trim() : null,
+				guest_phone: mode === "guest" ? guestPhone.trim() || null : null,
+				guest_email: mode === "guest" ? guestEmail.trim() || null : null,
+				date,
+				arrival_time: arrival || null,
+				notes: notes.trim() || null,
+				status: "confirmed",
+				created_by_admin: true,
+			})
+			.select("id")
+			.maybeSingle();
 		setSaving(false);
 		if (error) return toast.error(error.message);
+		if (inserted?.id) {
+			notifyBookingDecision({
+				data: { id: inserted.id, status: "confirmed" },
+			}).catch(() => {});
+		}
 		toast.success("Prenotazione creata");
 		onCreated();
 	}
